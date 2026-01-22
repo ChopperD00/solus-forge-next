@@ -17,7 +17,7 @@ interface GlitchingTechEyeProps {
   style?: React.CSSProperties
 }
 
-// Circular text component with blur and glitch effect
+// Circular text component with blur fade effect (Framer-style)
 function CircularText({
   text,
   radius,
@@ -29,22 +29,28 @@ function CircularText({
   isVisible: boolean
   fontSize?: number
 }) {
-  const pathId = `circlePath-${radius}`
-  const glitchPathId = `glitchPath-${radius}`
+  const uniqueId = React.useId()
+  const pathId = `circlePath-${uniqueId}`
+  const gradientId = `textGradient-${uniqueId}`
+  const blurGradientId = `blurGradient-${uniqueId}`
+
   const circumference = 2 * Math.PI * radius
-  // Repeat text to fill the circle
-  const repeatCount = Math.ceil(circumference / (text.length * fontSize * 0.55))
-  const repeatedText = Array(repeatCount).fill(text).join('  ·  ')
+  // Repeat text to fill the circle with dots as separators
+  const repeatCount = Math.ceil(circumference / (text.length * fontSize * 0.5))
+  const repeatedText = Array(repeatCount).fill(text).join(' · ')
+
+  const cx = radius + 20
+  const cy = radius + 20
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
           className="absolute inset-0 pointer-events-none"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, scale: 0.95, rotate: -10 }}
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <svg
             width="100%"
@@ -59,122 +65,113 @@ function CircularText({
             }}
           >
             <defs>
+              {/* Circular path for text */}
               <path
                 id={pathId}
-                d={`M ${radius + 20}, ${radius + 20} m -${radius}, 0 a ${radius},${radius} 0 1,1 ${radius * 2},0 a ${radius},${radius} 0 1,1 -${radius * 2},0`}
+                d={`M ${cx}, ${cy} m -${radius}, 0 a ${radius},${radius} 0 1,1 ${radius * 2},0 a ${radius},${radius} 0 1,1 -${radius * 2},0`}
                 fill="none"
               />
-              <filter id="textBlur" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" />
+
+              {/* Gradient mask for blur fade effect - sharp at top, fades to blur at bottom */}
+              <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="rgba(255, 180, 120, 0.9)" />
+                <stop offset="30%" stopColor="rgba(255, 160, 100, 0.7)" />
+                <stop offset="60%" stopColor="rgba(255, 140, 80, 0.4)" />
+                <stop offset="100%" stopColor="rgba(255, 120, 60, 0.1)" />
+              </linearGradient>
+
+              {/* Heavy blur filter */}
+              <filter id={`blur-heavy-${uniqueId}`} x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
               </filter>
-              {/* Glitch displacement filter */}
-              <filter id="glitchFilter" x="-20%" y="-20%" width="140%" height="140%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="1" result="noise" seed="0">
-                  <animate attributeName="seed" from="0" to="100" dur="0.5s" repeatCount="indefinite" />
-                </feTurbulence>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+
+              {/* Medium blur filter */}
+              <filter id={`blur-medium-${uniqueId}`} x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
+              </filter>
+
+              {/* Light blur filter */}
+              <filter id={`blur-light-${uniqueId}`} x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="0.8" />
               </filter>
             </defs>
 
-            {/* Glitch layer - red shifted */}
-            <motion.text
-              fill="rgba(255, 80, 80, 0.4)"
-              fontSize={fontSize}
-              fontFamily="'Inter', system-ui, sans-serif"
-              fontWeight="300"
-              letterSpacing="0.2em"
-              style={{ mixBlendMode: 'screen' }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0.4, 0.2, 0.4] }}
-              transition={{ duration: 0.3, repeat: Infinity, repeatType: "reverse" }}
-            >
-              <textPath href={`#${pathId}`} startOffset="1%">
-                {repeatedText}
-              </textPath>
+            {/* Rotating group containing all text layers */}
+            <g>
               <animateTransform
                 attributeName="transform"
                 type="rotate"
-                from={`0 ${radius + 20} ${radius + 20}`}
-                to={`360 ${radius + 20} ${radius + 20}`}
-                dur="30s"
+                from={`0 ${cx} ${cy}`}
+                to={`360 ${cx} ${cy}`}
+                dur="20s"
                 repeatCount="indefinite"
               />
-            </motion.text>
 
-            {/* Glitch layer - cyan shifted */}
-            <motion.text
-              fill="rgba(80, 255, 255, 0.3)"
-              fontSize={fontSize}
-              fontFamily="'Inter', system-ui, sans-serif"
-              fontWeight="300"
-              letterSpacing="0.2em"
-              style={{ mixBlendMode: 'screen' }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0.3, 0.15, 0.3] }}
-              transition={{ duration: 0.25, repeat: Infinity, repeatType: "reverse", delay: 0.1 }}
-            >
-              <textPath href={`#${pathId}`} startOffset="-1%">
-                {repeatedText}
-              </textPath>
-              <animateTransform
-                attributeName="transform"
-                type="rotate"
-                from={`0 ${radius + 20} ${radius + 20}`}
-                to={`360 ${radius + 20} ${radius + 20}`}
-                dur="30s"
-                repeatCount="indefinite"
-              />
-            </motion.text>
+              {/* Layer 1: Heavy blur background (creates glow effect) */}
+              <text
+                fill="rgba(255, 140, 80, 0.3)"
+                fontSize={fontSize}
+                fontFamily="'Inter', system-ui, sans-serif"
+                fontWeight="300"
+                letterSpacing="0.25em"
+                filter={`url(#blur-heavy-${uniqueId})`}
+              >
+                <textPath href={`#${pathId}`} startOffset="0%">
+                  {repeatedText}
+                </textPath>
+              </text>
 
-            {/* Blurred background text layer */}
-            <motion.text
-              fill="rgba(255, 140, 50, 0.25)"
-              fontSize={fontSize}
-              fontFamily="'Inter', system-ui, sans-serif"
-              fontWeight="300"
-              letterSpacing="0.2em"
-              filter="url(#textBlur)"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}
-            >
-              <textPath href={`#${pathId}`} startOffset="0%">
-                {repeatedText}
-              </textPath>
-              <animateTransform
-                attributeName="transform"
-                type="rotate"
-                from={`0 ${radius + 20} ${radius + 20}`}
-                to={`360 ${radius + 20} ${radius + 20}`}
-                dur="30s"
-                repeatCount="indefinite"
-              />
-            </motion.text>
+              {/* Layer 2: Medium blur mid-layer */}
+              <text
+                fill="rgba(255, 160, 100, 0.5)"
+                fontSize={fontSize}
+                fontFamily="'Inter', system-ui, sans-serif"
+                fontWeight="300"
+                letterSpacing="0.25em"
+                filter={`url(#blur-medium-${uniqueId})`}
+              >
+                <textPath href={`#${pathId}`} startOffset="0%">
+                  {repeatedText}
+                </textPath>
+              </text>
 
-            {/* Main text layer - Inter Light */}
-            <motion.text
-              fill="rgba(255, 200, 150, 0.85)"
-              fontSize={fontSize}
-              fontFamily="'Inter', system-ui, sans-serif"
-              fontWeight="300"
-              letterSpacing="0.2em"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-            >
-              <textPath href={`#${pathId}`} startOffset="0%">
-                {repeatedText}
-              </textPath>
-              <animateTransform
-                attributeName="transform"
-                type="rotate"
-                from={`0 ${radius + 20} ${radius + 20}`}
-                to={`360 ${radius + 20} ${radius + 20}`}
-                dur="30s"
-                repeatCount="indefinite"
-              />
-            </motion.text>
+              {/* Layer 3: Light blur for softness */}
+              <text
+                fill="rgba(255, 180, 120, 0.6)"
+                fontSize={fontSize}
+                fontFamily="'Inter', system-ui, sans-serif"
+                fontWeight="300"
+                letterSpacing="0.25em"
+                filter={`url(#blur-light-${uniqueId})`}
+              >
+                <textPath href={`#${pathId}`} startOffset="0%">
+                  {repeatedText}
+                </textPath>
+              </text>
+
+              {/* Layer 4: Sharp main text */}
+              <text
+                fill="rgba(255, 200, 150, 0.9)"
+                fontSize={fontSize}
+                fontFamily="'Inter', system-ui, sans-serif"
+                fontWeight="300"
+                letterSpacing="0.25em"
+              >
+                <textPath href={`#${pathId}`} startOffset="0%">
+                  {repeatedText}
+                </textPath>
+              </text>
+            </g>
           </svg>
+
+          {/* CSS-based fade mask overlay - creates the blur-to-sharp gradient effect */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `radial-gradient(circle at 50% 20%, transparent 30%, rgba(10, 10, 10, 0.7) 60%, rgba(10, 10, 10, 0.95) 80%)`,
+              pointerEvents: 'none',
+            }}
+          />
         </motion.div>
       )}
     </AnimatePresence>
