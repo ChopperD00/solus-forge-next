@@ -301,6 +301,20 @@ export default function CrucibleLanding({
       {/* Sticky viewport container */}
       <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
 
+        {/* Version Badge - Fixed Header */}
+        <div className="absolute top-4 right-4 z-50">
+          <div
+            className="px-3 py-1.5 rounded-full text-xs font-medium tracking-wide"
+            style={{
+              background: 'rgba(255, 107, 0, 0.15)',
+              border: '1px solid rgba(255, 107, 0, 0.3)',
+              color: colors.accent,
+            }}
+          >
+            Pre-Alpha v3.3
+          </div>
+        </div>
+
         {/* SECTION 1: Hero with Gradient Circle + Logo */}
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
