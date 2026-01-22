@@ -27,6 +27,7 @@ import {
   ChartBar as ChartBarIcon,
   Vault as VaultIcon,
   Detective as DetectiveIcon,
+  QrCode as QrCodeIcon,
 } from '@phosphor-icons/react'
 
 // SSR-safe window dimensions hook
@@ -128,6 +129,7 @@ const tarotCards = [
   // Misc / Arcane
   { id: 'audio', icon: MusicNotesIcon, title: 'Audio Production', subtitle: 'Music, SFX & voiceover', capabilities: ['Music Generation', 'Voice Synthesis', 'SFX Library', 'Audio Mastering'], arcana: 'The Alchemist' },
   { id: 'asset_vault', icon: VaultIcon, title: 'Asset Vault', subtitle: 'Organize & version control', capabilities: ['Version History', 'Smart Tagging', 'Quick Search', 'Team Sharing'], arcana: 'The Alchemist' },
+  { id: 'qr_barcode', icon: QrCodeIcon, title: 'QR/Barcode Gen', subtitle: 'Generate scannable codes', capabilities: ['QR Code Creation', 'Barcode Formats', 'Batch Generation', 'Custom Styling'], arcana: 'The Alchemist' },
 ]
 
 // Flat list for header icons
