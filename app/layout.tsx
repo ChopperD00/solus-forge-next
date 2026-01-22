@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import localFont from 'next/font/local'
+import { Inter, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 
 const inter = Inter({
@@ -8,15 +7,10 @@ const inter = Inter({
   variable: '--font-inter',
 })
 
-const halfre = localFont({
-  src: [
-    {
-      path: '../public/fonts/Halfre.woff2',
-      weight: '400',
-      style: 'normal',
-    },
-  ],
-  variable: '--font-halfre',
+// Space Grotesk as display font (similar geometric/modern feel to Halfre)
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-display',
   display: 'swap',
 })
 
@@ -32,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${halfre.variable}`}>
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className={inter.className}>{children}</body>
     </html>
   )

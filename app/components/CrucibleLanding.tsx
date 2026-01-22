@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion'
+import NovaGlowLogo from './NovaGlowLogo'
+import SpectraNoiseBackground from './SpectraNoiseBackground'
 
 // SSR-safe window dimensions hook
 function useWindowSize() {
@@ -31,13 +33,7 @@ const colors = {
   accentGlow: 'rgba(255, 107, 0, 0.3)',
 }
 
-// Agent configurations with orbital positions
-// Claude (Opus) = Solus - Strategic Oversight
-// Claude (Haiku) = Quintus - Planner and workflow optimization
-// Anthropic = Trion - Research and Discovery
-// Claude (Sonnet) = Lathe - Quality control and reviewer
-// Gemini = Alchemist - Creative Generation
-// NotebookLM = Cortex - Archival, memory, context save
+// Agent configurations with increased orbital radius to avoid text overlap
 const agents = [
   {
     id: 'solus',
@@ -45,8 +41,9 @@ const agents = [
     fullName: 'Claude Opus',
     icon: '🔮',
     specialty: 'Strategic Oversight',
+    role: 'Strategic Oversight',
     description: 'Deep reasoning & executive decisions',
-    orbitRadius: 280,
+    orbitRadius: 380, // Increased from 280
     orbitSpeed: 0.3,
     orbitOffset: 0,
     color: '#8B5CF6',
@@ -57,8 +54,9 @@ const agents = [
     fullName: 'Claude Haiku',
     icon: '📐',
     specialty: 'Planner',
+    role: 'Planner/Optimization',
     description: 'Workflow optimization & routing',
-    orbitRadius: 280,
+    orbitRadius: 380,
     orbitSpeed: 0.3,
     orbitOffset: Math.PI / 3,
     color: '#06B6D4',
@@ -69,8 +67,9 @@ const agents = [
     fullName: 'Anthropic',
     icon: '🔍',
     specialty: 'Research & Discovery',
+    role: 'Research & Discovery',
     description: 'Web research & cited sources',
-    orbitRadius: 280,
+    orbitRadius: 380,
     orbitSpeed: 0.3,
     orbitOffset: (Math.PI * 2) / 3,
     color: '#10B981',
@@ -81,8 +80,9 @@ const agents = [
     fullName: 'Claude Sonnet',
     icon: '⚖️',
     specialty: 'Quality Control',
+    role: 'Quality Control/Reviewer',
     description: 'Review, validation & refinement',
-    orbitRadius: 280,
+    orbitRadius: 380,
     orbitSpeed: 0.3,
     orbitOffset: Math.PI,
     color: '#F59E0B',
@@ -93,8 +93,9 @@ const agents = [
     fullName: 'Gemini',
     icon: '✨',
     specialty: 'Creative Generation',
+    role: 'Creative Generation',
     description: 'Multimodal synthesis & ideation',
-    orbitRadius: 280,
+    orbitRadius: 380,
     orbitSpeed: 0.3,
     orbitOffset: (Math.PI * 4) / 3,
     color: '#EC4899',
@@ -105,8 +106,9 @@ const agents = [
     fullName: 'NotebookLM',
     icon: '🧠',
     specialty: 'Memory & Context',
+    role: 'Archival',
     description: 'Archival & knowledge retrieval',
-    orbitRadius: 280,
+    orbitRadius: 380,
     orbitSpeed: 0.3,
     orbitOffset: (Math.PI * 5) / 3,
     color: '#EF4444',
@@ -176,23 +178,24 @@ function FloatingAgent({
           left: '50%',
           top: '50%',
           width: agent.orbitRadius * 2,
-          height: agent.orbitRadius,
-          transform: 'translate(-50%, -50%)',
-          opacity: (1 - scrollProgress) * 0.2,
+          height: agent.orbitRadius * 2,
+          marginLeft: -agent.orbitRadius,
+          marginTop: -agent.orbitRadius,
+          opacity: 0.1 * (1 - scrollProgress),
         }}
       >
         <line
-          x1="50%"
-          y1="50%"
-          x2={agent.orbitRadius}
-          y2={agent.orbitRadius / 2}
+          x1={agent.orbitRadius}
+          y1={agent.orbitRadius}
+          x2={agent.orbitRadius + Math.cos(angle) * 50}
+          y2={agent.orbitRadius + Math.sin(angle) * 50 * 0.4}
           stroke={colors.textDim}
           strokeWidth="1"
           strokeDasharray="4 4"
         />
       </svg>
 
-      {/* Agent node */}
+      {/* Agent circle */}
       <motion.div
         className="relative flex items-center justify-center"
         style={{
@@ -254,7 +257,12 @@ export default function CrucibleLanding({
   const [time, setTime] = useState(0)
   const [prompt, setPrompt] = useState('')
   const [searchBarRect, setSearchBarRect] = useState<DOMRect | null>(null)
-  const windowSize = useWindowSize() // SSR-safe window dimensions
+  const windowSize = useWindowSize()
+
+  // Hero states
+  const [heroPhase, setHeroPhase] = useState<'logo' | 'novaGlow' | 'spectraNoise' | 'crucible'>('logo')
+  const [logoClicked, setLogoClicked] = useState(false)
+
   // Default to solus and trion selected
   const [localSelectedAgents, setLocalSelectedAgents] = useState<string[]>(
     selectedAgents.length > 0 ? selectedAgents : ['solus', 'trion']
@@ -274,7 +282,7 @@ export default function CrucibleLanding({
   })
 
   // Transform scroll to our animation progress (0 to 1)
-  const morphProgress = useTransform(smoothProgress, [0, 0.5], [0, 1])
+  const morphProgress = useTransform(smoothProgress, [0, 0.3, 0.5], [0, 0, 1])
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
@@ -309,6 +317,24 @@ export default function CrucibleLanding({
     }
   }, [])
 
+  // Logo click handler - triggers Nova Glow → SpectraNoise transition
+  const handleLogoClick = () => {
+    if (heroPhase === 'logo') {
+      setLogoClicked(true)
+      setHeroPhase('novaGlow')
+
+      // After nova glow animation, transition to spectraNoise
+      setTimeout(() => {
+        setHeroPhase('spectraNoise')
+      }, 1500)
+
+      // Then reveal crucible section
+      setTimeout(() => {
+        setHeroPhase('crucible')
+      }, 3000)
+    }
+  }
+
   const handleAgentSelect = (agentId: string) => {
     setLocalSelectedAgents(prev =>
       prev.includes(agentId)
@@ -325,241 +351,321 @@ export default function CrucibleLanding({
     }
   }
 
-  // Title text animation
-  const titleOpacity = useTransform(smoothProgress, [0, 0.3], [1, 0])
-  const titleY = useTransform(smoothProgress, [0, 0.3], [0, -50])
-  const titleScale = useTransform(smoothProgress, [0, 0.3], [1, 0.8])
+  // Title text animation - delayed until crucible phase
+  const titleOpacity = useTransform(smoothProgress, [0, 0.2], [1, 0])
+  const titleY = useTransform(smoothProgress, [0, 0.2], [0, -50])
+  const titleScale = useTransform(smoothProgress, [0, 0.2], [1, 0.8])
 
   // Search bar animation
-  const searchOpacity = useTransform(smoothProgress, [0.3, 0.5], [0, 1])
-  const searchY = useTransform(smoothProgress, [0.3, 0.5], [50, 0])
+  const searchOpacity = useTransform(smoothProgress, [0.2, 0.4], [0, 1])
+  const searchY = useTransform(smoothProgress, [0.2, 0.4], [50, 0])
 
   return (
     <div
       ref={containerRef}
       className="relative"
-      style={{ height: '200vh', background: colors.bg }}
+      style={{ height: '300vh', background: colors.bg }}
     >
-      {/* Sticky container */}
-      <div className="sticky top-0 h-screen overflow-hidden">
-        {/* Background gradient mesh */}
-        <div
-          className="absolute inset-0 opacity-30"
-          style={{
-            background: `
-              radial-gradient(ellipse at 30% 20%, ${colors.accent}22 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 80%, #8B5CF622 0%, transparent 50%),
-              radial-gradient(ellipse at 50% 50%, ${colors.surface} 0%, ${colors.bg} 100%)
-            `,
-          }}
+      {/* SpectraNoise Background - activates after logo click */}
+      {(heroPhase === 'spectraNoise' || heroPhase === 'crucible') && (
+        <SpectraNoiseBackground
+          isExpanded={heroPhase === 'novaGlow'}
+          logoCenter={{ x: windowSize.width / 2, y: windowSize.height / 2 }}
+          logoSize={200}
         />
+      )}
 
-        {/* Curved connection lines (decorative) */}
-        <svg
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{ opacity: 0.1 * (1 - progress) }}
-        >
-          {agents.map((agent, i) => {
-            const nextAgent = agents[(i + 1) % agents.length]
-            const angle1 = agent.orbitOffset + time * agent.orbitSpeed
-            const angle2 = nextAgent.orbitOffset + time * nextAgent.orbitSpeed
-            const x1 = windowSize.width / 2 + Math.cos(angle1) * agent.orbitRadius
-            const y1 = windowSize.height / 2 + Math.sin(angle1) * agent.orbitRadius * 0.4
-            const x2 = windowSize.width / 2 + Math.cos(angle2) * nextAgent.orbitRadius
-            const y2 = windowSize.height / 2 + Math.sin(angle2) * nextAgent.orbitRadius * 0.4
-            const midX = (x1 + x2) / 2
-            const midY = (y1 + y2) / 2 - 50
-
-            return (
-              <path
-                key={`line-${i}`}
-                d={`M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`}
-                stroke={colors.textDim}
-                strokeWidth="1"
-                fill="none"
-                strokeDasharray="8 8"
-              />
-            )
-          })}
-        </svg>
-
-        {/* Center content */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          {/* "Enter the Crucible" title */}
+      {/* Hero Section - Logo */}
+      <AnimatePresence>
+        {heroPhase === 'logo' && (
           <motion.div
-            className="absolute text-center z-10"
-            style={{
-              opacity: titleOpacity,
-              y: titleY,
-              scale: titleScale,
-            }}
+            className="fixed inset-0 flex items-center justify-center z-50 cursor-pointer"
+            style={{ background: colors.bg }}
+            onClick={handleLogoClick}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            <motion.h1
-              className="text-6xl md:text-7xl font-bold mb-4 tracking-tight brand-text"
-              style={{
-                color: colors.text,
-                textShadow: `0 0 60px ${colors.accent}44`,
-              }}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+              className="text-center"
             >
-              Enter the{' '}
-              <span
+              {/* SOLUS FORGE Logo Text */}
+              <h1
+                className="text-7xl md:text-8xl font-bold tracking-tight mb-4"
                 style={{
-                  background: `linear-gradient(135deg, ${colors.accent} 0%, #F59E0B 100%)`,
+                  background: `linear-gradient(135deg, ${colors.accent} 0%, #F59E0B 50%, ${colors.accent} 100%)`,
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
+                  textShadow: `0 0 80px ${colors.accent}44`,
                 }}
               >
-                Crucible
-              </span>
-            </motion.h1>
-            <p className="text-lg md:text-xl max-w-md mx-auto" style={{ color: colors.textMuted }}>
-              Where AI models converge to forge your vision
-            </p>
-            <motion.div
-              className="mt-8 flex items-center justify-center gap-2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <span className="text-sm" style={{ color: colors.textDim }}>
-                Scroll to begin
-              </span>
-              <motion.span
-                animate={{ y: [0, 8, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-                style={{ color: colors.accent }}
+                SOLUS FORGE
+              </h1>
+              <p className="text-lg" style={{ color: colors.textMuted }}>
+                Click to enter
+              </p>
+              <motion.div
+                className="mt-6"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
               >
-                ↓
-              </motion.span>
+                <span className="text-4xl">🔮</span>
+              </motion.div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
 
-          {/* Floating agents */}
-          <div className="relative" style={{ width: 0, height: 0 }}>
-            {agents.map((agent, index) => (
-              <FloatingAgent
-                key={agent.id}
-                agent={agent}
-                scrollProgress={progress}
-                time={time}
-                index={index}
-                isSelected={localSelectedAgents.includes(agent.id)}
-                onSelect={() => handleAgentSelect(agent.id)}
-                searchBarRect={searchBarRect}
-                windowSize={windowSize}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Search bar section (appears on scroll) */}
-        <motion.div
-          className="absolute left-1/2 -translate-x-1/2"
-          style={{
-            top: '50%',
-            opacity: searchOpacity,
-            y: searchY,
-            width: '90%',
-            maxWidth: 800,
-          }}
-        >
-          {/* Agent overview */}
+      {/* Nova Glow Transition */}
+      <AnimatePresence>
+        {heroPhase === 'novaGlow' && (
           <motion.div
-            className="mb-6 text-center"
-            style={{ opacity: progress > 0.4 ? 1 : 0 }}
+            className="fixed inset-0 flex items-center justify-center z-50"
+            style={{ background: colors.bg }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
           >
-            <p className="text-sm mb-2" style={{ color: colors.textMuted }}>
-              {localSelectedAgents.length} agents ready
-            </p>
-            <div className="flex justify-center gap-4 flex-wrap">
-              {agents.map(agent => {
-                const isActive = localSelectedAgents.includes(agent.id)
-                return (
-                  <button
-                    key={agent.id}
-                    onClick={() => handleAgentSelect(agent.id)}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs transition-all"
-                    style={{
-                      background: isActive ? `${agent.color}22` : colors.surface,
-                      border: `1px solid ${isActive ? agent.color : colors.border}`,
-                      color: isActive ? agent.color : colors.textMuted,
-                    }}
-                  >
-                    <span>{agent.icon}</span>
-                    <span>{agent.name}</span>
-                  </button>
-                )
-              })}
-            </div>
+            <NovaGlowLogo size={300} />
           </motion.div>
+        )}
+      </AnimatePresence>
 
-          {/* Search bar */}
+      {/* Sticky container - main crucible section */}
+      {(heroPhase === 'spectraNoise' || heroPhase === 'crucible') && (
+        <div className="sticky top-0 h-screen overflow-hidden">
+          {/* Background gradient mesh (fallback if SpectraNoise not visible) */}
           <div
-            ref={searchBarRef}
-            className="relative rounded-2xl overflow-hidden"
+            className="absolute inset-0 opacity-30"
             style={{
-              background: colors.surface,
-              border: `1px solid ${colors.border}`,
-              boxShadow: `0 0 60px ${colors.accent}22`,
+              background: `
+                radial-gradient(ellipse at 30% 20%, ${colors.accent}22 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, #8B5CF622 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, ${colors.surface} 0%, ${colors.bg} 100%)
+              `,
             }}
+          />
+
+          {/* Curved connection lines (decorative) */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{ opacity: 0.1 * (1 - progress) }}
           >
-            <form onSubmit={handleSubmit} className="flex items-center">
-              <input
-                type="text"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="What would you like to create today?"
-                className="flex-1 px-6 py-5 bg-transparent text-base focus:outline-none"
-                style={{ color: colors.text }}
-              />
-              <button
-                type="submit"
-                className="px-6 py-3 m-2 rounded-xl font-medium transition-all"
+            {agents.map((agent, i) => {
+              const nextAgent = agents[(i + 1) % agents.length]
+              const angle1 = agent.orbitOffset + time * agent.orbitSpeed
+              const angle2 = nextAgent.orbitOffset + time * nextAgent.orbitSpeed
+              const x1 = windowSize.width / 2 + Math.cos(angle1) * agent.orbitRadius
+              const y1 = windowSize.height / 2 + Math.sin(angle1) * agent.orbitRadius * 0.4
+              const x2 = windowSize.width / 2 + Math.cos(angle2) * nextAgent.orbitRadius
+              const y2 = windowSize.height / 2 + Math.sin(angle2) * nextAgent.orbitRadius * 0.4
+              const midX = (x1 + x2) / 2
+              const midY = (y1 + y2) / 2 - 50
+
+              return (
+                <path
+                  key={`line-${i}`}
+                  d={`M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`}
+                  stroke={colors.textDim}
+                  strokeWidth="1"
+                  fill="none"
+                  strokeDasharray="8 8"
+                />
+              )
+            })}
+          </svg>
+
+          {/* Center content */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            {/* "Enter the Crucible" title */}
+            <motion.div
+              className="absolute text-center z-10"
+              style={{
+                opacity: titleOpacity,
+                y: titleY,
+                scale: titleScale,
+              }}
+            >
+              <motion.h1
+                className="text-6xl md:text-7xl font-bold mb-4 tracking-tight"
                 style={{
-                  background: colors.accent,
                   color: colors.text,
+                  textShadow: `0 0 60px ${colors.accent}44`,
                 }}
               >
-                Create →
-              </button>
-            </form>
-
-            {/* Subtle gradient border animation */}
-            <div
-              className="absolute inset-0 pointer-events-none rounded-2xl"
-              style={{
-                background: `linear-gradient(90deg, transparent, ${colors.accent}33, transparent)`,
-                backgroundSize: '200% 100%',
-                animation: 'shimmer 3s infinite linear',
-                opacity: 0.5,
-              }}
-            />
-          </div>
-
-          {/* Quick suggestions */}
-          <motion.div
-            className="mt-4 flex justify-center gap-2 flex-wrap"
-            style={{ opacity: progress > 0.5 ? 1 : 0 }}
-          >
-            {['Generate product images', 'Research competitors', 'Create video ad', 'Build email campaign'].map(
-              suggestion => (
-                <button
-                  key={suggestion}
-                  onClick={() => setPrompt(suggestion)}
-                  className="px-3 py-1.5 rounded-lg text-xs transition-all hover:bg-white/10"
+                Enter the{' '}
+                <span
                   style={{
-                    background: colors.bg,
-                    border: `1px solid ${colors.border}`,
-                    color: colors.textMuted,
+                    background: `linear-gradient(135deg, ${colors.accent} 0%, #F59E0B 100%)`,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
                   }}
                 >
-                  {suggestion}
+                  Crucible
+                </span>
+              </motion.h1>
+              <p className="text-lg md:text-xl max-w-md mx-auto" style={{ color: colors.textMuted }}>
+                Where AI models converge to forge your vision
+              </p>
+              <motion.div
+                className="mt-8 flex items-center justify-center gap-2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <span className="text-sm" style={{ color: colors.textDim }}>
+                  Scroll to begin
+                </span>
+                <motion.span
+                  animate={{ y: [0, 8, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                  style={{ color: colors.accent }}
+                >
+                  ↓
+                </motion.span>
+              </motion.div>
+            </motion.div>
+
+            {/* Floating agents */}
+            <div className="relative" style={{ width: 0, height: 0 }}>
+              {agents.map((agent, index) => (
+                <FloatingAgent
+                  key={agent.id}
+                  agent={agent}
+                  scrollProgress={progress}
+                  time={time}
+                  index={index}
+                  isSelected={localSelectedAgents.includes(agent.id)}
+                  onSelect={() => handleAgentSelect(agent.id)}
+                  searchBarRect={searchBarRect}
+                  windowSize={windowSize}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Search bar section - CENTERED and STICKY after scroll */}
+          <motion.div
+            className="absolute left-1/2 -translate-x-1/2"
+            style={{
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              opacity: searchOpacity,
+              y: searchY,
+              width: '90%',
+              maxWidth: 800,
+              position: progress >= 0.95 ? 'fixed' : 'absolute',
+            }}
+          >
+            {/* Agent overview with ROLES underneath */}
+            <motion.div
+              className="mb-6 text-center"
+              style={{ opacity: progress > 0.4 ? 1 : 0 }}
+            >
+              <p className="text-sm mb-4" style={{ color: colors.textMuted }}>
+                {localSelectedAgents.length} agents ready
+              </p>
+              <div className="flex justify-center gap-3 flex-wrap">
+                {agents.map(agent => {
+                  const isActive = localSelectedAgents.includes(agent.id)
+                  return (
+                    <button
+                      key={agent.id}
+                      onClick={() => handleAgentSelect(agent.id)}
+                      className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl text-xs transition-all"
+                      style={{
+                        background: isActive ? `${agent.color}22` : colors.surface,
+                        border: `1px solid ${isActive ? agent.color : colors.border}`,
+                        color: isActive ? agent.color : colors.textMuted,
+                        minWidth: 100,
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{agent.icon}</span>
+                        <span className="font-medium">{agent.name}</span>
+                      </div>
+                      {/* Role label underneath */}
+                      <span
+                        className="text-[10px] opacity-70"
+                        style={{ color: isActive ? agent.color : colors.textDim }}
+                      >
+                        {agent.role}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </motion.div>
+
+            {/* Search bar */}
+            <div
+              ref={searchBarRef}
+              className="relative rounded-2xl overflow-hidden"
+              style={{
+                background: colors.surface,
+                border: `1px solid ${colors.border}`,
+                boxShadow: `0 0 60px ${colors.accent}22`,
+              }}
+            >
+              <form onSubmit={handleSubmit} className="flex items-center">
+                <input
+                  type="text"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="What would you like to create today?"
+                  className="flex-1 px-6 py-5 bg-transparent text-base focus:outline-none"
+                  style={{ color: colors.text }}
+                />
+                <button
+                  type="submit"
+                  className="px-6 py-3 m-2 rounded-xl font-medium transition-all"
+                  style={{
+                    background: colors.accent,
+                    color: colors.text,
+                  }}
+                >
+                  Create →
                 </button>
-              )
-            )}
+              </form>
+
+              {/* Subtle gradient border animation */}
+              <div
+                className="absolute inset-0 pointer-events-none rounded-2xl"
+                style={{
+                  background: `linear-gradient(90deg, transparent, ${colors.accent}33, transparent)`,
+                  backgroundSize: '200% 100%',
+                  animation: 'shimmer 3s infinite linear',
+                  opacity: 0.5,
+                }}
+              />
+            </div>
+
+            {/* Quick suggestions */}
+            <motion.div
+              className="mt-4 flex justify-center gap-2 flex-wrap"
+              style={{ opacity: progress > 0.5 ? 1 : 0 }}
+            >
+              {['Generate product images', 'Research competitors', 'Create video ad', 'Build email campaign'].map(
+                suggestion => (
+                  <button
+                    key={suggestion}
+                    onClick={() => setPrompt(suggestion)}
+                    className="px-3 py-1.5 rounded-lg text-xs transition-all hover:bg-white/10"
+                    style={{
+                      background: colors.bg,
+                      border: `1px solid ${colors.border}`,
+                      color: colors.textMuted,
+                    }}
+                  >
+                    {suggestion}
+                  </button>
+                )
+              )}
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </div>
+        </div>
+      )}
 
       <style jsx>{`
         @keyframes shimmer {

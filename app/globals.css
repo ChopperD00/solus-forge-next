@@ -38,13 +38,13 @@ body.theme-ocean {
   color: var(--ocean-text);
 }
 
-/* Typography - Halfre display font + Inter for body */
+/* Typography - Space Grotesk display font + Inter for body */
 /* Fonts are loaded via next/font in layout.tsx for optimal performance */
 
-h1, h2, h3, .font-display, .font-halfre {
-  font-family: var(--font-halfre), var(--font-inter), system-ui, sans-serif;
-  font-weight: normal;
-  letter-spacing: 0.02em;
+h1, h2, h3, .font-display {
+  font-family: var(--font-display), var(--font-inter), system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 /* Body text uses Inter */
@@ -52,10 +52,11 @@ body {
   font-family: var(--font-inter), system-ui, sans-serif;
 }
 
-/* Explicit Halfre class for branding elements */
+/* Explicit brand class for logo/branding elements */
 .brand-text {
-  font-family: var(--font-halfre), var(--font-inter), system-ui, sans-serif;
-  letter-spacing: 0.05em;
+  font-family: var(--font-display), var(--font-inter), system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  font-weight: 700;
 }
 
 /* Custom scrollbar */
