@@ -262,13 +262,19 @@ export default function CrucibleLanding({
     }
   }
 
-  // Animation phases based on scroll
-  const heroOpacity = useTransform(smoothProgress, [0, 0.15], [1, 0])
-  const heroScale = useTransform(smoothProgress, [0, 0.2], [1, 1.5])
-  const crucibleOpacity = useTransform(smoothProgress, [0.1, 0.25], [0, 1])
-  const searchBarY = useTransform(smoothProgress, [0.2, 0.35], [100, 0])
-  const workflowsOpacity = useTransform(smoothProgress, [0.5, 0.65], [0, 1])
-  const workflowsY = useTransform(smoothProgress, [0.5, 0.65], [100, 0])
+  // Animation phases based on scroll - clearer separation between sections
+  // Section 1 (Hero): 0% - 25% scroll
+  const heroOpacity = useTransform(smoothProgress, [0, 0.2, 0.25], [1, 1, 0])
+  const heroScale = useTransform(smoothProgress, [0, 0.25], [1, 1.2])
+  const auroraOpacity = useTransform(smoothProgress, [0, 0.15], [1, 0])
+
+  // Section 2 (Crucible): 25% - 60% scroll
+  const crucibleOpacity = useTransform(smoothProgress, [0.2, 0.3, 0.55, 0.6], [0, 1, 1, 0])
+  const searchBarY = useTransform(smoothProgress, [0.25, 0.35], [50, 0])
+
+  // Section 3 (Workflows): 60% - 100% scroll
+  const workflowsOpacity = useTransform(smoothProgress, [0.55, 0.65], [0, 1])
+  const workflowsY = useTransform(smoothProgress, [0.55, 0.65], [50, 0])
 
   return (
     <div
@@ -301,7 +307,7 @@ export default function CrucibleLanding({
                 animated={true}
               />
               <h1
-                className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-wider mt-6 mb-2 brand-text"
+                className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-wider mt-6 brand-text"
                 style={{
                   color: colors.text,
                   textShadow: `0 0 60px ${colors.accent}66`,
@@ -309,20 +315,51 @@ export default function CrucibleLanding({
               >
                 SOLUS FORGE
               </h1>
-              <p className="text-sm md:text-base" style={{ color: colors.textMuted }}>
-                AI Creative Command Center
-              </p>
-              <motion.div
-                className="mt-6"
-                animate={{ y: [0, 10, 0] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-              >
-                <span className="text-sm" style={{ color: colors.textDim }}>
-                  Scroll to enter ↓
-                </span>
-              </motion.div>
             </div>
           </GradientCircle>
+        </motion.div>
+
+        {/* Aurora Borealis bottom glow - subtle scroll indicator */}
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none"
+          style={{ opacity: auroraOpacity }}
+        >
+          {/* Multiple layered gradients for aurora effect */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `
+                radial-gradient(ellipse 80% 50% at 20% 100%, rgba(255, 107, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 50% 100%, rgba(249, 158, 11, 0.12) 0%, transparent 45%),
+                radial-gradient(ellipse 70% 45% at 80% 100%, rgba(255, 140, 0, 0.1) 0%, transparent 50%)
+              `,
+            }}
+          />
+          {/* Animated shimmer layer */}
+          <motion.div
+            className="absolute inset-0"
+            animate={{
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            style={{
+              background: `
+                radial-gradient(ellipse 50% 30% at 35% 100%, rgba(255, 107, 0, 0.2) 0%, transparent 40%),
+                radial-gradient(ellipse 40% 25% at 65% 100%, rgba(251, 191, 36, 0.15) 0%, transparent 35%)
+              `,
+            }}
+          />
+          {/* Soft top fade */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(to bottom, transparent 0%, transparent 60%, rgba(10, 10, 10, 0.5) 100%)',
+            }}
+          />
         </motion.div>
 
         {/* SECTION 2: Enter the Crucible with Orbiting Agents */}
