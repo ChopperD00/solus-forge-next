@@ -907,7 +907,7 @@ export default function CrucibleLanding({
 
           {/* Section Title - fades in then moves up as cards appear */}
           <motion.div
-            className="text-center relative z-10 mb-8"
+            className="text-center relative z-10 mb-12 md:mb-16"
             style={{
               y: useTransform(smoothProgress, [0.55, 0.65, 0.78], [30, 0, -40]),
               opacity: useTransform(smoothProgress, [0.55, 0.62, 0.75, 0.85], [0, 1, 1, 0.7]),
@@ -932,7 +932,7 @@ export default function CrucibleLanding({
 
           {/* Arcana Split Columns - unified symbols that fracture into playing cards */}
           <div className="relative w-full max-w-6xl mx-auto z-10 px-2 md:px-4 overflow-x-auto">
-            <div className="flex justify-start md:justify-center items-start gap-2 md:gap-4 min-w-max md:min-w-0 pb-4">
+            <div className="flex justify-start md:justify-center items-start gap-3 md:gap-6 min-w-max md:min-w-0 pb-4">
               {/* The Visionary - Orange */}
               <ArcanaSplit
                 arcanaName="The Visionary"

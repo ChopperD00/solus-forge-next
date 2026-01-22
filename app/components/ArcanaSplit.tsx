@@ -261,11 +261,11 @@ export default function ArcanaSplit({
   return (
     <div
       className="relative flex flex-col items-center"
-      style={{ width: cardWidth + 20 }}
+      style={{ width: cardWidth + 20, minHeight: isMobile ? 700 : 900 }}
     >
       {/* Arcana Name - positioned above everything */}
       <motion.span
-        className="text-[8px] md:text-[10px] uppercase tracking-widest mb-2 md:mb-4 whitespace-nowrap font-semibold"
+        className="text-[8px] md:text-[10px] uppercase tracking-widest mb-3 md:mb-6 whitespace-nowrap font-semibold"
         style={{
           color: arcanaColor,
           opacity: useTransform(scrollProgress, [adjustedStart, adjustedStart + 0.03], [0, 0.9]),
@@ -276,7 +276,7 @@ export default function ArcanaSplit({
       </motion.span>
 
       {/* Container for symbol and cards */}
-      <div className="relative flex flex-col items-center justify-start">
+      <div className="relative flex flex-col items-center justify-start" style={{ minHeight: isMobile ? 120 : 150 }}>
         {/* Unified Arcana Symbol */}
         <motion.div
           className="absolute flex flex-col items-center justify-center"
@@ -388,9 +388,9 @@ export default function ArcanaSplit({
           </motion.div>
         </motion.div>
 
-        {/* Playing Cards - vertical stack */}
+        {/* Playing Cards - vertical stack with top margin for spacing from symbol */}
         <motion.div
-          className="flex flex-col items-center gap-2 md:gap-3"
+          className="flex flex-col items-center gap-2 md:gap-3 mt-8 md:mt-12"
           style={{ opacity: cardsOpacity }}
         >
           {cards.map((card, cardIndex) => {
