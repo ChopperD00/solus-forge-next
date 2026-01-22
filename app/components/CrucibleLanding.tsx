@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
 import GradientCircle from './GradientCircle'
 import SpectraNoiseBackground from './SpectraNoiseBackground'
 import SolusForgeIcon from './SolusForgeIcon'
+import TarotCard from './TarotCard'
 import {
   Eye as EyeIcon,
   Compass as CompassIcon,
@@ -107,53 +108,29 @@ const agents = [
   },
 ]
 
-// Workflow decks - grouped by theme like tarot card stacks
-const workflowDecks = [
-  {
-    id: 'visual',
-    name: 'The Visionary',
-    subtitle: 'Creative Production',
-    cards: [
-      { id: 'video_production', icon: FilmSlateIcon, title: 'Video Production', subtitle: 'AI video generation & editing' },
-      { id: 'image_generation', icon: PaintBrushIcon, title: 'Image Generation', subtitle: 'Concept art & product shots' },
-      { id: '3d_assets', icon: CubeIcon, title: '3D Assets', subtitle: 'Models, textures & scenes' },
-      { id: 'repurposing', icon: ArrowsClockwiseIcon, title: 'Content Repurpose', subtitle: 'Transform across formats' },
-    ],
-  },
-  {
-    id: 'marketing',
-    name: 'The Merchant',
-    subtitle: 'Marketing Stack',
-    cards: [
-      { id: 'email_campaign', icon: EnvelopeIcon, title: 'Email Campaign', subtitle: 'Figma templates, copy, AI images' },
-      { id: 'social_paid_ads', icon: DeviceMobileIcon, title: 'Social Paid Ads', subtitle: 'Multi-format ad creation' },
-      { id: 'influencer_suite', icon: UserIcon, title: 'Influencer Suite', subtitle: 'LoRA training & clothing swap' },
-      { id: 'automation', icon: LightningIcon, title: 'Automation', subtitle: 'Workflow triggers & sequences' },
-    ],
-  },
-  {
-    id: 'intelligence',
-    name: 'The Oracle',
-    subtitle: 'Research & Strategy',
-    cards: [
-      { id: 'research', icon: FlaskIcon, title: 'Research', subtitle: 'Parallel AI research' },
-      { id: 'analytics', icon: ChartBarIcon, title: 'Analytics', subtitle: 'Performance insights' },
-      { id: 'lupin_iii', icon: DetectiveIcon, title: 'Lupin III', subtitle: 'OSINT & Intelligence' },
-    ],
-  },
-  {
-    id: 'misc',
-    name: 'The Alchemist',
-    subtitle: 'Arcane Tools',
-    cards: [
-      { id: 'audio', icon: MusicNotesIcon, title: 'Audio Production', subtitle: 'Music, SFX & voiceover' },
-      { id: 'asset_vault', icon: VaultIcon, title: 'Asset Vault', subtitle: 'Organize & version control' },
-    ],
-  },
+// All tarot cards with front (icon) and back (details) content
+const tarotCards = [
+  // Visual / Creative
+  { id: 'video_production', icon: FilmSlateIcon, title: 'Video Production', subtitle: 'AI video generation & editing', capabilities: ['AI Video Generation', 'Motion Graphics', 'Auto-Editing', 'B-Roll Assembly'], arcana: 'The Visionary' },
+  { id: 'image_generation', icon: PaintBrushIcon, title: 'Image Generation', subtitle: 'Concept art & product shots', capabilities: ['Product Photography', 'Concept Art', 'Style Transfer', 'Batch Generation'], arcana: 'The Visionary' },
+  { id: '3d_assets', icon: CubeIcon, title: '3D Assets', subtitle: 'Models, textures & scenes', capabilities: ['Model Generation', 'Texture Synthesis', 'Scene Composition', 'Asset Export'], arcana: 'The Visionary' },
+  { id: 'repurposing', icon: ArrowsClockwiseIcon, title: 'Content Repurpose', subtitle: 'Transform across formats', capabilities: ['Format Conversion', 'Platform Optimization', 'Aspect Ratios', 'Content Slicing'], arcana: 'The Visionary' },
+  // Marketing
+  { id: 'email_campaign', icon: EnvelopeIcon, title: 'Email Campaign', subtitle: 'Figma templates, copy, AI images', capabilities: ['Template Design', 'Copy Generation', 'A/B Testing', 'Send Automation'], arcana: 'The Merchant' },
+  { id: 'social_paid_ads', icon: DeviceMobileIcon, title: 'Social Paid Ads', subtitle: 'Multi-format ad creation', capabilities: ['Ad Creative', 'Audience Targeting', 'Budget Optimization', 'Performance Tracking'], arcana: 'The Merchant' },
+  { id: 'influencer_suite', icon: UserIcon, title: 'Influencer Suite', subtitle: 'LoRA training & clothing swap', capabilities: ['LoRA Training', 'Face Swap', 'Clothing Transfer', 'Brand Consistency'], arcana: 'The Merchant' },
+  { id: 'automation', icon: LightningIcon, title: 'Automation', subtitle: 'Workflow triggers & sequences', capabilities: ['Trigger Events', 'Conditional Logic', 'API Integrations', 'Scheduled Tasks'], arcana: 'The Merchant' },
+  // Intelligence
+  { id: 'research', icon: FlaskIcon, title: 'Research', subtitle: 'Parallel AI research', capabilities: ['Multi-Source Search', 'Summarization', 'Fact Checking', 'Citation Tracking'], arcana: 'The Oracle' },
+  { id: 'analytics', icon: ChartBarIcon, title: 'Analytics', subtitle: 'Performance insights', capabilities: ['Data Visualization', 'Trend Analysis', 'ROI Tracking', 'Custom Reports'], arcana: 'The Oracle' },
+  { id: 'lupin_iii', icon: DetectiveIcon, title: 'Lupin III', subtitle: 'OSINT & Intelligence', capabilities: ['Social Recon', 'Domain Intel', 'Entity Mapping', 'Deep Web Search'], arcana: 'The Oracle' },
+  // Misc / Arcane
+  { id: 'audio', icon: MusicNotesIcon, title: 'Audio Production', subtitle: 'Music, SFX & voiceover', capabilities: ['Music Generation', 'Voice Synthesis', 'SFX Library', 'Audio Mastering'], arcana: 'The Alchemist' },
+  { id: 'asset_vault', icon: VaultIcon, title: 'Asset Vault', subtitle: 'Organize & version control', capabilities: ['Version History', 'Smart Tagging', 'Quick Search', 'Team Sharing'], arcana: 'The Alchemist' },
 ]
 
 // Flat list for header icons
-const workflows = workflowDecks.flatMap(deck => deck.cards)
+const workflows = tarotCards.map(card => ({ id: card.id, icon: card.icon, title: card.title, subtitle: card.subtitle }))
 
 // Icon component type
 type IconComponent = React.ForwardRefExoticComponent<React.PropsWithoutRef<{ size?: number | string; weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone'; color?: string }> & React.RefAttributes<SVGSVGElement>>
@@ -663,12 +640,12 @@ export default function CrucibleLanding({
           }}
         />
 
-        {/* SECTION 3: Workflow Cards - Tarot-style Deck Layout */}
+        {/* SECTION 3: Tarot Card Arc Animation */}
         <motion.div
-          className="absolute inset-0 flex flex-col items-center justify-center pt-16"
-          style={{ opacity: workflowsOpacity, y: workflowsY }}
+          className="absolute inset-0 flex flex-col items-center justify-center"
+          style={{ opacity: workflowsOpacity }}
         >
-          {/* Subtle background overlay for workflows section */}
+          {/* Subtle background overlay */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -676,120 +653,218 @@ export default function CrucibleLanding({
             }}
           />
 
-          <h3
-            className="text-2xl md:text-3xl font-bold mb-6 text-center relative z-10"
+          {/* Section Title - morphs from English to Latin */}
+          <motion.div
+            className="text-center relative z-10 mb-2"
+            style={{ y: workflowsY }}
+          >
+            <motion.h3
+              className="text-2xl md:text-3xl font-bold"
+              style={{
+                color: colors.text,
+                fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                fontStretch: 'expanded',
+                letterSpacing: '0.05em',
+                position: 'relative',
+              }}
+            >
+              {/* English phrase - fades out */}
+              <motion.span
+                style={{
+                  opacity: useTransform(smoothProgress, [0.55, 0.65], [1, 0]),
+                  position: 'absolute',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Draw Your Path
+              </motion.span>
+              {/* Latin phrase - fades in */}
+              <motion.span
+                style={{
+                  opacity: useTransform(smoothProgress, [0.65, 0.75], [0, 1]),
+                  color: colors.accent,
+                  textShadow: `0 0 30px ${colors.accent}66`,
+                }}
+              >
+                Non viribus sed mente labores
+              </motion.span>
+            </motion.h3>
+          </motion.div>
+          <motion.p
+            className="text-sm mb-8 text-center relative z-10"
             style={{
-              color: colors.text,
+              color: colors.textDim,
               fontFamily: "'Dobla Sans', system-ui, sans-serif",
-              fontStretch: 'expanded',
-              letterSpacing: '0.05em',
+              y: workflowsY,
             }}
           >
-            Draw Your Path
-          </h3>
+            Those who are brave find fortune
+          </motion.p>
 
-          {/* Tarot Deck Layout - 4 stacks side by side */}
-          <div className="flex flex-wrap justify-center gap-8 md:gap-12 px-4 relative z-10 max-w-6xl">
-            {workflowDecks.map((deck, deckIndex) => (
-              <motion.div
-                key={deck.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: deckIndex * 0.15 }}
-                className="flex flex-col items-center"
+          {/* Arcana Group Labels and Glow Zones */}
+          <div className="absolute inset-0 pointer-events-none z-0">
+            {/* The Visionary - Creative (left) */}
+            <motion.div
+              className="absolute"
+              style={{
+                left: 'calc(50% - 380px)',
+                top: 'calc(50% + 20px)',
+                width: '180px',
+                height: '280px',
+                opacity: useTransform(smoothProgress, [0.7, 0.85], [0, 0.6]),
+              }}
+            >
+              <div
+                className="absolute inset-0 rounded-3xl"
+                style={{
+                  border: `1px solid ${colors.accent}33`,
+                  background: `radial-gradient(ellipse at center, ${colors.accent}08 0%, transparent 70%)`,
+                }}
+              />
+              <span
+                className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest whitespace-nowrap"
+                style={{ color: colors.accent, opacity: 0.6 }}
               >
-                {/* Deck Title */}
-                <div className="text-center mb-4">
-                  <h4
-                    className="text-lg font-bold tracking-wide"
-                    style={{
-                      color: colors.accent,
-                      fontFamily: "'Dobla Sans', system-ui, sans-serif",
-                      textShadow: `0 0 20px ${colors.accent}44`,
-                    }}
-                  >
-                    {deck.name}
-                  </h4>
-                  <span
-                    className="text-xs tracking-wider uppercase"
-                    style={{ color: colors.textDim }}
-                  >
-                    {deck.subtitle}
-                  </span>
-                </div>
+                The Visionary
+              </span>
+            </motion.div>
 
-                {/* Stacked Cards */}
-                <div className="relative" style={{ height: deck.cards.length * 20 + 140 }}>
-                  {deck.cards.map((card, cardIndex) => {
-                    const IconComponent = card.icon
-                    const stackOffset = cardIndex * 20
-                    const rotation = (cardIndex - (deck.cards.length - 1) / 2) * 2 // Slight fan effect
+            {/* The Merchant - Marketing (center-left) */}
+            <motion.div
+              className="absolute"
+              style={{
+                left: 'calc(50% - 180px)',
+                top: 'calc(50% + 20px)',
+                width: '180px',
+                height: '280px',
+                opacity: useTransform(smoothProgress, [0.72, 0.87], [0, 0.6]),
+              }}
+            >
+              <div
+                className="absolute inset-0 rounded-3xl"
+                style={{
+                  border: `1px solid #10B98133`,
+                  background: `radial-gradient(ellipse at center, #10B98108 0%, transparent 70%)`,
+                }}
+              />
+              <span
+                className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest whitespace-nowrap"
+                style={{ color: '#10B981', opacity: 0.6 }}
+              >
+                The Merchant
+              </span>
+            </motion.div>
 
-                    return (
-                      <motion.button
-                        key={card.id}
-                        initial={{ opacity: 0, y: 20, rotate: rotation }}
-                        animate={{ opacity: 1, y: 0, rotate: rotation }}
-                        transition={{ delay: deckIndex * 0.15 + cardIndex * 0.08 }}
-                        onClick={() => onWorkflowSelect?.(card.id)}
-                        className="tarot-card absolute flex flex-col items-center p-5 rounded-xl transition-all duration-300"
-                        style={{
-                          width: 140,
-                          height: 160,
-                          top: stackOffset,
-                          left: '50%',
-                          marginLeft: -70,
-                          background: 'transparent',
-                          border: `2px solid ${colors.accent}66`,
-                          boxShadow: `0 0 15px ${colors.accent}22, inset 0 0 30px ${colors.bg}`,
-                          zIndex: deck.cards.length - cardIndex,
-                        }}
-                        whileHover={{
-                          y: -10,
-                          zIndex: 50,
-                          background: colors.surface,
-                          boxShadow: `0 0 30px ${colors.accent}55, 0 10px 40px rgba(0,0,0,0.5)`,
-                          transition: { duration: 0.2 },
-                        }}
-                      >
-                        {/* Icon - white default, orange on hover via CSS class */}
-                        <div className="mb-3 tarot-icon">
-                          <IconComponent
-                            size={40}
-                            weight="duotone"
-                            className="transition-all duration-300"
-                            color="#FFFFFF"
-                          />
-                        </div>
+            {/* The Oracle - Intelligence (center-right) */}
+            <motion.div
+              className="absolute"
+              style={{
+                left: 'calc(50% + 20px)',
+                top: 'calc(50% + 20px)',
+                width: '150px',
+                height: '280px',
+                opacity: useTransform(smoothProgress, [0.74, 0.89], [0, 0.6]),
+              }}
+            >
+              <div
+                className="absolute inset-0 rounded-3xl"
+                style={{
+                  border: `1px solid #8B5CF633`,
+                  background: `radial-gradient(ellipse at center, #8B5CF608 0%, transparent 70%)`,
+                }}
+              />
+              <span
+                className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest whitespace-nowrap"
+                style={{ color: '#8B5CF6', opacity: 0.6 }}
+              >
+                The Oracle
+              </span>
+            </motion.div>
 
-                        {/* Title */}
-                        <span
-                          className="font-bold text-base text-center leading-tight"
-                          style={{
-                            color: '#FFFFFF',
-                            fontFamily: "'Dobla Sans', system-ui, sans-serif",
-                          }}
-                        >
-                          {card.title}
-                        </span>
+            {/* The Alchemist - Arcane (right) */}
+            <motion.div
+              className="absolute"
+              style={{
+                left: 'calc(50% + 190px)',
+                top: 'calc(50% + 20px)',
+                width: '140px',
+                height: '280px',
+                opacity: useTransform(smoothProgress, [0.76, 0.91], [0, 0.6]),
+              }}
+            >
+              <div
+                className="absolute inset-0 rounded-3xl"
+                style={{
+                  border: `1px solid #EC489933`,
+                  background: `radial-gradient(ellipse at center, #EC489908 0%, transparent 70%)`,
+                }}
+              />
+              <span
+                className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest whitespace-nowrap"
+                style={{ color: '#EC4899', opacity: 0.6 }}
+              >
+                The Alchemist
+              </span>
+            </motion.div>
+          </div>
 
-                        {/* Subtitle - visible on hover */}
-                        <span
-                          className="tarot-subtitle text-[10px] text-center mt-2 transition-opacity absolute bottom-3 left-2 right-2"
-                          style={{
-                            color: colors.textMuted,
-                            fontFamily: "'Dobla Sans', system-ui, sans-serif",
-                            opacity: 0,
-                          }}
-                        >
-                          {card.subtitle}
-                        </span>
-                      </motion.button>
-                    )
-                  })}
-                </div>
-              </motion.div>
-            ))}
+          {/* Cards in Arc Formation - scroll triggers arc-to-grid animation */}
+          <div className="relative w-full max-w-6xl h-[500px] z-10">
+            {tarotCards.map((card, index) => {
+              const totalCards = tarotCards.length
+
+              // Arc formation (initial) - cards spread in a semicircle arc
+              const arcAngle = (index / (totalCards - 1)) * Math.PI - Math.PI / 2 // -90° to 90°
+              const arcRadius = 350
+              const arcX = Math.sin(arcAngle) * arcRadius
+              const arcY = -Math.cos(arcAngle) * arcRadius * 0.4 + 100
+              const arcRotation = (index - (totalCards - 1) / 2) * 8 // Fan rotation
+
+              // Grid formation by arcana groups (horizontal arrangement)
+              // Group 1: Visionary (0-3), Group 2: Merchant (4-7), Group 3: Oracle (8-10), Group 4: Alchemist (11-12)
+              let groupIndex = 0
+              let indexInGroup = index
+              if (index < 4) {
+                groupIndex = 0
+                indexInGroup = index
+              } else if (index < 8) {
+                groupIndex = 1
+                indexInGroup = index - 4
+              } else if (index < 11) {
+                groupIndex = 2
+                indexInGroup = index - 8
+              } else {
+                groupIndex = 3
+                indexInGroup = index - 11
+              }
+
+              // Calculate grid position based on group
+              const groupOffsets = [-290, -90, 110, 280] // X offset for each group
+              const gridX = groupOffsets[groupIndex]
+              const gridY = indexInGroup * 70 - 70 // Stack vertically within group
+              const gridRotation = 0
+
+              const cardDelay = index * 0.03
+
+              return (
+                <TarotCard
+                  key={card.id}
+                  card={card}
+                  index={index}
+                  arcX={arcX}
+                  arcY={arcY}
+                  arcRotation={arcRotation}
+                  gridX={gridX}
+                  gridY={gridY}
+                  gridRotation={gridRotation}
+                  cardDelay={cardDelay}
+                  onSelect={() => onWorkflowSelect?.(card.id)}
+                  scrollProgress={progress}
+                />
+              )
+            })}
           </div>
 
           {/* Footer */}

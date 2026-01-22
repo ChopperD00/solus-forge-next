@@ -1,12 +1,6 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
 import './globals.css'
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-})
 
 // Futuriata font family
 const futuriata = localFont({
@@ -56,8 +50,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${futuriata.variable} ${futuriataLine.variable}`}>
-      <body className={inter.className}>{children}</body>
+    <html lang="en" className={`${futuriata.variable} ${futuriataLine.variable}`}>
+      <body style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>{children}</body>
     </html>
   )
 }
