@@ -107,13 +107,14 @@ export default function ArcanaSplit({
   }
 
   return (
-    <div className="relative flex flex-col items-center" style={{ width: 160, minHeight: 400 }}>
+    <div className="relative flex flex-col items-center flex-1" style={{ minWidth: 150, maxWidth: 180, minHeight: 400 }}>
       {/* Arcana Name - always visible once section starts */}
       <motion.span
-        className="text-[10px] uppercase tracking-widest mb-4"
+        className="text-[10px] uppercase tracking-widest mb-4 whitespace-nowrap"
         style={{
           color: arcanaColor,
           opacity: useTransform(scrollProgress, [adjustedStart, adjustedStart + 0.03], [0, 0.7]),
+          fontFamily: "system-ui, -apple-system, sans-serif",
         }}
       >
         {arcanaName}

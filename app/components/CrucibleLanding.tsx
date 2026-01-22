@@ -527,7 +527,7 @@ export default function CrucibleLanding({
               className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-wide"
               style={{
                 color: colors.text,
-                fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                fontFamily: "system-ui, -apple-system, sans-serif",
               }}
             >
               <span style={{ textShadow: `0 0 30px ${colors.accent}44` }}>
@@ -574,7 +574,7 @@ export default function CrucibleLanding({
                 style={{
                   color: colors.textMuted,
                   textShadow: `0 0 20px ${colors.accent}22`,
-                  fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                  fontFamily: "system-ui, -apple-system, sans-serif",
                 }}
               >
                 Aut viam inveniam aut faciam
@@ -705,7 +705,7 @@ export default function CrucibleLanding({
               className="text-xl md:text-2xl font-semibold tracking-wide mb-2"
               style={{
                 color: colors.text,
-                fontFamily: "var(--font-futuriata), system-ui, sans-serif",
+                fontFamily: "system-ui, -apple-system, sans-serif",
               }}
             >
               Select Your Workflow
@@ -719,8 +719,8 @@ export default function CrucibleLanding({
           </motion.div>
 
           {/* Arcana Split Columns - unified symbols that fracture into cards */}
-          <div className="relative w-full max-w-5xl mx-auto z-10 px-8">
-            <div className="flex justify-center gap-8">
+          <div className="relative w-full max-w-6xl mx-auto z-10 px-4">
+            <div className="flex justify-between gap-4">
               {/* The Visionary - Orange */}
               <ArcanaSplit
                 arcanaName="The Visionary"

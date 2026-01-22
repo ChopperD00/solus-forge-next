@@ -341,7 +341,7 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                     background: 'rgba(255, 255, 255, 0.03)',
                     border: `1px solid ${error ? '#EF4444' : 'rgba(150, 150, 150, 0.3)'}`,
                     color: colors.text,
-                    fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                    fontFamily: "system-ui, -apple-system, sans-serif",
                     boxShadow: error
                       ? '0 0 30px rgba(239, 68, 68, 0.3)'
                       : '0 0 30px rgba(100, 100, 100, 0.15)',
