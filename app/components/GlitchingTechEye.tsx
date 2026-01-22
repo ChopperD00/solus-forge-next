@@ -17,7 +17,7 @@ interface GlitchingTechEyeProps {
   style?: React.CSSProperties
 }
 
-// Circular text component with blur effect
+// Circular text component with blur and glitch effect
 function CircularText({
   text,
   radius,
@@ -30,10 +30,11 @@ function CircularText({
   fontSize?: number
 }) {
   const pathId = `circlePath-${radius}`
+  const glitchPathId = `glitchPath-${radius}`
   const circumference = 2 * Math.PI * radius
   // Repeat text to fill the circle
-  const repeatCount = Math.ceil(circumference / (text.length * fontSize * 0.6))
-  const repeatedText = Array(repeatCount).fill(text).join(' · ')
+  const repeatCount = Math.ceil(circumference / (text.length * fontSize * 0.55))
+  const repeatedText = Array(repeatCount).fill(text).join('  ·  ')
 
   return (
     <AnimatePresence>
@@ -66,46 +67,97 @@ function CircularText({
               <filter id="textBlur" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" />
               </filter>
+              {/* Glitch displacement filter */}
+              <filter id="glitchFilter" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="1" result="noise" seed="0">
+                  <animate attributeName="seed" from="0" to="100" dur="0.5s" repeatCount="indefinite" />
+                </feTurbulence>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+              </filter>
             </defs>
 
-            {/* Blurred background text layer */}
+            {/* Glitch layer - red shifted */}
             <motion.text
-              fill="rgba(255, 140, 50, 0.3)"
+              fill="rgba(255, 80, 80, 0.4)"
               fontSize={fontSize}
-              fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
+              fontFamily="'Inter', system-ui, sans-serif"
               fontWeight="300"
-              letterSpacing="0.15em"
-              filter="url(#textBlur)"
+              letterSpacing="0.2em"
+              style={{ mixBlendMode: 'screen' }}
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}
+              animate={{ opacity: [0, 0.4, 0.2, 0.4] }}
+              transition={{ duration: 0.3, repeat: Infinity, repeatType: "reverse" }}
             >
-              <textPath href={`#${pathId}`} startOffset="0%">
-                <motion.tspan
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  {repeatedText}
-                </motion.tspan>
+              <textPath href={`#${pathId}`} startOffset="1%">
+                {repeatedText}
               </textPath>
               <animateTransform
                 attributeName="transform"
                 type="rotate"
                 from={`0 ${radius + 20} ${radius + 20}`}
                 to={`360 ${radius + 20} ${radius + 20}`}
-                dur="25s"
+                dur="30s"
                 repeatCount="indefinite"
               />
             </motion.text>
 
-            {/* Sharp foreground text layer */}
+            {/* Glitch layer - cyan shifted */}
             <motion.text
-              fill="rgba(255, 180, 100, 0.7)"
+              fill="rgba(80, 255, 255, 0.3)"
               fontSize={fontSize}
-              fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
+              fontFamily="'Inter', system-ui, sans-serif"
               fontWeight="300"
-              letterSpacing="0.15em"
+              letterSpacing="0.2em"
+              style={{ mixBlendMode: 'screen' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.3, 0.15, 0.3] }}
+              transition={{ duration: 0.25, repeat: Infinity, repeatType: "reverse", delay: 0.1 }}
+            >
+              <textPath href={`#${pathId}`} startOffset="-1%">
+                {repeatedText}
+              </textPath>
+              <animateTransform
+                attributeName="transform"
+                type="rotate"
+                from={`0 ${radius + 20} ${radius + 20}`}
+                to={`360 ${radius + 20} ${radius + 20}`}
+                dur="30s"
+                repeatCount="indefinite"
+              />
+            </motion.text>
+
+            {/* Blurred background text layer */}
+            <motion.text
+              fill="rgba(255, 140, 50, 0.25)"
+              fontSize={fontSize}
+              fontFamily="'Inter', system-ui, sans-serif"
+              fontWeight="300"
+              letterSpacing="0.2em"
+              filter="url(#textBlur)"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+            >
+              <textPath href={`#${pathId}`} startOffset="0%">
+                {repeatedText}
+              </textPath>
+              <animateTransform
+                attributeName="transform"
+                type="rotate"
+                from={`0 ${radius + 20} ${radius + 20}`}
+                to={`360 ${radius + 20} ${radius + 20}`}
+                dur="30s"
+                repeatCount="indefinite"
+              />
+            </motion.text>
+
+            {/* Main text layer - Inter Light */}
+            <motion.text
+              fill="rgba(255, 200, 150, 0.85)"
+              fontSize={fontSize}
+              fontFamily="'Inter', system-ui, sans-serif"
+              fontWeight="300"
+              letterSpacing="0.2em"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4, delay: 0.1 }}
@@ -118,7 +170,7 @@ function CircularText({
                 type="rotate"
                 from={`0 ${radius + 20} ${radius + 20}`}
                 to={`360 ${radius + 20} ${radius + 20}`}
-                dur="25s"
+                dur="30s"
                 repeatCount="indefinite"
               />
             </motion.text>
