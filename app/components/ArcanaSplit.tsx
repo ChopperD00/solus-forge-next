@@ -33,9 +33,9 @@ const colors = {
   textDim: '#555555',
 }
 
-// Playing card dimensions (2.5:3.5 ratio like standard cards) - larger for legibility
-const CARD_WIDTH = 140
-const CARD_HEIGHT = 196
+// Playing card dimensions - more compact for grid layout
+const CARD_WIDTH = 130
+const CARD_HEIGHT = 170
 
 // Flippable Tarot Card component
 function FlippableCard({
@@ -79,7 +79,7 @@ function FlippableCard({
       >
         {/* Front of card */}
         <div
-          className="absolute inset-0 rounded-xl flex flex-col items-center justify-center p-4"
+          className="absolute inset-0 rounded-xl flex flex-col items-center justify-center p-3"
           style={{
             backfaceVisibility: 'hidden',
             background: `linear-gradient(145deg, ${colors.surface} 0%, ${colors.bg} 100%)`,
@@ -99,38 +99,30 @@ function FlippableCard({
 
           {/* Icon */}
           <div
-            className="w-14 h-14 rounded-lg flex items-center justify-center mb-3"
+            className="w-12 h-12 rounded-lg flex items-center justify-center mb-2"
             style={{
               background: `${arcanaColor}15`,
               border: `1px solid ${arcanaColor}33`,
             }}
           >
-            <IconComponent size={32} weight="duotone" color={arcanaColor} />
+            <IconComponent size={28} weight="duotone" color={arcanaColor} />
           </div>
 
-          {/* Title */}
+          {/* Title - larger */}
           <span
-            className="text-sm font-semibold text-center leading-tight"
+            className="text-base font-bold text-center leading-tight"
             style={{ color: colors.text }}
           >
             {card.title}
           </span>
 
-          {/* Subtitle */}
+          {/* Subtitle - larger, more legible */}
           <span
-            className="text-xs text-center mt-1.5 opacity-70 leading-tight px-2"
+            className="text-sm text-center mt-2 leading-snug px-1"
             style={{ color: colors.textMuted }}
           >
             {card.subtitle}
           </span>
-
-          {/* Arcana indicator */}
-          <div
-            className="absolute bottom-3 text-[9px] uppercase tracking-wider opacity-60"
-            style={{ color: arcanaColor }}
-          >
-            {card.arcana}
-          </div>
         </div>
 
         {/* Back of card (capabilities) */}
@@ -221,12 +213,12 @@ export default function ArcanaSplit({
     [0, 1]
   )
 
-  // Card position transforms
+  // Card position transforms - tighter vertical spacing
   const getCardTransform = (cardIndex: number, totalCards: number) => {
     const centerOffset = (totalCards - 1) / 2
-    // More vertical spacing for taller playing cards
-    const finalY = (cardIndex - centerOffset) * (CARD_HEIGHT + 16)
-    const jitterX = (cardIndex % 2 === 0 ? -1 : 1) * 15
+    // Tighter vertical spacing - 12px gap between cards
+    const finalY = (cardIndex - centerOffset) * (CARD_HEIGHT + 12)
+    const jitterX = (cardIndex % 2 === 0 ? -1 : 1) * 10
 
     const y = useTransform(
       scrollProgress,
@@ -249,7 +241,7 @@ export default function ArcanaSplit({
     const rotate = useTransform(
       scrollProgress,
       [adjustedEnd - 0.05, adjustedEnd - 0.02, adjustedEnd + 0.02],
-      [cardIndex * 8 - totalCards * 4, cardIndex * 3, 0]
+      [cardIndex * 6 - totalCards * 3, cardIndex * 2, 0]
     )
 
     return { x, y, scale, rotate }
@@ -258,7 +250,7 @@ export default function ArcanaSplit({
   return (
     <div
       className="relative flex flex-col items-center flex-1"
-      style={{ minWidth: CARD_WIDTH + 24, maxWidth: CARD_WIDTH + 48, minHeight: 650 }}
+      style={{ minWidth: CARD_WIDTH + 16, maxWidth: CARD_WIDTH + 32, minHeight: 600 }}
     >
       {/* Arcana Name - positioned above everything */}
       <motion.span
@@ -273,7 +265,7 @@ export default function ArcanaSplit({
       </motion.span>
 
       {/* Container for symbol and cards */}
-      <div className="relative flex-1 flex items-start justify-center pt-4" style={{ minHeight: 550 }}>
+      <div className="relative flex-1 flex items-start justify-center pt-2" style={{ minHeight: 500 }}>
         {/* Unified Arcana Symbol */}
         <motion.div
           className="absolute flex flex-col items-center justify-center"
