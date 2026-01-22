@@ -3,6 +3,16 @@
 import { useRef, useEffect, useState } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 
+interface SolarFlare {
+  id: number
+  angle: number // Position on the circle (radians)
+  startTime: number
+  duration: number // How long the flare lasts
+  intensity: number // 0-1 strength
+  size: number // Scale factor
+  direction: number // -1 to 1, bias toward bottom (positive y)
+}
+
 interface GradientCircleProps {
   children?: React.ReactNode
   scrollProgress?: number
@@ -13,6 +23,8 @@ export default function GradientCircle({ children, scrollProgress = 0 }: Gradien
   const containerRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number>(0)
   const timeRef = useRef(0)
+  const flaresRef = useRef<SolarFlare[]>([])
+  const lastFlareTimeRef = useRef(0)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -33,6 +45,129 @@ export default function GradientCircle({ children, scrollProgress = 0 }: Gradien
     const centerX = size / 2
     const centerY = size / 2
     const radius = size * 0.42
+
+    // Generate a new solar flare
+    const createFlare = (time: number): SolarFlare => {
+      // Bias toward bottom half of circle (between PI/4 and 3PI/4 from bottom)
+      // Bottom is at PI/2, so we want angles around there
+      const bottomBias = Math.PI / 2 // Bottom of circle
+      const spread = Math.PI * 0.6 // How wide the spawn area is
+      const angle = bottomBias + (Math.random() - 0.5) * spread
+
+      return {
+        id: Math.random(),
+        angle,
+        startTime: time,
+        duration: 2 + Math.random() * 2, // 2-4 seconds
+        intensity: 0.6 + Math.random() * 0.4,
+        size: 0.8 + Math.random() * 0.6,
+        direction: 0.3 + Math.random() * 0.7, // Mostly downward
+      }
+    }
+
+    // Draw a solar flare
+    const drawFlare = (flare: SolarFlare, currentTime: number) => {
+      const elapsed = currentTime - flare.startTime
+      const progress = elapsed / flare.duration
+
+      if (progress > 1) return // Flare has ended
+
+      // Easing: quick rise, slow fall
+      const riseTime = 0.2
+      let alpha: number
+      if (progress < riseTime) {
+        alpha = (progress / riseTime) * flare.intensity
+      } else {
+        alpha = flare.intensity * (1 - (progress - riseTime) / (1 - riseTime))
+      }
+
+      // Flare extends outward and downward
+      const baseX = centerX + Math.cos(flare.angle) * radius
+      const baseY = centerY + Math.sin(flare.angle) * radius
+
+      // Flare grows outward over time
+      const flareLength = 40 + progress * 80 * flare.size
+      const flareWidth = 15 + Math.sin(progress * Math.PI) * 25 * flare.size
+
+      // Direction: outward from center with downward bias
+      const outwardX = Math.cos(flare.angle)
+      const outwardY = Math.sin(flare.angle)
+
+      // Add downward drift
+      const driftY = progress * 30 * flare.direction
+
+      // Create gradient for the flare
+      const endX = baseX + outwardX * flareLength
+      const endY = baseY + outwardY * flareLength + driftY
+
+      const flareGradient = ctx.createLinearGradient(baseX, baseY, endX, endY)
+      flareGradient.addColorStop(0, `rgba(255, 200, 100, ${alpha * 0.8})`)
+      flareGradient.addColorStop(0.3, `rgba(255, 140, 50, ${alpha * 0.6})`)
+      flareGradient.addColorStop(0.7, `rgba(255, 80, 20, ${alpha * 0.3})`)
+      flareGradient.addColorStop(1, 'transparent')
+
+      // Draw the main flare body
+      ctx.save()
+      ctx.translate(baseX, baseY)
+      ctx.rotate(flare.angle + Math.PI / 2)
+
+      // Organic flare shape using bezier curves
+      ctx.beginPath()
+      ctx.moveTo(0, 0)
+
+      // Left side of flare
+      ctx.bezierCurveTo(
+        -flareWidth * 0.3, flareLength * 0.3,
+        -flareWidth * 0.5, flareLength * 0.6,
+        -flareWidth * 0.2 + Math.sin(currentTime * 3 + flare.id) * 5, flareLength
+      )
+
+      // Tip
+      ctx.bezierCurveTo(
+        0, flareLength * 1.1,
+        0, flareLength * 1.1,
+        flareWidth * 0.2 + Math.sin(currentTime * 3 + flare.id + 1) * 5, flareLength
+      )
+
+      // Right side of flare
+      ctx.bezierCurveTo(
+        flareWidth * 0.5, flareLength * 0.6,
+        flareWidth * 0.3, flareLength * 0.3,
+        0, 0
+      )
+
+      ctx.fillStyle = flareGradient
+      ctx.fill()
+
+      // Add glow around the flare
+      const glowGradient = ctx.createRadialGradient(0, flareLength * 0.5, 0, 0, flareLength * 0.5, flareLength)
+      glowGradient.addColorStop(0, `rgba(255, 150, 50, ${alpha * 0.3})`)
+      glowGradient.addColorStop(1, 'transparent')
+
+      ctx.fillStyle = glowGradient
+      ctx.beginPath()
+      ctx.arc(0, flareLength * 0.5, flareLength * 0.8, 0, Math.PI * 2)
+      ctx.fill()
+
+      ctx.restore()
+
+      // Draw ripple particles falling downward
+      const numParticles = 5
+      for (let i = 0; i < numParticles; i++) {
+        const particleProgress = (progress + i * 0.1) % 1
+        if (particleProgress < 0.2) continue // Delay particle start
+
+        const px = baseX + outwardX * flareLength * particleProgress * 0.8 + (Math.random() - 0.5) * 20
+        const py = baseY + outwardY * flareLength * particleProgress + driftY * particleProgress * 1.5 + i * 15
+        const particleAlpha = alpha * (1 - particleProgress) * 0.5
+        const particleSize = 2 + (1 - particleProgress) * 3
+
+        ctx.fillStyle = `rgba(255, ${150 + i * 20}, 50, ${particleAlpha})`
+        ctx.beginPath()
+        ctx.arc(px, py, particleSize, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
 
     const animate = () => {
       timeRef.current += 0.008
@@ -112,6 +247,26 @@ export default function GradientCircle({ children, scrollProgress = 0 }: Gradien
       ctx.beginPath()
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2)
       ctx.stroke()
+
+      // === SOLAR FLARES ===
+      // Spawn new flares randomly (every 1.5-4 seconds)
+      if (t - lastFlareTimeRef.current > 1.5 + Math.random() * 2.5) {
+        flaresRef.current.push(createFlare(t))
+        lastFlareTimeRef.current = t
+
+        // Keep max 4 flares active
+        if (flaresRef.current.length > 4) {
+          flaresRef.current.shift()
+        }
+      }
+
+      // Draw active flares
+      flaresRef.current = flaresRef.current.filter(flare => {
+        const elapsed = t - flare.startTime
+        if (elapsed > flare.duration) return false
+        drawFlare(flare, t)
+        return true
+      })
 
       // Animated particles around the circle
       const numParticles = 30
