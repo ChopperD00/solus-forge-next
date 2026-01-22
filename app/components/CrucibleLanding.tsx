@@ -126,67 +126,72 @@ function MorphingAgent({
   const orbitX = Math.cos(angle) * orbitRadius
   const orbitY = Math.sin(angle) * orbitRadius * 0.4
 
-  // Final position (spread across top, evenly spaced)
-  const spacing = 100
-  const totalWidth = (totalAgents - 1) * spacing
-  const finalX = (index * spacing) - (totalWidth / 2)
-  const finalY = -180 // Above the chat bar
+  // Dissolve phase: agents scatter outward and fade like particles
+  // morphProgress 0-0.5: orbit to scatter, 0.5-1: fade out completely
+  const scatterProgress = Math.min(1, morphProgress * 2) // 0 to 1 over first half
+  const fadeProgress = Math.max(0, (morphProgress - 0.3) / 0.7) // 0 to 1 over last 70%
 
-  // Interpolate between orbit and final positions
-  const currentX = orbitX + (finalX - orbitX) * morphProgress
-  const currentY = orbitY + (finalY - orbitY) * morphProgress
+  // Scatter outward in random-ish directions based on agent index
+  const scatterAngle = agent.orbitOffset + (index * 0.7) // Unique scatter angle per agent
+  const scatterDistance = 300 + (index % 3) * 100 // Varied distances
+  const scatterX = orbitX + Math.cos(scatterAngle) * scatterDistance * scatterProgress
+  const scatterY = orbitY + Math.sin(scatterAngle) * scatterDistance * scatterProgress - (scatterProgress * 200)
 
-  // Scale down slightly when morphed
-  const scale = 1 - morphProgress * 0.15
+  // Final position is scattered outward
+  const currentX = scatterX
+  const currentY = scatterY
 
-  // Show label when morphed
-  const labelOpacity = morphProgress
+  // Scale down as they dissolve
+  const scale = Math.max(0.1, 1 - morphProgress * 0.8)
+
+  // Fade out completely
+  const opacity = 1 - fadeProgress
+
+  // Don't render if fully faded
+  if (opacity <= 0) return null
 
   return (
     <motion.div
-      className="absolute cursor-pointer"
+      className="absolute cursor-pointer pointer-events-none"
       style={{
         x: currentX,
         y: currentY,
         scale,
-        zIndex: isSelected ? 20 : 10,
+        opacity,
+        zIndex: 10,
       }}
-      onClick={onSelect}
-      whileHover={{ scale: scale * 1.1 }}
     >
       <motion.div
         className="relative flex flex-col items-center"
         style={{ width: 56, height: 56 }}
       >
-        {/* Glow */}
+        {/* Glow - becomes more orange/particle-like as it dissolves */}
         <div
           className="absolute inset-0 rounded-full"
           style={{
-            background: `radial-gradient(circle, ${agent.color}33 0%, transparent 70%)`,
-            transform: 'scale(1.5)',
-            opacity: isSelected ? 1 : 0.5,
+            background: `radial-gradient(circle, ${morphProgress > 0.3 ? colors.accent : agent.color}${Math.round((1 - fadeProgress) * 50).toString(16).padStart(2, '0')} 0%, transparent 70%)`,
+            transform: `scale(${1.5 + morphProgress * 2})`,
+            opacity: 0.8,
           }}
         />
-        {/* Icon container */}
+        {/* Icon container - fades to just a glowing orb */}
         <div
           className="relative w-full h-full rounded-full flex items-center justify-center transition-all"
           style={{
-            background: colors.surface,
-            border: `2px solid ${isSelected ? agent.color : colors.border}`,
-            boxShadow: isSelected ? `0 0 20px ${agent.color}66` : 'none',
+            background: morphProgress > 0.5
+              ? `radial-gradient(circle, ${colors.accent}66 0%, ${colors.accent}22 100%)`
+              : colors.surface,
+            border: `2px solid ${morphProgress > 0.5 ? colors.accent : colors.border}`,
+            boxShadow: `0 0 ${20 + morphProgress * 30}px ${colors.accent}${Math.round((morphProgress) * 99).toString(16).padStart(2, '0')}`,
           }}
         >
-          <span className="text-xl">{agent.icon}</span>
+          <span
+            className="text-xl transition-opacity"
+            style={{ opacity: 1 - morphProgress * 1.5 }}
+          >
+            {agent.icon}
+          </span>
         </div>
-        {/* Label - appears when morphed */}
-        <motion.div
-          className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-center"
-          style={{ opacity: labelOpacity }}
-        >
-          <div className="text-[10px] font-medium" style={{ color: colors.text }}>
-            {agent.name}
-          </div>
-        </motion.div>
       </motion.div>
     </motion.div>
   )
@@ -380,7 +385,7 @@ export default function CrucibleLanding({
             style={{ opacity: orbitPhraseOpacity }}
           >
             <h2
-              className="text-2xl md:text-3xl lg:text-4xl font-light italic tracking-wide"
+              className="text-2xl md:text-3xl lg:text-4xl font-light italic tracking-wide brand-text"
               style={{
                 color: colors.textMuted,
                 textShadow: `0 0 30px ${colors.accent}33`,
@@ -388,9 +393,6 @@ export default function CrucibleLanding({
             >
               Libera te tutemet ex inferis
             </h2>
-            <p className="text-sm mt-2" style={{ color: colors.textDim }}>
-              "Free yourself from hell"
-            </p>
           </motion.div>
 
           {/* Morphing Agents */}
@@ -420,7 +422,7 @@ export default function CrucibleLanding({
             {/* Latin Phrase for chat phase */}
             <div className="text-center mb-6">
               <h2
-                className="text-xl md:text-2xl lg:text-3xl font-light italic tracking-wide"
+                className="text-xl md:text-2xl lg:text-3xl font-light italic tracking-wide brand-text"
                 style={{
                   color: colors.textMuted,
                   textShadow: `0 0 20px ${colors.accent}22`,
@@ -428,9 +430,6 @@ export default function CrucibleLanding({
               >
                 Aut viam inveniam aut faciam
               </h2>
-              <p className="text-xs mt-1" style={{ color: colors.textDim }}>
-                "I shall find a way or make one"
-              </p>
             </div>
 
             {/* Agent selector chips - single line */}

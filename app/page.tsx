@@ -159,7 +159,7 @@ export default function Home() {
                     className="text-[10px] px-2 py-1 rounded-full"
                     style={{ background: `${colors.accent}22`, color: colors.accent, border: `1px solid ${colors.accent}44` }}
                   >
-                    PRE-ALPHA v3.3
+                    PRE-ALPHA v3.4
                   </span>
                 </motion.div>
 
@@ -198,71 +198,8 @@ export default function Home() {
               selectedAgents={selectedAgents}
               onAgentSelect={handleAgentSelect}
               onPromptSubmit={handlePromptSubmit}
+              onWorkflowSelect={(workflowId) => handleSelectIntent(workflowId)}
             />
-
-            {/* Workflow Grid (appears after scroll) */}
-            <section className="relative z-10 py-20 px-6" style={{ background: colors.bg }}>
-              <div className="max-w-6xl mx-auto">
-                <motion.h2
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="text-3xl font-bold mb-4 text-center"
-                >
-                  Choose Your{' '}
-                  <span
-                    style={{
-                      background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.accentAmber} 100%)`,
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    Workflow
-                  </span>
-                </motion.h2>
-                <p className="text-center mb-12" style={{ color: colors.textMuted }}>
-                  Select a specialized pipeline or let the AI agents guide you
-                </p>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {workflows.map((workflow, index) => (
-                    <motion.button
-                      key={workflow.id}
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.05 }}
-                      onClick={(e) => handleSelectIntent(workflow.id, e)}
-                      className="group p-6 rounded-2xl text-left transition-all duration-300"
-                      style={{
-                        background: colors.surface,
-                        border: `1px solid ${colors.border}`,
-                      }}
-                      whileHover={{
-                        scale: 1.02,
-                        borderColor: workflow.color,
-                        boxShadow: `0 0 30px ${workflow.color}33`,
-                      }}
-                    >
-                      <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4 transition-transform group-hover:scale-110"
-                        style={{
-                          background: `${workflow.color}22`,
-                        }}
-                      >
-                        {workflow.icon}
-                      </div>
-                      <h3 className="font-medium mb-1" style={{ color: colors.text }}>
-                        {workflow.title}
-                      </h3>
-                      <p className="text-xs" style={{ color: colors.textDim }}>
-                        {workflow.subtitle}
-                      </p>
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-            </section>
           </motion.div>
         ) : (
           <motion.div
