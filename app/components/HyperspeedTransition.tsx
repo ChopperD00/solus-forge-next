@@ -247,38 +247,16 @@ export default function HyperspeedTransition({
 
       {/* Arrival text */}
       <AnimatePresence>
+        {/* Arrival phase - no text, just flash to black then fade out */}
         {phase === 'arrival' && (
           <motion.div
-            initial={{ opacity: 0, scale: 2 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="absolute inset-0 flex flex-col items-center justify-center"
-            style={{ background: 'rgba(0, 0, 0, 0.8)' }}
-          >
-            <motion.h1
-              initial={{ y: 20 }}
-              animate={{ y: 0 }}
-              className="text-5xl md:text-7xl font-bold tracking-widest mb-4"
-              style={{
-                background: 'linear-gradient(135deg, #FF6B00 0%, #F59E0B 50%, #FFFFFF 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: '0 0 60px rgba(255, 107, 0, 0.5)',
-              }}
-            >
-              SOLUS FORGE
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-lg tracking-wider"
-              style={{ color: 'rgba(255, 255, 255, 0.6)' }}
-            >
-              Welcome to the Crucible
-            </motion.p>
-          </motion.div>
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className="absolute inset-0"
+            style={{ background: '#0A0A0A' }}
+          />
         )}
       </AnimatePresence>
     </div>
