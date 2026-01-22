@@ -530,19 +530,43 @@ export default function CrucibleLanding({
           </motion.div>
         </motion.div>
 
+        {/* Transition fade overlay - feathers from animated background to workflow section */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            opacity: workflowsOpacity,
+            background: `linear-gradient(to bottom,
+              transparent 0%,
+              ${colors.bg}00 30%,
+              ${colors.bg}40 50%,
+              ${colors.bg}90 70%,
+              ${colors.bg} 85%,
+              ${colors.bg} 100%
+            )`,
+          }}
+        />
+
         {/* SECTION 3: Workflow Cards */}
         <motion.div
           className="absolute inset-0 flex flex-col items-center justify-center pt-20"
           style={{ opacity: workflowsOpacity, y: workflowsY }}
         >
+          {/* Subtle background overlay for workflows section */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: `radial-gradient(ellipse 100% 60% at 50% 80%, ${colors.bg} 0%, transparent 70%)`,
+            }}
+          />
+
           <h3
-            className="text-2xl md:text-3xl font-bold mb-8 text-center"
+            className="text-2xl md:text-3xl font-bold mb-8 text-center relative z-10 font-expanded"
             style={{ color: colors.text }}
           >
             Choose Your Workflow
           </h3>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl px-4 relative z-10">
             {workflows.map((workflow, index) => {
               const IconComponent = workflow.icon
               return (
@@ -554,8 +578,9 @@ export default function CrucibleLanding({
                   onClick={() => onWorkflowSelect?.(workflow.id)}
                   className="flex flex-col items-center p-4 rounded-xl transition-all hover:scale-105"
                   style={{
-                    background: colors.surface,
+                    background: `${colors.surface}ee`,
                     border: `1px solid ${colors.border}`,
+                    backdropFilter: 'blur(8px)',
                   }}
                   whileHover={{
                     borderColor: workflow.color,
@@ -575,6 +600,31 @@ export default function CrucibleLanding({
               )
             })}
           </div>
+
+          {/* Footer */}
+          <motion.footer
+            className="absolute bottom-6 left-0 right-0 flex justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <a
+              href="mailto:phil@secretme.nu?subject=SOLUS%20FORGE%20-%20Bug%20Report%2FFeature%20Request"
+              className="px-4 py-2 rounded-lg text-xs transition-all hover:bg-white/5 flex items-center gap-2"
+              style={{
+                color: colors.textDim,
+                border: `1px solid ${colors.border}`,
+                background: `${colors.surface}80`,
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              Bug Report / Feature Request
+            </a>
+          </motion.footer>
         </motion.div>
       </div>
     </div>

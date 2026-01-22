@@ -37,25 +37,26 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
   const animationRef = useRef<number>()
   const pullStrengthRef = useRef(0)
 
-  // Initialize particles
+  // Initialize particles - more particles for denser effect
   const initParticles = useCallback((width: number, height: number) => {
     const particles: Particle[] = []
     const centerX = width / 2
     const centerY = height / 2
-    const maxRadius = Math.max(width, height) * 0.8
+    const maxRadius = Math.max(width, height) * 0.9
 
-    for (let i = 0; i < 300; i++) {
+    // More particles for denser, grainier effect
+    for (let i = 0; i < 500; i++) {
       const angle = Math.random() * Math.PI * 2
-      const radius = Math.random() * maxRadius + 100
+      const radius = Math.random() * maxRadius + 80
       particles.push({
         x: centerX + Math.cos(angle) * radius,
         y: centerY + Math.sin(angle) * radius,
         angle,
         radius,
-        speed: 0.002 + Math.random() * 0.003,
-        size: Math.random() * 2 + 0.5,
-        opacity: Math.random() * 0.8 + 0.2,
-        hue: Math.random() * 40 + 15, // Orange to yellow range
+        speed: 0.001 + Math.random() * 0.004,
+        size: Math.random() * 1.5 + 0.3, // Smaller particles for granularity
+        opacity: Math.random() * 0.6 + 0.1,
+        hue: Math.random() * 35 + 15, // Orange to amber range
       })
     }
     particlesRef.current = particles
@@ -86,37 +87,65 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
       const centerX = width / 2
       const centerY = height / 2
 
-      // Clear with fade effect
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
+      // Clear with deeper fade for richer blacks
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'
       ctx.fillRect(0, 0, width, height)
 
-      // Draw black hole core
-      const gradient = ctx.createRadialGradient(
+      // Add noise/grain texture overlay
+      const noiseIntensity = 15
+      for (let i = 0; i < 800; i++) {
+        const nx = Math.random() * width
+        const ny = Math.random() * height
+        const distFromCenter = Math.sqrt(Math.pow(nx - centerX, 2) + Math.pow(ny - centerY, 2))
+        const noiseBrightness = Math.random() * noiseIntensity * (distFromCenter / 400)
+        ctx.fillStyle = `rgba(${noiseBrightness}, ${noiseBrightness * 0.8}, ${noiseBrightness * 0.5}, ${Math.random() * 0.3})`
+        ctx.fillRect(nx, ny, 1, 1)
+      }
+
+      // Draw black hole core - DEEPER black with more layers
+      const coreGradient = ctx.createRadialGradient(
         centerX, centerY, 0,
-        centerX, centerY, 150
+        centerX, centerY, 180
       )
-      gradient.addColorStop(0, 'rgba(0, 0, 0, 1)')
-      gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.95)')
-      gradient.addColorStop(0.6, 'rgba(20, 10, 5, 0.5)')
-      gradient.addColorStop(0.8, 'rgba(255, 107, 0, 0.1)')
-      gradient.addColorStop(1, 'transparent')
+      coreGradient.addColorStop(0, 'rgba(0, 0, 0, 1)')
+      coreGradient.addColorStop(0.15, 'rgba(0, 0, 0, 1)')
+      coreGradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.98)')
+      coreGradient.addColorStop(0.5, 'rgba(5, 2, 0, 0.9)')
+      coreGradient.addColorStop(0.7, 'rgba(15, 5, 0, 0.6)')
+      coreGradient.addColorStop(0.85, 'rgba(40, 15, 0, 0.2)')
+      coreGradient.addColorStop(1, 'transparent')
 
       ctx.beginPath()
-      ctx.arc(centerX, centerY, 150, 0, Math.PI * 2)
-      ctx.fillStyle = gradient
+      ctx.arc(centerX, centerY, 180, 0, Math.PI * 2)
+      ctx.fillStyle = coreGradient
       ctx.fill()
 
-      // Draw accretion disk glow
-      const diskGradient = ctx.createRadialGradient(
-        centerX, centerY, 80,
-        centerX, centerY, 200
+      // Event horizon ring - absolute black inner circle
+      const eventHorizon = ctx.createRadialGradient(
+        centerX, centerY, 0,
+        centerX, centerY, 60
       )
-      diskGradient.addColorStop(0, 'rgba(255, 107, 0, 0.3)')
-      diskGradient.addColorStop(0.5, 'rgba(255, 140, 0, 0.15)')
+      eventHorizon.addColorStop(0, 'rgba(0, 0, 0, 1)')
+      eventHorizon.addColorStop(0.8, 'rgba(0, 0, 0, 1)')
+      eventHorizon.addColorStop(1, 'rgba(0, 0, 0, 0.95)')
+
+      ctx.beginPath()
+      ctx.arc(centerX, centerY, 60, 0, Math.PI * 2)
+      ctx.fillStyle = eventHorizon
+      ctx.fill()
+
+      // Draw accretion disk glow - more subtle
+      const diskGradient = ctx.createRadialGradient(
+        centerX, centerY, 90,
+        centerX, centerY, 250
+      )
+      diskGradient.addColorStop(0, 'rgba(255, 107, 0, 0.25)')
+      diskGradient.addColorStop(0.3, 'rgba(255, 120, 0, 0.15)')
+      diskGradient.addColorStop(0.6, 'rgba(255, 140, 0, 0.08)')
       diskGradient.addColorStop(1, 'transparent')
 
       ctx.beginPath()
-      ctx.arc(centerX, centerY, 200, 0, Math.PI * 2)
+      ctx.arc(centerX, centerY, 250, 0, Math.PI * 2)
       ctx.fillStyle = diskGradient
       ctx.fill()
 
