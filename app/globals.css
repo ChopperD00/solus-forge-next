@@ -188,6 +188,18 @@ body {
   color: #E7FFD9;
 }
 
+/* Multi-colored glow pulse animation */
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1.1);
+  }
+}
+
 /* Noise texture overlay */
 .noise-overlay::before {
   content: '';

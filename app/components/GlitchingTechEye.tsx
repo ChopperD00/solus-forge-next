@@ -433,15 +433,11 @@ export default function GlitchingTechEye({
           height: "100%",
         }}
       />
+      {/* Hidden grain canvas - used only for offscreen rendering */}
       <canvas
         ref={grainCanvasRef}
         style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          pointerEvents: "none",
-          mixBlendMode: "overlay",
+          display: "none",
         }}
       />
 

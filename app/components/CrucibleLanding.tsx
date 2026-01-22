@@ -718,32 +718,13 @@ export default function CrucibleLanding({
 
           {/* Chat Bar Section - slides up from below */}
           <motion.div
-            className="absolute w-full max-w-3xl px-4"
+            className="absolute w-full max-w-3xl px-4 left-1/2 -translate-x-1/2"
             style={{
               top: '50%',
               y: chatBarY,
               opacity: chatBarOpacity,
             }}
           >
-            {/* Latin Phrase - fades in AFTER bar reaches sticky point */}
-            <motion.div
-              className="text-center mb-6"
-              style={{
-                opacity: useTransform(smoothProgress, [0.32, 0.38], [0, 1]),
-              }}
-            >
-              <h2
-                className="text-xl md:text-2xl lg:text-3xl font-bold tracking-wide"
-                style={{
-                  color: colors.textMuted,
-                  textShadow: `0 0 20px ${colors.accent}22`,
-                  fontFamily: "system-ui, -apple-system, sans-serif",
-                }}
-              >
-                Aut viam inveniam aut faciam
-              </h2>
-            </motion.div>
-
             {/* Agent selector chips - with BorderBeam glow when agents land */}
             <div className="mb-4 flex justify-center gap-3 pb-2 px-4">
               {agents.map(agent => {
@@ -826,6 +807,41 @@ export default function CrucibleLanding({
                 )
               )}
             </div>
+
+            {/* Multi-colored glow at bottom - scroll hint */}
+            <motion.div
+              className="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[600px] h-24 pointer-events-none"
+              style={{
+                opacity: useTransform(smoothProgress, [0.35, 0.42, 0.48], [0, 0.8, 0]),
+              }}
+            >
+              {/* Animated gradient glow */}
+              <div
+                className="absolute inset-0 blur-3xl"
+                style={{
+                  background: `linear-gradient(90deg,
+                    ${colors.accent}60 0%,
+                    #10B98160 25%,
+                    #8B5CF660 50%,
+                    #EC489960 75%,
+                    ${colors.accent}60 100%
+                  )`,
+                  animation: 'glowPulse 3s ease-in-out infinite',
+                }}
+              />
+              {/* Downward arrow hint */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
+                <motion.div
+                  animate={{ y: [0, 8, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  style={{ color: colors.textDim }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg>
+                </motion.div>
+              </div>
+            </motion.div>
           </motion.div>
         </motion.div>
 
