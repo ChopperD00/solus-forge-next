@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import SolusLogo from './components/SolusLogo'
+import BlackHoleGate from './components/BlackHoleGate'
 import EmailCampaignWorkflow from './components/EmailCampaignWorkflow'
 import VideoNodeWorkflow from './components/VideoNodeWorkflow'
 import ImageNodeWorkflow from './components/ImageNodeWorkflow'
@@ -51,10 +52,21 @@ const workflows = [
 ]
 
 export default function Home() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [selectedIntent, setSelectedIntent] = useState<IntentId>(null)
   const [showLanding, setShowLanding] = useState(true)
   const [selectedAgents, setSelectedAgents] = useState<string[]>(['solus', 'trion'])
   const { isTransitioning, transitionOrigin, triggerTransition, handleComplete } = useRadialWipe()
+
+  // Password gate
+  if (!isAuthenticated) {
+    return (
+      <BlackHoleGate
+        password="liberateme"
+        onUnlock={() => setIsAuthenticated(true)}
+      />
+    )
+  }
 
   const handleSelectIntent = (intentId: string, event?: React.MouseEvent) => {
     // Get click position for radial wipe origin
@@ -134,7 +146,7 @@ export default function Home() {
                     className="text-[10px] px-2 py-1 rounded-full"
                     style={{ background: `${colors.accent}22`, color: colors.accent, border: `1px solid ${colors.accent}44` }}
                   >
-                    PRE-ALPHA v3.0
+                    PRE-ALPHA v3.3
                   </span>
                 </motion.div>
 
