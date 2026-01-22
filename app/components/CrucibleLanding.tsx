@@ -198,7 +198,14 @@ function MorphingAgent({
   onSelect,
   totalAgents,
 }: MorphingAgentProps) {
-  const orbitRadius = 200
+  // Responsive orbit radius
+  const [orbitRadius, setOrbitRadius] = useState(200)
+  useEffect(() => {
+    const updateRadius = () => setOrbitRadius(window.innerWidth < 768 ? 120 : 200)
+    updateRadius()
+    window.addEventListener('resize', updateRadius)
+    return () => window.removeEventListener('resize', updateRadius)
+  }, [])
   const orbitSpeed = 0.5 // Faster orbit speed
 
   // Limit to 2 complete orbits (2 * 2π radians), then stop
@@ -488,9 +495,9 @@ export default function CrucibleLanding({
       <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
 
         {/* Fixed Header */}
-        <div className="absolute top-0 left-0 right-0 z-50 px-4 py-3 flex items-center justify-between">
-          {/* Left: Workflow Icons */}
-          <div className="flex items-center gap-1">
+        <div className="absolute top-0 left-0 right-0 z-50 px-2 md:px-4 py-2 md:py-3 flex items-center justify-between">
+          {/* Left: Workflow Icons - hidden on mobile */}
+          <div className="hidden md:flex items-center gap-1">
             {workflows.map((workflow) => {
               const IconComponent = workflow.icon
               return (
@@ -512,6 +519,8 @@ export default function CrucibleLanding({
               )
             })}
           </div>
+          {/* Mobile spacer */}
+          <div className="md:hidden w-1" />
 
           {/* Right: Version Badge + Status Dropdown */}
           <div className="relative flex flex-col items-end gap-2">
@@ -643,10 +652,10 @@ export default function CrucibleLanding({
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
           style={{ opacity: heroOpacity, scale: heroScale }}
         >
-          <div className="pointer-events-auto">
+          <div className="pointer-events-auto scale-50 md:scale-100">
             <GradientCircle scrollProgress={0}>
               <GlitchingTechEye
-                size={220}
+                size={windowSize.width < 768 ? 140 : 220}
                 hueBase={25}
                 rotationSpeed={0.6}
                 glitchiness={0.4}
@@ -709,11 +718,11 @@ export default function CrucibleLanding({
 
           {/* Latin Phrase - Orbiting phase - moves UP behind agents as they land */}
           <motion.div
-            className="absolute text-center z-10"
+            className="absolute text-center z-10 px-4"
             style={{ opacity: orbitPhraseOpacity, y: orbitPhraseY }}
           >
             <h2
-              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-wide"
+              className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold tracking-wide"
               style={{
                 color: colors.text,
                 fontFamily: "system-ui, -apple-system, sans-serif",
@@ -905,7 +914,7 @@ export default function CrucibleLanding({
             }}
           >
             <h3
-              className="text-xl md:text-2xl font-semibold tracking-wide mb-2"
+              className="text-lg sm:text-xl md:text-2xl font-semibold tracking-wide mb-1 md:mb-2"
               style={{
                 color: colors.text,
                 fontFamily: "system-ui, -apple-system, sans-serif",
@@ -914,7 +923,7 @@ export default function CrucibleLanding({
               Select Your Workflow
             </h3>
             <p
-              className="text-sm"
+              className="text-xs md:text-sm"
               style={{ color: colors.textDim }}
             >
               Choose a creative pathway to begin
@@ -922,8 +931,8 @@ export default function CrucibleLanding({
           </motion.div>
 
           {/* Arcana Split Columns - unified symbols that fracture into playing cards */}
-          <div className="relative w-full max-w-6xl mx-auto z-10 px-4">
-            <div className="flex justify-center items-start gap-4">
+          <div className="relative w-full max-w-6xl mx-auto z-10 px-2 md:px-4 overflow-x-auto">
+            <div className="flex justify-start md:justify-center items-start gap-2 md:gap-4 min-w-max md:min-w-0 pb-4">
               {/* The Visionary - Orange */}
               <ArcanaSplit
                 arcanaName="The Visionary"

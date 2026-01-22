@@ -112,6 +112,22 @@ interface GradientCircleProps {
   isHovered?: boolean
 }
 
+// Hook to get responsive size
+function useResponsiveSize() {
+  const [size, setSize] = useState(800)
+  useEffect(() => {
+    const updateSize = () => {
+      // On mobile, use smaller size
+      const isMobile = window.innerWidth < 768
+      setSize(isMobile ? 400 : 800)
+    }
+    updateSize()
+    window.addEventListener('resize', updateSize)
+    return () => window.removeEventListener('resize', updateSize)
+  }, [])
+  return size
+}
+
 export default function GradientCircle({ children, scrollProgress = 0, isHovered = false }: GradientCircleProps) {
   const [localHovered, setLocalHovered] = useState(false)
   const showText = isHovered || localHovered
@@ -119,6 +135,7 @@ export default function GradientCircle({ children, scrollProgress = 0, isHovered
   const containerRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number>(0)
   const timeRef = useRef(0)
+  const responsiveSize = useResponsiveSize()
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -127,8 +144,8 @@ export default function GradientCircle({ children, scrollProgress = 0, isHovered
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    // Set canvas size
-    const size = 800
+    // Set canvas size - use responsive size
+    const size = responsiveSize
     const dpr = window.devicePixelRatio || 1
     canvas.width = size * dpr
     canvas.height = size * dpr
@@ -242,21 +259,21 @@ export default function GradientCircle({ children, scrollProgress = 0, isHovered
     return () => {
       cancelAnimationFrame(animationRef.current)
     }
-  }, [])
+  }, [responsiveSize])
 
   // Scale based on scroll progress
   const scale = 1 + scrollProgress * 2
 
-  // Sphere visual radius is size * 0.42 = 336px
-  const textRadius = 336
+  // Sphere visual radius scales with container size
+  const textRadius = responsiveSize * 0.42
 
   return (
     <motion.div
       ref={containerRef}
       className="relative flex items-center justify-center"
       style={{
-        width: 800,
-        height: 800,
+        width: responsiveSize,
+        height: responsiveSize,
         transform: `scale(${scale})`,
         transition: 'transform 0.1s ease-out',
         overflow: 'visible',
@@ -267,15 +284,15 @@ export default function GradientCircle({ children, scrollProgress = 0, isHovered
       <canvas
         ref={canvasRef}
         className="absolute inset-0"
-        style={{ width: 800, height: 800 }}
+        style={{ width: responsiveSize, height: responsiveSize }}
       />
 
-      {/* Circular text around outer perimeter */}
+      {/* Circular text around outer perimeter - hidden on very small screens */}
       <OuterCircularText
         text="SOLUS FORGE"
         radius={textRadius}
-        isVisible={showText}
-        fontSize={14}
+        isVisible={showText && responsiveSize > 400}
+        fontSize={responsiveSize > 600 ? 14 : 10}
       />
 
       {/* Content inside the circle - perfectly centered */}

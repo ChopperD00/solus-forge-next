@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, MotionValue, useTransform } from 'framer-motion'
-import { ReactNode, ComponentType, useState } from 'react'
+import { ReactNode, ComponentType, useState, useEffect } from 'react'
 
 interface ArcanaCard {
   id: string
@@ -33,9 +33,23 @@ const colors = {
   textDim: '#555555',
 }
 
-// Playing card dimensions - larger for better text legibility
-const CARD_WIDTH = 150
-const CARD_HEIGHT = 200
+// Hook to detect mobile
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  return isMobile
+}
+
+// Playing card dimensions - responsive
+const CARD_WIDTH_DESKTOP = 150
+const CARD_HEIGHT_DESKTOP = 200
+const CARD_WIDTH_MOBILE = 120
+const CARD_HEIGHT_MOBILE = 160
 
 // Flippable Tarot Card component
 function FlippableCard({
@@ -43,29 +57,35 @@ function FlippableCard({
   arcanaColor,
   transforms,
   onSelect,
+  isMobile,
 }: {
   card: ArcanaCard
   arcanaColor: string
   transforms: { x: MotionValue<number>; y: MotionValue<number>; scale: MotionValue<number>; rotate: MotionValue<number> }
   onSelect?: (id: string) => void
+  isMobile: boolean
 }) {
   const [isFlipped, setIsFlipped] = useState(false)
   const IconComponent = card.icon
 
+  const cardWidth = isMobile ? CARD_WIDTH_MOBILE : CARD_WIDTH_DESKTOP
+  const cardHeight = isMobile ? CARD_HEIGHT_MOBILE : CARD_HEIGHT_DESKTOP
+
   return (
     <motion.div
-      className="relative cursor-pointer"
+      className="relative cursor-pointer flex-shrink-0"
       style={{
-        width: CARD_WIDTH,
-        height: CARD_HEIGHT,
+        width: cardWidth,
+        height: cardHeight,
         x: transforms.x,
         y: transforms.y,
         scale: transforms.scale,
         rotate: transforms.rotate,
         perspective: 1000,
       }}
-      onMouseEnter={() => setIsFlipped(true)}
-      onMouseLeave={() => setIsFlipped(false)}
+      onMouseEnter={() => !isMobile && setIsFlipped(true)}
+      onMouseLeave={() => !isMobile && setIsFlipped(false)}
+      onTouchStart={() => isMobile && setIsFlipped(!isFlipped)}
       onClick={() => onSelect?.(card.id)}
     >
       {/* Card container with 3D flip */}
@@ -79,7 +99,7 @@ function FlippableCard({
       >
         {/* Front of card */}
         <div
-          className="absolute inset-0 rounded-xl flex flex-col items-center justify-center p-3"
+          className="absolute inset-0 rounded-xl flex flex-col items-center justify-center p-2 md:p-3"
           style={{
             backfaceVisibility: 'hidden',
             background: `linear-gradient(145deg, ${colors.surface} 0%, ${colors.bg} 100%)`,
@@ -92,33 +112,33 @@ function FlippableCard({
           }}
         >
           {/* Corner decorations */}
-          <div className="absolute top-2 left-2 w-3 h-3 border-l border-t" style={{ borderColor: `${arcanaColor}44` }} />
-          <div className="absolute top-2 right-2 w-3 h-3 border-r border-t" style={{ borderColor: `${arcanaColor}44` }} />
-          <div className="absolute bottom-2 left-2 w-3 h-3 border-l border-b" style={{ borderColor: `${arcanaColor}44` }} />
-          <div className="absolute bottom-2 right-2 w-3 h-3 border-r border-b" style={{ borderColor: `${arcanaColor}44` }} />
+          <div className="absolute top-1.5 left-1.5 md:top-2 md:left-2 w-2 h-2 md:w-3 md:h-3 border-l border-t" style={{ borderColor: `${arcanaColor}44` }} />
+          <div className="absolute top-1.5 right-1.5 md:top-2 md:right-2 w-2 h-2 md:w-3 md:h-3 border-r border-t" style={{ borderColor: `${arcanaColor}44` }} />
+          <div className="absolute bottom-1.5 left-1.5 md:bottom-2 md:left-2 w-2 h-2 md:w-3 md:h-3 border-l border-b" style={{ borderColor: `${arcanaColor}44` }} />
+          <div className="absolute bottom-1.5 right-1.5 md:bottom-2 md:right-2 w-2 h-2 md:w-3 md:h-3 border-r border-b" style={{ borderColor: `${arcanaColor}44` }} />
 
           {/* Icon */}
           <div
-            className="w-14 h-14 rounded-lg flex items-center justify-center mb-3"
+            className="w-10 h-10 md:w-14 md:h-14 rounded-lg flex items-center justify-center mb-2 md:mb-3"
             style={{
               background: `${arcanaColor}15`,
               border: `1px solid ${arcanaColor}33`,
             }}
           >
-            <IconComponent size={32} weight="duotone" color={arcanaColor} />
+            <IconComponent size={isMobile ? 24 : 32} weight="duotone" color={arcanaColor} />
           </div>
 
-          {/* Title - larger */}
+          {/* Title */}
           <span
-            className="text-lg font-bold text-center leading-tight"
+            className="text-sm md:text-lg font-bold text-center leading-tight"
             style={{ color: colors.text }}
           >
             {card.title}
           </span>
 
-          {/* Subtitle - larger, more legible */}
+          {/* Subtitle */}
           <span
-            className="text-sm text-center mt-2 leading-snug px-2"
+            className="text-[10px] md:text-sm text-center mt-1 md:mt-2 leading-snug px-1 md:px-2"
             style={{ color: colors.textMuted }}
           >
             {card.subtitle}
@@ -127,7 +147,7 @@ function FlippableCard({
 
         {/* Back of card (capabilities) */}
         <div
-          className="absolute inset-0 rounded-xl flex flex-col p-4"
+          className="absolute inset-0 rounded-xl flex flex-col p-2 md:p-4"
           style={{
             backfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
@@ -141,23 +161,23 @@ function FlippableCard({
           }}
         >
           {/* Header */}
-          <div className="flex items-center gap-2 mb-3 pb-2 border-b" style={{ borderColor: `${arcanaColor}33` }}>
-            <IconComponent size={18} weight="duotone" color={arcanaColor} />
-            <span className="text-xs font-semibold" style={{ color: arcanaColor }}>
+          <div className="flex items-center gap-1 md:gap-2 mb-2 md:mb-3 pb-1 md:pb-2 border-b" style={{ borderColor: `${arcanaColor}33` }}>
+            <IconComponent size={isMobile ? 14 : 18} weight="duotone" color={arcanaColor} />
+            <span className="text-[10px] md:text-xs font-semibold" style={{ color: arcanaColor }}>
               {card.title}
             </span>
           </div>
 
           {/* Capabilities list */}
-          <div className="flex-1 flex flex-col gap-2">
+          <div className="flex-1 flex flex-col gap-1 md:gap-2">
             {card.capabilities.map((cap, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2 text-[11px]"
+                className="flex items-center gap-1 md:gap-2 text-[9px] md:text-[11px]"
                 style={{ color: colors.text }}
               >
                 <div
-                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full flex-shrink-0"
                   style={{ background: arcanaColor }}
                 />
                 <span className="leading-tight">{cap}</span>
@@ -167,10 +187,10 @@ function FlippableCard({
 
           {/* Click to select indicator */}
           <div
-            className="text-[10px] text-center mt-2 pt-2 border-t opacity-80 font-medium"
+            className="text-[8px] md:text-[10px] text-center mt-1 md:mt-2 pt-1 md:pt-2 border-t opacity-80 font-medium"
             style={{ borderColor: `${arcanaColor}33`, color: arcanaColor }}
           >
-            Click to select →
+            Tap to select →
           </div>
         </div>
       </motion.div>
@@ -189,6 +209,9 @@ export default function ArcanaSplit({
   columnIndex,
   onCardSelect,
 }: ArcanaSplitProps) {
+  const isMobile = useIsMobile()
+  const cardWidth = isMobile ? CARD_WIDTH_MOBILE : CARD_WIDTH_DESKTOP
+
   // Minimal stagger for subtle wave effect - all columns reveal together
   const stagger = columnIndex * 0.005
   const adjustedStart = splitStart + stagger
@@ -238,11 +261,11 @@ export default function ArcanaSplit({
   return (
     <div
       className="relative flex flex-col items-center"
-      style={{ width: CARD_WIDTH + 20 }}
+      style={{ width: cardWidth + 20 }}
     >
       {/* Arcana Name - positioned above everything */}
       <motion.span
-        className="text-[10px] uppercase tracking-widest mb-4 whitespace-nowrap font-semibold"
+        className="text-[8px] md:text-[10px] uppercase tracking-widest mb-2 md:mb-4 whitespace-nowrap font-semibold"
         style={{
           color: arcanaColor,
           opacity: useTransform(scrollProgress, [adjustedStart, adjustedStart + 0.03], [0, 0.9]),
@@ -264,11 +287,11 @@ export default function ArcanaSplit({
           }}
         >
           <div
-            className="absolute w-32 h-32 rounded-full blur-2xl"
+            className="absolute w-20 h-20 md:w-32 md:h-32 rounded-full blur-2xl"
             style={{ background: `${arcanaColor}30` }}
           />
           <div
-            className="relative w-20 h-20 rounded-2xl flex items-center justify-center"
+            className="relative w-14 h-14 md:w-20 md:h-20 rounded-xl md:rounded-2xl flex items-center justify-center"
             style={{
               background: `linear-gradient(135deg, ${colors.surface} 0%, ${colors.bg} 100%)`,
               border: `2px solid ${arcanaColor}`,
@@ -278,9 +301,9 @@ export default function ArcanaSplit({
             {arcanaSymbol}
           </div>
 
-          {/* Fracture lines */}
+          {/* Fracture lines - hidden on mobile for cleaner look */}
           <motion.div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            className="absolute inset-0 hidden md:flex items-center justify-center pointer-events-none"
             style={{
               opacity: useTransform(
                 scrollProgress,
@@ -323,9 +346,9 @@ export default function ArcanaSplit({
             </svg>
           </motion.div>
 
-          {/* Particle burst */}
+          {/* Particle burst - hidden on mobile */}
           <motion.div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            className="absolute inset-0 hidden md:flex items-center justify-center pointer-events-none"
             style={{
               opacity: useTransform(
                 scrollProgress,
@@ -365,9 +388,9 @@ export default function ArcanaSplit({
           </motion.div>
         </motion.div>
 
-        {/* Playing Cards - simple vertical stack */}
+        {/* Playing Cards - vertical stack */}
         <motion.div
-          className="flex flex-col items-center gap-3"
+          className="flex flex-col items-center gap-2 md:gap-3"
           style={{ opacity: cardsOpacity }}
         >
           {cards.map((card, cardIndex) => {
@@ -379,6 +402,7 @@ export default function ArcanaSplit({
                 arcanaColor={arcanaColor}
                 transforms={transforms}
                 onSelect={onCardSelect}
+                isMobile={isMobile}
               />
             )
           })}
