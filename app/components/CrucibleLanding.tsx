@@ -3,6 +3,22 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion'
 
+// SSR-safe window dimensions hook
+function useWindowSize() {
+  const [size, setSize] = useState({ width: 1920, height: 1080 }) // Default for SSR
+
+  useEffect(() => {
+    function updateSize() {
+      setSize({ width: window.innerWidth, height: window.innerHeight })
+    }
+    updateSize()
+    window.addEventListener('resize', updateSize)
+    return () => window.removeEventListener('resize', updateSize)
+  }, [])
+
+  return size
+}
+
 const colors = {
   bg: '#0A0A0A',
   bgWarm: '#141010',
@@ -105,6 +121,7 @@ interface FloatingAgentProps {
   isSelected: boolean
   onSelect: () => void
   searchBarRect: DOMRect | null
+  windowSize: { width: number; height: number }
 }
 
 function FloatingAgent({
@@ -115,6 +132,7 @@ function FloatingAgent({
   isSelected,
   onSelect,
   searchBarRect,
+  windowSize,
 }: FloatingAgentProps) {
   // Calculate orbital position
   const angle = agent.orbitOffset + time * agent.orbitSpeed
@@ -123,10 +141,10 @@ function FloatingAgent({
 
   // Target position in search bar (evenly distributed)
   const searchBarX = searchBarRect
-    ? searchBarRect.left + (searchBarRect.width / (agents.length + 1)) * (index + 1) - window.innerWidth / 2
+    ? searchBarRect.left + (searchBarRect.width / (agents.length + 1)) * (index + 1) - windowSize.width / 2
     : 0
   const searchBarY = searchBarRect
-    ? searchBarRect.top + searchBarRect.height / 2 - window.innerHeight / 2
+    ? searchBarRect.top + searchBarRect.height / 2 - windowSize.height / 2
     : 200
 
   // Interpolate between orbit and search bar positions
@@ -236,6 +254,7 @@ export default function CrucibleLanding({
   const [time, setTime] = useState(0)
   const [prompt, setPrompt] = useState('')
   const [searchBarRect, setSearchBarRect] = useState<DOMRect | null>(null)
+  const windowSize = useWindowSize() // SSR-safe window dimensions
   // Default to solus and trion selected
   const [localSelectedAgents, setLocalSelectedAgents] = useState<string[]>(
     selectedAgents.length > 0 ? selectedAgents : ['solus', 'trion']
@@ -344,10 +363,10 @@ export default function CrucibleLanding({
             const nextAgent = agents[(i + 1) % agents.length]
             const angle1 = agent.orbitOffset + time * agent.orbitSpeed
             const angle2 = nextAgent.orbitOffset + time * nextAgent.orbitSpeed
-            const x1 = window.innerWidth / 2 + Math.cos(angle1) * agent.orbitRadius
-            const y1 = window.innerHeight / 2 + Math.sin(angle1) * agent.orbitRadius * 0.4
-            const x2 = window.innerWidth / 2 + Math.cos(angle2) * nextAgent.orbitRadius
-            const y2 = window.innerHeight / 2 + Math.sin(angle2) * nextAgent.orbitRadius * 0.4
+            const x1 = windowSize.width / 2 + Math.cos(angle1) * agent.orbitRadius
+            const y1 = windowSize.height / 2 + Math.sin(angle1) * agent.orbitRadius * 0.4
+            const x2 = windowSize.width / 2 + Math.cos(angle2) * nextAgent.orbitRadius
+            const y2 = windowSize.height / 2 + Math.sin(angle2) * nextAgent.orbitRadius * 0.4
             const midX = (x1 + x2) / 2
             const midY = (y1 + y2) / 2 - 50
 
@@ -427,6 +446,7 @@ export default function CrucibleLanding({
                 isSelected={localSelectedAgents.includes(agent.id)}
                 onSelect={() => handleAgentSelect(agent.id)}
                 searchBarRect={searchBarRect}
+                windowSize={windowSize}
               />
             ))}
           </div>
