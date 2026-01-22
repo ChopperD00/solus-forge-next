@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion'
 import GradientCircle from './GradientCircle'
 import SpectraNoiseBackground from './SpectraNoiseBackground'
+import SolusForgeIcon from './SolusForgeIcon'
 
 // SSR-safe window dimensions hook
 function useWindowSize() {
@@ -291,9 +292,16 @@ export default function CrucibleLanding({
           style={{ opacity: heroOpacity, scale: heroScale }}
         >
           <GradientCircle scrollProgress={0}>
-            <div className="text-center">
+            <div className="text-center flex flex-col items-center">
+              {/* Geometric Logo Icon */}
+              <SolusForgeIcon
+                size={180}
+                color={colors.text}
+                glowColor={colors.accentGlow}
+                animated={true}
+              />
               <h1
-                className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-wider mb-4 brand-text"
+                className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-wider mt-6 mb-2 brand-text"
                 style={{
                   color: colors.text,
                   textShadow: `0 0 60px ${colors.accent}66`,
@@ -301,11 +309,11 @@ export default function CrucibleLanding({
               >
                 SOLUS FORGE
               </h1>
-              <p className="text-base md:text-lg" style={{ color: colors.textMuted }}>
+              <p className="text-sm md:text-base" style={{ color: colors.textMuted }}>
                 AI Creative Command Center
               </p>
               <motion.div
-                className="mt-8"
+                className="mt-6"
                 animate={{ y: [0, 10, 0] }}
                 transition={{ repeat: Infinity, duration: 2 }}
               >
