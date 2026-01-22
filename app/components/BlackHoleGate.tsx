@@ -2,13 +2,15 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { HandEye } from '@phosphor-icons/react'
 
 const colors = {
   bg: '#000000',
   accent: '#FF6B00',
   accentDim: 'rgba(255, 107, 0, 0.3)',
   text: '#FFFFFF',
-  textMuted: '#666666',
+  textMuted: '#888888',
+  textDim: '#444444',
 }
 
 // Particle class for the swirling effect
@@ -20,7 +22,7 @@ interface Particle {
   speed: number
   size: number
   opacity: number
-  hue: number
+  brightness: number // 0-1 for grayscale, converts to orange at edges
 }
 
 interface BlackHoleGateProps {
@@ -33,18 +35,19 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
   const [inputValue, setInputValue] = useState('')
   const [error, setError] = useState(false)
   const [isUnlocking, setIsUnlocking] = useState(false)
+  const [warpPhase, setWarpPhase] = useState<'idle' | 'collapse' | 'warp' | 'colorize'>('idle')
   const particlesRef = useRef<Particle[]>([])
   const animationRef = useRef<number>()
   const pullStrengthRef = useRef(0)
+  const colorTransitionRef = useRef(0) // 0 = grayscale, 1 = full color
 
-  // Initialize particles - more particles for denser effect
+  // Initialize particles - monochromatic, color at edges only
   const initParticles = useCallback((width: number, height: number) => {
     const particles: Particle[] = []
     const centerX = width / 2
     const centerY = height / 2
     const maxRadius = Math.max(width, height) * 0.9
 
-    // More particles for denser, grainier effect
     for (let i = 0; i < 500; i++) {
       const angle = Math.random() * Math.PI * 2
       const radius = Math.random() * maxRadius + 80
@@ -54,9 +57,9 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
         angle,
         radius,
         speed: 0.001 + Math.random() * 0.004,
-        size: Math.random() * 1.5 + 0.3, // Smaller particles for granularity
+        size: Math.random() * 1.5 + 0.3,
         opacity: Math.random() * 0.6 + 0.1,
-        hue: Math.random() * 35 + 15, // Orange to amber range
+        brightness: Math.random() * 0.5 + 0.3, // Grayscale brightness
       })
     }
     particlesRef.current = particles
@@ -86,33 +89,44 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
       const height = canvas.height
       const centerX = width / 2
       const centerY = height / 2
+      const maxDist = Math.sqrt(centerX * centerX + centerY * centerY)
 
-      // Clear with deeper fade for richer blacks
+      // Clear with deeper fade
       ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'
       ctx.fillRect(0, 0, width, height)
 
-      // Add noise/grain texture overlay
-      const noiseIntensity = 15
-      for (let i = 0; i < 800; i++) {
+      // Add noise/grain texture - monochromatic
+      const noiseIntensity = 12
+      for (let i = 0; i < 600; i++) {
         const nx = Math.random() * width
         const ny = Math.random() * height
         const distFromCenter = Math.sqrt(Math.pow(nx - centerX, 2) + Math.pow(ny - centerY, 2))
-        const noiseBrightness = Math.random() * noiseIntensity * (distFromCenter / 400)
-        ctx.fillStyle = `rgba(${noiseBrightness}, ${noiseBrightness * 0.8}, ${noiseBrightness * 0.5}, ${Math.random() * 0.3})`
+        const normalizedDist = distFromCenter / maxDist
+
+        // Color only at edges based on colorTransition
+        const colorAmount = Math.max(0, (normalizedDist - 0.5) * 2) * colorTransitionRef.current
+        const grayVal = Math.random() * noiseIntensity * normalizedDist
+
+        if (colorAmount > 0 && Math.random() < colorAmount * 0.3) {
+          // Orange tinted at edges
+          ctx.fillStyle = `rgba(${grayVal + 30 * colorAmount}, ${grayVal * 0.5}, 0, ${Math.random() * 0.3})`
+        } else {
+          // Pure grayscale
+          ctx.fillStyle = `rgba(${grayVal}, ${grayVal}, ${grayVal}, ${Math.random() * 0.25})`
+        }
         ctx.fillRect(nx, ny, 1, 1)
       }
 
-      // Draw black hole core - DEEPER black with more layers
+      // Draw black hole core - absolute void
       const coreGradient = ctx.createRadialGradient(
         centerX, centerY, 0,
         centerX, centerY, 180
       )
       coreGradient.addColorStop(0, 'rgba(0, 0, 0, 1)')
-      coreGradient.addColorStop(0.15, 'rgba(0, 0, 0, 1)')
-      coreGradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.98)')
-      coreGradient.addColorStop(0.5, 'rgba(5, 2, 0, 0.9)')
-      coreGradient.addColorStop(0.7, 'rgba(15, 5, 0, 0.6)')
-      coreGradient.addColorStop(0.85, 'rgba(40, 15, 0, 0.2)')
+      coreGradient.addColorStop(0.2, 'rgba(0, 0, 0, 1)')
+      coreGradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.98)')
+      coreGradient.addColorStop(0.6, 'rgba(10, 10, 10, 0.8)')
+      coreGradient.addColorStop(0.8, 'rgba(20, 20, 20, 0.4)')
       coreGradient.addColorStop(1, 'transparent')
 
       ctx.beginPath()
@@ -120,32 +134,31 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
       ctx.fillStyle = coreGradient
       ctx.fill()
 
-      // Event horizon ring - absolute black inner circle
-      const eventHorizon = ctx.createRadialGradient(
-        centerX, centerY, 0,
-        centerX, centerY, 60
-      )
-      eventHorizon.addColorStop(0, 'rgba(0, 0, 0, 1)')
-      eventHorizon.addColorStop(0.8, 'rgba(0, 0, 0, 1)')
-      eventHorizon.addColorStop(1, 'rgba(0, 0, 0, 0.95)')
-
+      // Event horizon - absolute black center
       ctx.beginPath()
       ctx.arc(centerX, centerY, 60, 0, Math.PI * 2)
-      ctx.fillStyle = eventHorizon
+      ctx.fillStyle = 'rgba(0, 0, 0, 1)'
       ctx.fill()
 
-      // Draw accretion disk glow - more subtle
+      // Draw accretion disk glow - only at edges, monochrome center
       const diskGradient = ctx.createRadialGradient(
         centerX, centerY, 90,
-        centerX, centerY, 250
+        centerX, centerY, 350
       )
-      diskGradient.addColorStop(0, 'rgba(255, 107, 0, 0.25)')
-      diskGradient.addColorStop(0.3, 'rgba(255, 120, 0, 0.15)')
-      diskGradient.addColorStop(0.6, 'rgba(255, 140, 0, 0.08)')
+      // Inner is grayscale, outer gets orange based on colorTransition
+      diskGradient.addColorStop(0, 'rgba(40, 40, 40, 0.15)')
+      diskGradient.addColorStop(0.3, 'rgba(60, 60, 60, 0.1)')
+      if (colorTransitionRef.current > 0) {
+        diskGradient.addColorStop(0.6, `rgba(180, 80, 0, ${0.08 * colorTransitionRef.current})`)
+        diskGradient.addColorStop(0.85, `rgba(255, 107, 0, ${0.15 * colorTransitionRef.current})`)
+      } else {
+        diskGradient.addColorStop(0.6, 'rgba(80, 80, 80, 0.06)')
+        diskGradient.addColorStop(0.85, 'rgba(100, 100, 100, 0.1)')
+      }
       diskGradient.addColorStop(1, 'transparent')
 
       ctx.beginPath()
-      ctx.arc(centerX, centerY, 250, 0, Math.PI * 2)
+      ctx.arc(centerX, centerY, 350, 0, Math.PI * 2)
       ctx.fillStyle = diskGradient
       ctx.fill()
 
@@ -154,47 +167,79 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
 
       particlesRef.current.forEach((particle) => {
         // Rotate around center
-        particle.angle += particle.speed * (1 + pullStrength * 2)
+        particle.angle += particle.speed * (1 + pullStrength * 3)
 
         // Pull towards center when unlocking
         if (pullStrength > 0) {
-          particle.radius -= pullStrength * 5
+          particle.radius -= pullStrength * 6
           if (particle.radius < 50) {
-            particle.opacity *= 0.95
+            particle.opacity *= 0.93
           }
         }
 
         // Calculate position
         particle.x = centerX + Math.cos(particle.angle) * particle.radius
-        particle.y = centerY + Math.sin(particle.angle) * particle.radius * 0.4 // Elliptical orbit
+        particle.y = centerY + Math.sin(particle.angle) * particle.radius * 0.4
 
-        // Draw particle
+        // Calculate distance from center for color blending
+        const distFromCenter = Math.sqrt(
+          Math.pow(particle.x - centerX, 2) +
+          Math.pow(particle.y - centerY, 2)
+        )
+        const normalizedDist = Math.min(1, distFromCenter / (maxDist * 0.6))
+
+        // Particles closer to edge get orange color, center stays gray
+        const edgeColorAmount = Math.max(0, (normalizedDist - 0.4) * 2.5) * colorTransitionRef.current
+
         const alpha = particle.opacity * (1 - pullStrength * 0.5)
+
         ctx.beginPath()
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
-        ctx.fillStyle = `hsla(${particle.hue}, 100%, 60%, ${alpha})`
+
+        if (edgeColorAmount > 0) {
+          // Orange at edges
+          const orangeBlend = edgeColorAmount
+          const r = Math.round(particle.brightness * 255 * (1 - orangeBlend) + 255 * orangeBlend)
+          const g = Math.round(particle.brightness * 255 * (1 - orangeBlend) + 107 * orangeBlend)
+          const b = Math.round(particle.brightness * 255 * (1 - orangeBlend))
+          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`
+        } else {
+          // Grayscale - being sucked into center
+          const gray = Math.round(particle.brightness * 200)
+          ctx.fillStyle = `rgba(${gray}, ${gray}, ${gray}, ${alpha})`
+        }
         ctx.fill()
 
         // Draw trail
-        const trailLength = 20
+        const trailLength = 15
         for (let i = 1; i <= trailLength; i++) {
           const trailAngle = particle.angle - particle.speed * i * 3
           const trailX = centerX + Math.cos(trailAngle) * particle.radius
           const trailY = centerY + Math.sin(trailAngle) * particle.radius * 0.4
-          const trailAlpha = alpha * (1 - i / trailLength) * 0.3
+          const trailAlpha = alpha * (1 - i / trailLength) * 0.25
 
           ctx.beginPath()
-          ctx.arc(trailX, trailY, particle.size * 0.5, 0, Math.PI * 2)
-          ctx.fillStyle = `hsla(${particle.hue}, 100%, 60%, ${trailAlpha})`
+          ctx.arc(trailX, trailY, particle.size * 0.4, 0, Math.PI * 2)
+
+          if (edgeColorAmount > 0) {
+            ctx.fillStyle = `rgba(255, 107, 0, ${trailAlpha * edgeColorAmount})`
+          } else {
+            const gray = Math.round(particle.brightness * 150)
+            ctx.fillStyle = `rgba(${gray}, ${gray}, ${gray}, ${trailAlpha})`
+          }
           ctx.fill()
         }
       })
 
-      // Inner glow ring
+      // Inner glow ring - subtle gray with orange tint at edges during color phase
+      const ringColor = colorTransitionRef.current > 0.5
+        ? `rgba(255, 107, 0, ${0.15 + Math.sin(Date.now() * 0.003) * 0.05})`
+        : `rgba(100, 100, 100, ${0.2 + Math.sin(Date.now() * 0.003) * 0.05})`
+
       ctx.beginPath()
       ctx.arc(centerX, centerY, 90 + Math.sin(Date.now() * 0.002) * 5, 0, Math.PI * 2)
-      ctx.strokeStyle = `rgba(255, 107, 0, ${0.3 + Math.sin(Date.now() * 0.003) * 0.1})`
-      ctx.lineWidth = 2
+      ctx.strokeStyle = ringColor
+      ctx.lineWidth = 1.5
       ctx.stroke()
 
       animationRef.current = requestAnimationFrame(animate)
@@ -210,17 +255,32 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
     }
   }, [initParticles])
 
-  // Handle unlock animation - faster collapse, quicker handoff to hyperspeed
+  // Handle unlock animation with warp phases
   useEffect(() => {
     if (isUnlocking) {
+      setWarpPhase('collapse')
+
       let progress = 0
       const unlockAnimation = setInterval(() => {
-        progress += 0.04 // Faster collapse
+        progress += 0.03
         pullStrengthRef.current = progress
 
-        if (progress >= 0.6) { // Trigger hyperspeed earlier for seamless transition
+        // Start colorizing as we approach handoff
+        if (progress >= 0.4) {
+          colorTransitionRef.current = Math.min(1, (progress - 0.4) / 0.3)
+        }
+
+        if (progress >= 0.7) {
           clearInterval(unlockAnimation)
-          onUnlock()
+          setWarpPhase('warp')
+
+          // Brief warp phase then handoff
+          setTimeout(() => {
+            setWarpPhase('colorize')
+            setTimeout(() => {
+              onUnlock()
+            }, 800)
+          }, 600)
         }
       }, 16)
 
@@ -271,17 +331,12 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-widest mb-4"
                 style={{
                   color: colors.text,
-                  textShadow: `0 0 40px ${colors.accentDim}`,
+                  fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                  textShadow: '0 0 40px rgba(100, 100, 100, 0.3)',
                 }}
               >
                 SOLUS FORGE
               </h1>
-              <p
-                className="text-sm md:text-base tracking-wider uppercase"
-                style={{ color: colors.textMuted }}
-              >
-                Authorized Access Only
-              </p>
             </motion.div>
 
             {/* Password input */}
@@ -301,12 +356,13 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                   autoFocus
                   className="w-72 md:w-80 px-6 py-4 rounded-full text-center text-base tracking-wider focus:outline-none transition-all"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: `1px solid ${error ? '#EF4444' : 'rgba(255, 107, 0, 0.3)'}`,
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: `1px solid ${error ? '#EF4444' : 'rgba(150, 150, 150, 0.3)'}`,
                     color: colors.text,
+                    fontFamily: "'Dobla Sans', system-ui, sans-serif",
                     boxShadow: error
                       ? '0 0 30px rgba(239, 68, 68, 0.3)'
-                      : `0 0 30px ${colors.accentDim}`,
+                      : '0 0 30px rgba(100, 100, 100, 0.15)',
                   }}
                 />
                 {error && (
@@ -325,56 +381,97 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                 type="submit"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-3 rounded-full font-medium tracking-wider transition-all"
+                className="px-8 py-3 rounded-full font-medium tracking-wider transition-all flex items-center gap-3"
                 style={{
-                  background: `linear-gradient(135deg, ${colors.accent} 0%, #F59E0B 100%)`,
+                  background: 'linear-gradient(135deg, #666666 0%, #888888 100%)',
                   color: colors.text,
-                  boxShadow: `0 0 40px ${colors.accentDim}`,
+                  fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                  boxShadow: '0 0 30px rgba(100, 100, 100, 0.2)',
                 }}
               >
-                ENTER THE VOID
+                <HandEye size={24} weight="duotone" />
               </motion.button>
             </motion.form>
-
-            {/* Hint */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
-              className="mt-16 text-xs tracking-wider italic"
-              style={{ color: colors.textMuted }}
-            >
-              "Libera te tutemet ex inferis"
-            </motion.p>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Unlocking state overlay */}
+      {/* Warp transition phases with subtle phrases */}
       <AnimatePresence>
         {isUnlocking && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute inset-0 flex items-center justify-center z-10"
-          >
-            <motion.div
-              initial={{ scale: 1 }}
-              animate={{ scale: 0, opacity: 0 }}
-              transition={{ duration: 1.5, ease: 'easeIn' }}
-              className="text-center"
-            >
-              <p
-                className="text-2xl md:text-3xl font-light tracking-widest"
-                style={{
-                  color: colors.accent,
-                  textShadow: `0 0 30px ${colors.accent}`,
-                }}
+          <>
+            {/* Phase 1: "engaged..." */}
+            {warpPhase === 'collapse' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.25 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0 flex items-center justify-center z-10"
               >
-                ACCESS GRANTED
-              </p>
-            </motion.div>
-          </motion.div>
+                <motion.p
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  className="text-4xl md:text-6xl font-bold tracking-widest lowercase"
+                  style={{
+                    color: colors.textMuted,
+                    fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                  }}
+                >
+                  engaged...
+                </motion.p>
+              </motion.div>
+            )}
+
+            {/* Phase 2: "save" */}
+            {warpPhase === 'warp' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.3 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0 flex items-center justify-center z-10"
+              >
+                <motion.p
+                  initial={{ scale: 1.2, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  className="text-5xl md:text-7xl font-bold tracking-widest lowercase"
+                  style={{
+                    color: colors.text,
+                    fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                  }}
+                >
+                  save
+                </motion.p>
+              </motion.div>
+            )}
+
+            {/* Phase 3: "yourself" with orange tint */}
+            {warpPhase === 'colorize' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.4 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                className="absolute inset-0 flex items-center justify-center z-10"
+              >
+                <motion.p
+                  initial={{ scale: 1.3, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.5, opacity: 0 }}
+                  className="text-5xl md:text-7xl font-bold tracking-widest lowercase"
+                  style={{
+                    color: colors.accent,
+                    fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                    textShadow: `0 0 60px ${colors.accent}`,
+                  }}
+                >
+                  yourself
+                </motion.p>
+              </motion.div>
+            )}
+          </>
         )}
       </AnimatePresence>
     </div>
