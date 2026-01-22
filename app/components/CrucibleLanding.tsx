@@ -20,6 +20,11 @@ import {
   MusicNotes as MusicNotesIcon,
   Cube as CubeIcon,
   Flask as FlaskIcon,
+  Lightning as LightningIcon,
+  ArrowsClockwise as ArrowsClockwiseIcon,
+  ChartBar as ChartBarIcon,
+  Vault as VaultIcon,
+  Detective as DetectiveIcon,
 } from '@phosphor-icons/react'
 
 // SSR-safe window dimensions hook
@@ -102,16 +107,23 @@ const agents = [
   },
 ]
 
-// Workflow cards data with Phosphor duotone icons
+// Workflow cards data with Phosphor duotone icons - monochromatic color scheme
+const workflowIconColor = '#AAAAAA' // Subtle gray for all icons
+const workflowHoverColor = colors.accent // Orange on hover
 const workflows = [
-  { id: 'email_campaign', icon: EnvelopeIcon, title: 'Email Campaign', subtitle: 'Figma templates, copy, AI images', color: colors.accent },
-  { id: 'video_production', icon: FilmSlateIcon, title: 'Video Production', subtitle: 'AI video generation & editing', color: '#FF8C00' },
-  { id: 'image_generation', icon: PaintBrushIcon, title: 'Image Generation', subtitle: 'Concept art & product shots', color: '#F59E0B' },
-  { id: 'influencer_suite', icon: UserIcon, title: 'Influencer Suite', subtitle: 'LoRA training & clothing swap', color: '#E1306C' },
-  { id: 'social_paid_ads', icon: DeviceMobileIcon, title: 'Social Paid Ads', subtitle: 'Multi-format ad creation', color: '#1877F2' },
-  { id: 'audio', icon: MusicNotesIcon, title: 'Audio Production', subtitle: 'Music, SFX & voiceover', color: '#10B981' },
-  { id: '3d_assets', icon: CubeIcon, title: '3D Assets', subtitle: 'Models, textures & scenes', color: '#8B5CF6' },
-  { id: 'research', icon: FlaskIcon, title: 'Research', subtitle: 'Parallel AI research', color: '#06B6D4' },
+  { id: 'email_campaign', icon: EnvelopeIcon, title: 'Email Campaign', subtitle: 'Figma templates, copy, AI images', color: workflowIconColor, hoverColor: workflowHoverColor },
+  { id: 'video_production', icon: FilmSlateIcon, title: 'Video Production', subtitle: 'AI video generation & editing', color: workflowIconColor, hoverColor: workflowHoverColor },
+  { id: 'image_generation', icon: PaintBrushIcon, title: 'Image Generation', subtitle: 'Concept art & product shots', color: workflowIconColor, hoverColor: workflowHoverColor },
+  { id: 'influencer_suite', icon: UserIcon, title: 'Influencer Suite', subtitle: 'LoRA training & clothing swap', color: workflowIconColor, hoverColor: workflowHoverColor },
+  { id: 'social_paid_ads', icon: DeviceMobileIcon, title: 'Social Paid Ads', subtitle: 'Multi-format ad creation', color: workflowIconColor, hoverColor: workflowHoverColor },
+  { id: 'audio', icon: MusicNotesIcon, title: 'Audio Production', subtitle: 'Music, SFX & voiceover', color: workflowIconColor, hoverColor: workflowHoverColor },
+  { id: '3d_assets', icon: CubeIcon, title: '3D Assets', subtitle: 'Models, textures & scenes', color: workflowIconColor, hoverColor: workflowHoverColor },
+  { id: 'research', icon: FlaskIcon, title: 'Research', subtitle: 'Parallel AI research', color: workflowIconColor, hoverColor: workflowHoverColor },
+  { id: 'automation', icon: LightningIcon, title: 'Automation', subtitle: 'Workflow triggers & sequences', color: workflowIconColor, hoverColor: workflowHoverColor },
+  { id: 'repurposing', icon: ArrowsClockwiseIcon, title: 'Content Repurpose', subtitle: 'Transform across formats', color: workflowIconColor, hoverColor: workflowHoverColor },
+  { id: 'analytics', icon: ChartBarIcon, title: 'Analytics', subtitle: 'Performance insights', color: workflowIconColor, hoverColor: workflowHoverColor },
+  { id: 'asset_vault', icon: VaultIcon, title: 'Asset Vault', subtitle: 'Organize & version control', color: workflowIconColor, hoverColor: workflowHoverColor },
+  { id: 'osint', icon: DetectiveIcon, title: 'OSINT', subtitle: 'Intelligence gathering', color: workflowIconColor, hoverColor: workflowHoverColor },
 ]
 
 // Icon component type
@@ -404,13 +416,35 @@ export default function CrucibleLanding({
             style={{ opacity: orbitPhraseOpacity }}
           >
             <h2
-              className="text-2xl md:text-3xl lg:text-4xl font-light italic tracking-wide brand-text"
+              className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-wide"
               style={{
-                color: colors.textMuted,
-                textShadow: `0 0 30px ${colors.accent}33`,
+                color: colors.text,
+                fontFamily: "'Dobla Sans', system-ui, sans-serif",
               }}
             >
-              Libera te tutemet ex inferis
+              <span style={{ textShadow: `0 0 30px ${colors.accent}44` }}>
+                Libera te tutemet{' '}
+              </span>
+              <motion.span
+                style={{
+                  color: colors.accent,
+                  display: 'inline-block',
+                }}
+                animate={{
+                  textShadow: [
+                    `0 0 20px ${colors.accent}66, 0 0 40px ${colors.accent}33`,
+                    `0 0 30px ${colors.accent}99, 0 0 60px ${colors.accent}55, 0 0 80px ${colors.accent}22`,
+                    `0 0 20px ${colors.accent}66, 0 0 40px ${colors.accent}33`,
+                  ],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              >
+                ex inferis
+              </motion.span>
             </h2>
           </motion.div>
 
@@ -441,18 +475,19 @@ export default function CrucibleLanding({
             {/* Latin Phrase for chat phase */}
             <div className="text-center mb-6">
               <h2
-                className="text-xl md:text-2xl lg:text-3xl font-light italic tracking-wide brand-text"
+                className="text-xl md:text-2xl lg:text-3xl font-bold tracking-wide"
                 style={{
                   color: colors.textMuted,
                   textShadow: `0 0 20px ${colors.accent}22`,
+                  fontFamily: "'Dobla Sans', system-ui, sans-serif",
                 }}
               >
                 Aut viam inveniam aut faciam
               </h2>
             </div>
 
-            {/* Agent selector chips - single line */}
-            <div className="mb-4 flex justify-center gap-3 overflow-x-auto pb-2">
+            {/* Agent selector chips - single line, no overflow clipping */}
+            <div className="mb-4 flex justify-center gap-3 pb-2 px-4">
               {agents.map(agent => {
                 const isActive = localSelectedAgents.includes(agent.id)
                 const IconComponent = agent.icon
@@ -560,13 +595,18 @@ export default function CrucibleLanding({
           />
 
           <h3
-            className="text-2xl md:text-3xl font-bold mb-8 text-center relative z-10 font-expanded"
-            style={{ color: colors.text }}
+            className="text-2xl md:text-3xl font-bold mb-8 text-center relative z-10"
+            style={{
+              color: colors.text,
+              fontFamily: "'Dobla Sans', system-ui, sans-serif",
+              fontStretch: 'expanded',
+              letterSpacing: '0.05em',
+            }}
           >
             Choose Your Workflow
           </h3>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl px-4 relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 max-w-5xl px-4 relative z-10">
             {workflows.map((workflow, index) => {
               const IconComponent = workflow.icon
               return (
@@ -574,26 +614,43 @@ export default function CrucibleLanding({
                   key={workflow.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={{ delay: index * 0.03 }}
                   onClick={() => onWorkflowSelect?.(workflow.id)}
-                  className="flex flex-col items-center p-4 rounded-xl transition-all hover:scale-105"
+                  className="group flex flex-col items-center p-4 rounded-xl transition-all hover:scale-105"
                   style={{
                     background: `${colors.surface}ee`,
                     border: `1px solid ${colors.border}`,
                     backdropFilter: 'blur(8px)',
                   }}
                   whileHover={{
-                    borderColor: workflow.color,
-                    boxShadow: `0 0 30px ${workflow.color}33`,
+                    borderColor: colors.accent,
+                    boxShadow: `0 0 30px ${colors.accent}33`,
                   }}
                 >
-                  <div className="mb-2">
-                    <IconComponent size={32} weight="duotone" color={workflow.color} />
+                  <div className="mb-2 transition-colors">
+                    <IconComponent
+                      size={32}
+                      weight="duotone"
+                      className="transition-all duration-200 group-hover:scale-110"
+                      style={{ color: workflow.color }}
+                    />
                   </div>
-                  <span className="font-medium text-sm" style={{ color: colors.text }}>
+                  <span
+                    className="font-medium text-sm transition-colors group-hover:text-white"
+                    style={{
+                      color: colors.textMuted,
+                      fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                    }}
+                  >
                     {workflow.title}
                   </span>
-                  <span className="text-[10px] text-center mt-1" style={{ color: colors.textDim }}>
+                  <span
+                    className="text-[10px] text-center mt-1"
+                    style={{
+                      color: colors.textDim,
+                      fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                    }}
+                  >
                     {workflow.subtitle}
                   </span>
                 </motion.button>
