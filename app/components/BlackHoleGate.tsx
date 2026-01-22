@@ -312,34 +312,15 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.5 }}
-            className="absolute inset-0 z-10"
+            className="absolute inset-0 flex items-center justify-center z-10"
           >
-            {/* Title - positioned at top */}
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="absolute top-[15%] left-0 right-0 text-center z-20"
-            >
-              <h1
-                className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-widest"
-                style={{
-                  color: colors.text,
-                  fontFamily: "system-ui, -apple-system, sans-serif",
-                  textShadow: '0 0 60px rgba(255, 255, 255, 0.2), 0 0 120px rgba(100, 100, 100, 0.3)',
-                }}
-              >
-                SOLUS FORGE
-              </h1>
-            </motion.div>
-
-            {/* Password input - absolute center with inline enter button */}
+            {/* Password input - centered with inline enter button */}
             <motion.form
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
+              transition={{ delay: 0.3 }}
               onSubmit={handleSubmit}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
+              className="z-20"
             >
               <div className="relative">
                 <input
