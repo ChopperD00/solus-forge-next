@@ -255,32 +255,26 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
     }
   }, [initParticles])
 
-  // Handle unlock animation with warp phases
+  // Handle unlock animation - fast warp directly
   useEffect(() => {
     if (isUnlocking) {
-      setWarpPhase('collapse')
+      // Skip straight to warp phase
+      setWarpPhase('warp')
 
       let progress = 0
       const unlockAnimation = setInterval(() => {
-        progress += 0.03
+        progress += 0.06 // Faster progress
         pullStrengthRef.current = progress
+        colorTransitionRef.current = Math.min(1, progress / 0.5) // Faster color transition
 
-        // Start colorizing as we approach handoff
-        if (progress >= 0.4) {
-          colorTransitionRef.current = Math.min(1, (progress - 0.4) / 0.3)
-        }
-
-        if (progress >= 0.7) {
+        if (progress >= 0.5) {
           clearInterval(unlockAnimation)
-          setWarpPhase('warp')
+          setWarpPhase('colorize')
 
-          // Brief warp phase then handoff
+          // Quick handoff
           setTimeout(() => {
-            setWarpPhase('colorize')
-            setTimeout(() => {
-              onUnlock()
-            }, 800)
-          }, 600)
+            onUnlock()
+          }, 400)
         }
       }, 16)
 
@@ -392,52 +386,29 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
         )}
       </AnimatePresence>
 
-      {/* Warp transition phases with subtle phrases */}
+      {/* Fast warp transition */}
       <AnimatePresence>
         {isUnlocking && (
           <>
-            {/* Phase 1: "engaged..." */}
-            {warpPhase === 'collapse' && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.6 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5 }}
-                className="absolute inset-0 flex items-center justify-center z-20"
-              >
-                <motion.p
-                  initial={{ scale: 0.9 }}
-                  animate={{ scale: 1 }}
-                  className="text-4xl md:text-6xl font-bold tracking-widest lowercase"
-                  style={{
-                    color: colors.text,
-                    fontFamily: "system-ui, -apple-system, sans-serif",
-                    textShadow: '0 0 40px rgba(255, 255, 255, 0.3)',
-                  }}
-                >
-                  engaged...
-                </motion.p>
-              </motion.div>
-            )}
-
-            {/* Phase 2: "save" */}
+            {/* Quick "save" flash */}
             {warpPhase === 'warp' && (
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.8 }}
+                animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.15 }}
                 className="absolute inset-0 flex items-center justify-center z-20"
               >
                 <motion.p
-                  initial={{ scale: 1.2, opacity: 0 }}
+                  initial={{ scale: 1.5, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
+                  exit={{ scale: 0.6, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
                   className="text-5xl md:text-7xl font-bold tracking-widest lowercase"
                   style={{
                     color: colors.text,
                     fontFamily: "system-ui, -apple-system, sans-serif",
-                    textShadow: '0 0 60px rgba(255, 255, 255, 0.4)',
+                    textShadow: '0 0 80px rgba(255, 255, 255, 0.5)',
                   }}
                 >
                   save
@@ -445,24 +416,25 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
               </motion.div>
             )}
 
-            {/* Phase 3: "yourself" with orange tint */}
+            {/* Fast "yourself" with orange */}
             {warpPhase === 'colorize' && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
+                transition={{ duration: 0.15 }}
                 className="absolute inset-0 flex items-center justify-center z-20"
               >
                 <motion.p
-                  initial={{ scale: 1.3, opacity: 0 }}
+                  initial={{ scale: 1.5, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.5, opacity: 0 }}
+                  exit={{ scale: 0.3, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
                   className="text-5xl md:text-7xl font-bold tracking-widest lowercase"
                   style={{
                     color: colors.accent,
                     fontFamily: "system-ui, -apple-system, sans-serif",
-                    textShadow: `0 0 80px ${colors.accent}, 0 0 120px ${colors.accent}`,
+                    textShadow: `0 0 100px ${colors.accent}, 0 0 150px ${colors.accent}`,
                   }}
                 >
                   yourself
