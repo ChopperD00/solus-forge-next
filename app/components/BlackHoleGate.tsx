@@ -396,7 +396,7 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                   className="text-4xl md:text-6xl font-bold tracking-widest lowercase"
                   style={{
                     color: colors.textMuted,
-                    fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                    fontFamily: "var(--font-futuriata), 'Futuriata', system-ui, sans-serif",
                   }}
                 >
                   engaged...
@@ -420,7 +420,7 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                   className="text-5xl md:text-7xl font-bold tracking-widest lowercase"
                   style={{
                     color: colors.text,
-                    fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                    fontFamily: "var(--font-futuriata), 'Futuriata', system-ui, sans-serif",
                   }}
                 >
                   save
@@ -444,7 +444,7 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                   className="text-5xl md:text-7xl font-bold tracking-widest lowercase"
                   style={{
                     color: colors.accent,
-                    fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                    fontFamily: "var(--font-futuriata), 'Futuriata', system-ui, sans-serif",
                     textShadow: `0 0 60px ${colors.accent}`,
                   }}
                 >

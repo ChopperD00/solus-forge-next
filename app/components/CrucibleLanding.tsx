@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, ReactNode } from 'react'
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
 import GradientCircle from './GradientCircle'
 import SpectraNoiseBackground from './SpectraNoiseBackground'
-import SolusForgeIcon from './SolusForgeIcon'
+import GlitchingTechEye from './GlitchingTechEye'
 import ArcanaSplit from './ArcanaSplit'
 import {
   Eye as EyeIcon,
@@ -410,45 +410,39 @@ export default function CrucibleLanding({
             })}
           </div>
 
-          {/* Right: Version Badge */}
-          <div
-            className="px-3 py-1.5 rounded-full text-xs font-medium tracking-wide"
-            style={{
-              background: 'rgba(255, 107, 0, 0.15)',
-              border: '1px solid rgba(255, 107, 0, 0.3)',
-              color: colors.accent,
-              fontFamily: "'Dobla Sans', system-ui, sans-serif",
-            }}
-          >
-            Pre-Alpha v3.5
+          {/* Right: Name + Version Badge */}
+          <div className="flex items-center gap-3">
+            <span
+              className="text-sm font-medium tracking-widest"
+              style={{
+                color: colors.accent,
+                fontFamily: "var(--font-futuriata), 'Futuriata', system-ui, sans-serif",
+                letterSpacing: '0.15em',
+              }}
+            >
+              SOLUS FORGE
+            </span>
+            <div
+              className="px-3 py-1.5 rounded-full text-xs font-medium tracking-wide"
+              style={{
+                background: 'rgba(255, 107, 0, 0.15)',
+                border: '1px solid rgba(255, 107, 0, 0.3)',
+                color: colors.accent,
+                fontFamily: "var(--font-futuriata), 'Futuriata', system-ui, sans-serif",
+              }}
+            >
+              Pre-Alpha v3.5
+            </div>
           </div>
         </div>
 
-        {/* SECTION 1: Hero with Gradient Circle + Logo */}
+        {/* SECTION 1: Hero with Gradient Circle + Glitching Eye */}
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           style={{ opacity: heroOpacity, scale: heroScale }}
         >
           <GradientCircle scrollProgress={0}>
-            <div className="text-center flex flex-col items-center justify-center">
-              <SolusForgeIcon
-                size={160}
-                color={colors.text}
-                glowColor={colors.accentGlow}
-                animated={true}
-              />
-              <h1
-                className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-wider mt-8"
-                style={{
-                  color: colors.text,
-                  textShadow: `0 0 60px ${colors.accent}66`,
-                  fontFamily: "var(--font-futuriata), 'Futuriata', system-ui, sans-serif",
-                  letterSpacing: '0.15em',
-                }}
-              >
-                SOLUS FORGE
-              </h1>
-            </div>
+            <GlitchingTechEye size={180} glitchIntensity={0.4} />
           </GradientCircle>
         </motion.div>
 
