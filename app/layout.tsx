@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
-import { Inter, Space_Grotesk } from 'next/font/google'
+import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 
 const inter = Inter({
@@ -7,10 +8,39 @@ const inter = Inter({
   variable: '--font-inter',
 })
 
-// Space Grotesk as display font (similar geometric/modern feel to Halfre)
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-display',
+// Futuriata font family
+const futuriata = localFont({
+  src: [
+    {
+      path: '../public/fonts/futuriata-regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../public/fonts/futuriata-bold.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
+  variable: '--font-futuriata',
+  display: 'swap',
+})
+
+// Futuriata line variants for special effects
+const futuriataLine = localFont({
+  src: [
+    {
+      path: '../public/fonts/futuriata-light-line.woff2',
+      weight: '300',
+      style: 'normal',
+    },
+    {
+      path: '../public/fonts/futuriata-boldline.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
+  variable: '--font-futuriata-line',
   display: 'swap',
 })
 
@@ -26,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+    <html lang="en" className={`${inter.variable} ${futuriata.variable} ${futuriataLine.variable}`}>
       <body className={inter.className}>{children}</body>
     </html>
   )

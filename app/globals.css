@@ -38,13 +38,13 @@ body.theme-ocean {
   color: var(--ocean-text);
 }
 
-/* Typography - Space Grotesk display font + Inter for body */
+/* Typography - Futuriata display font + Inter for body */
 /* Fonts are loaded via next/font in layout.tsx for optimal performance */
 
 h1, h2, h3, .font-display {
-  font-family: var(--font-display), var(--font-inter), system-ui, sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-family: var(--font-futuriata), var(--font-inter), system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
 }
 
 /* Body text uses Inter */
@@ -54,9 +54,17 @@ body {
 
 /* Explicit brand class for logo/branding elements */
 .brand-text {
-  font-family: var(--font-display), var(--font-inter), system-ui, sans-serif;
-  letter-spacing: 0.02em;
+  font-family: var(--font-futuriata), var(--font-inter), system-ui, sans-serif;
+  letter-spacing: 0.08em;
   font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Line variant for special effects */
+.brand-text-line {
+  font-family: var(--font-futuriata-line), var(--font-futuriata), system-ui, sans-serif;
+  letter-spacing: 0.1em;
+  font-weight: 300;
 }
 
 /* Custom scrollbar */
