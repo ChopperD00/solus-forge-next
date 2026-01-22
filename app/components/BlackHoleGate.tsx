@@ -320,32 +320,13 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
             transition={{ duration: 0.5 }}
             className="absolute inset-0 flex flex-col items-center justify-center z-10"
           >
-            {/* Title */}
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-center mb-12"
-            >
-              <h1
-                className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-widest mb-4"
-                style={{
-                  color: colors.text,
-                  fontFamily: "'Dobla Sans', system-ui, sans-serif",
-                  textShadow: '0 0 40px rgba(100, 100, 100, 0.3)',
-                }}
-              >
-                SOLUS FORGE
-              </h1>
-            </motion.div>
-
-            {/* Password input */}
+            {/* Password input - centered */}
             <motion.form
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
+              transition={{ delay: 0.3 }}
               onSubmit={handleSubmit}
-              className="flex flex-col items-center gap-4"
+              className="flex flex-col items-center gap-6"
             >
               <div className="relative">
                 <input
@@ -379,17 +360,16 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
 
               <motion.button
                 type="submit"
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-3 rounded-full font-medium tracking-wider transition-all flex items-center gap-3"
+                className="w-16 h-16 rounded-full font-medium tracking-wider transition-all flex items-center justify-center"
                 style={{
-                  background: 'linear-gradient(135deg, #666666 0%, #888888 100%)',
+                  background: 'linear-gradient(135deg, #555555 0%, #777777 100%)',
                   color: colors.text,
-                  fontFamily: "'Dobla Sans', system-ui, sans-serif",
-                  boxShadow: '0 0 30px rgba(100, 100, 100, 0.2)',
+                  boxShadow: '0 0 40px rgba(100, 100, 100, 0.25)',
                 }}
               >
-                <HandEye size={24} weight="duotone" />
+                <HandEye size={36} weight="duotone" />
               </motion.button>
             </motion.form>
           </motion.div>
