@@ -20,6 +20,27 @@ import SocialAdsAutomationWorkflow from './components/SocialAdsAutomationWorkflo
 import OSINTWorkflow from './components/OSINTWorkflow'
 import CrucibleLanding from './components/CrucibleLanding'
 import RadialWipeTransition, { useRadialWipe } from './components/RadialWipeTransition'
+import {
+  Eye as EyeIcon,
+  Compass as CompassIcon,
+  MagnifyingGlass as MagnifyingGlassIcon,
+  Scales as ScalesIcon,
+  Sparkle as SparkleIcon,
+  Brain as BrainIcon,
+  EnvelopeSimple as EnvelopeIcon,
+  FilmSlate as FilmSlateIcon,
+  PaintBrush as PaintBrushIcon,
+  User as UserIcon,
+  DeviceMobile as DeviceMobileIcon,
+  MusicNotes as MusicNotesIcon,
+  Cube as CubeIcon,
+  Flask as FlaskIcon,
+  Lightning as LightningIcon,
+  ArrowsClockwise as ArrowsClockwiseIcon,
+  ChartBar as ChartBarIcon,
+  Vault as VaultIcon,
+  Detective as DetectiveIcon,
+} from '@phosphor-icons/react'
 
 type IntentId = 'email_campaign' | 'video_production' | 'image_generation' | 'audio' | '3d_assets' | 'research' | 'automation' | 'prompt_vault' | 'influencer_suite' | 'social_paid_ads' | 'email_automation' | 'social_ads_automation' | 'lupin_iii' | null
 
@@ -38,20 +59,39 @@ const colors = {
   accentTaupe: '#E85D04',
 }
 
+// Agent icon mapping for workspace header
+const agentIcons: Record<string, typeof EyeIcon> = {
+  solus: EyeIcon,
+  quintus: CompassIcon,
+  trion: MagnifyingGlassIcon,
+  lathe: ScalesIcon,
+  alchemist: SparkleIcon,
+  cortex: BrainIcon,
+}
+
+const agentColors: Record<string, string> = {
+  solus: '#8B5CF6',
+  quintus: '#06B6D4',
+  trion: '#10B981',
+  lathe: '#F59E0B',
+  alchemist: '#EC4899',
+  cortex: '#EF4444',
+}
+
 const workflows = [
-  { id: 'email_campaign', icon: '📧', title: 'Email Campaign', subtitle: 'Figma templates, copy, AI images', color: colors.accent },
-  { id: 'video_production', icon: '🎬', title: 'Video Production', subtitle: 'AI video generation & editing', color: colors.accentCoral },
-  { id: 'image_generation', icon: '🎨', title: 'Image Generation', subtitle: 'Concept art & product shots', color: colors.accentAmber },
-  { id: 'influencer_suite', icon: '👤', title: 'Influencer Suite', subtitle: 'LoRA training & clothing swap', color: '#E1306C' },
-  { id: 'social_paid_ads', icon: '📱', title: 'Social Paid Ads', subtitle: 'Multi-format ad creation', color: '#1877F2' },
-  { id: 'audio', icon: '🎵', title: 'Audio Production', subtitle: 'Music, SFX & voiceover', color: colors.accent },
-  { id: '3d_assets', icon: '🎲', title: '3D Assets', subtitle: 'Models, textures & scenes', color: colors.accentCoral },
-  { id: 'research', icon: '🔬', title: 'Research', subtitle: 'Parallel AI research', color: colors.accentAmber },
-  { id: 'automation', icon: '⚡', title: 'Automation', subtitle: 'Custom workflows', color: colors.accentTaupe },
-  { id: 'email_automation', icon: '🔄', title: 'Email Automation', subtitle: 'Node-based email flows', color: '#3B82F6' },
-  { id: 'social_ads_automation', icon: '📊', title: 'Social Ads Automation', subtitle: 'Auto-optimize campaigns', color: '#EC4899' },
-  { id: 'prompt_vault', icon: '🗄️', title: 'Prompt Vault', subtitle: 'Pony, SDXL & LoRA prompts', color: '#FF69B4' },
-  { id: 'lupin_iii', icon: '🎩', title: 'Lupin III', subtitle: 'OSINT & Intelligence Suite', color: '#8B5CF6' },
+  { id: 'email_campaign', icon: EnvelopeIcon, title: 'Email Campaign', subtitle: 'Figma templates, copy, AI images', color: colors.accent },
+  { id: 'video_production', icon: FilmSlateIcon, title: 'Video Production', subtitle: 'AI video generation & editing', color: colors.accentCoral },
+  { id: 'image_generation', icon: PaintBrushIcon, title: 'Image Generation', subtitle: 'Concept art & product shots', color: colors.accentAmber },
+  { id: 'influencer_suite', icon: UserIcon, title: 'Influencer Suite', subtitle: 'LoRA training & clothing swap', color: '#E1306C' },
+  { id: 'social_paid_ads', icon: DeviceMobileIcon, title: 'Social Paid Ads', subtitle: 'Multi-format ad creation', color: '#1877F2' },
+  { id: 'audio', icon: MusicNotesIcon, title: 'Audio Production', subtitle: 'Music, SFX & voiceover', color: colors.accent },
+  { id: '3d_assets', icon: CubeIcon, title: '3D Assets', subtitle: 'Models, textures & scenes', color: colors.accentCoral },
+  { id: 'research', icon: FlaskIcon, title: 'Research', subtitle: 'Parallel AI research', color: colors.accentAmber },
+  { id: 'automation', icon: LightningIcon, title: 'Automation', subtitle: 'Custom workflows', color: colors.accentTaupe },
+  { id: 'email_automation', icon: ArrowsClockwiseIcon, title: 'Email Automation', subtitle: 'Node-based email flows', color: '#3B82F6' },
+  { id: 'social_ads_automation', icon: ChartBarIcon, title: 'Social Ads Automation', subtitle: 'Auto-optimize campaigns', color: '#EC4899' },
+  { id: 'prompt_vault', icon: VaultIcon, title: 'Prompt Vault', subtitle: 'Pony, SDXL & LoRA prompts', color: '#FF69B4' },
+  { id: 'lupin_iii', icon: DetectiveIcon, title: 'Lupin III', subtitle: 'OSINT & Intelligence Suite', color: '#8B5CF6' },
 ]
 
 export default function Home() {
@@ -169,20 +209,23 @@ export default function Home() {
                   animate={{ opacity: 1, x: 0 }}
                   className="flex items-center gap-2"
                 >
-                  {workflows.slice(0, 4).map((workflow) => (
-                    <button
-                      key={workflow.id}
-                      onClick={(e) => handleSelectIntent(workflow.id, e)}
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-all hover:scale-110"
-                      style={{
-                        background: colors.surface,
-                        border: `1px solid ${colors.border}`,
-                      }}
-                      title={workflow.title}
-                    >
-                      {workflow.icon}
-                    </button>
-                  ))}
+                  {workflows.slice(0, 4).map((workflow) => {
+                    const IconComponent = workflow.icon
+                    return (
+                      <button
+                        key={workflow.id}
+                        onClick={(e) => handleSelectIntent(workflow.id, e)}
+                        className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-110"
+                        style={{
+                          background: colors.surface,
+                          border: `1px solid ${colors.border}`,
+                        }}
+                        title={workflow.title}
+                      >
+                        <IconComponent size={20} weight="duotone" color={workflow.color} />
+                      </button>
+                    )
+                  })}
                   <div
                     className="px-3 py-2 rounded-xl text-xs"
                     style={{ background: colors.surface, color: colors.textMuted }}
@@ -253,17 +296,24 @@ export default function Home() {
 
                 {/* Active workflow badge */}
                 <div className="flex items-center gap-3">
-                  <div
-                    className="px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2"
-                    style={{
-                      background: `${workflows.find(w => w.id === selectedIntent)?.color}22`,
-                      color: workflows.find(w => w.id === selectedIntent)?.color,
-                      border: `1px solid ${workflows.find(w => w.id === selectedIntent)?.color}44`,
-                    }}
-                  >
-                    {workflows.find(w => w.id === selectedIntent)?.icon}
-                    {workflows.find(w => w.id === selectedIntent)?.title}
-                  </div>
+                  {(() => {
+                    const activeWorkflow = workflows.find(w => w.id === selectedIntent)
+                    if (!activeWorkflow) return null
+                    const WorkflowIcon = activeWorkflow.icon
+                    return (
+                      <div
+                        className="px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2"
+                        style={{
+                          background: `${activeWorkflow.color}22`,
+                          color: activeWorkflow.color,
+                          border: `1px solid ${activeWorkflow.color}44`,
+                        }}
+                      >
+                        <WorkflowIcon size={18} weight="duotone" color={activeWorkflow.color} />
+                        {activeWorkflow.title}
+                      </div>
+                    )
+                  })()}
 
                   {/* Agent status */}
                   <div
@@ -272,21 +322,15 @@ export default function Home() {
                   >
                     <div className="flex -space-x-2">
                       {selectedAgents.slice(0, 3).map(agentId => {
-                        const icons: Record<string, string> = {
-                          solus: '🔮',      // Claude Opus - Strategic Oversight
-                          quintus: '📐',    // Claude Haiku - Planner
-                          trion: '🔍',      // Anthropic - Research & Discovery
-                          lathe: '⚖️',      // Claude Sonnet - Quality Control
-                          alchemist: '✨',  // Gemini - Creative Generation
-                          cortex: '🧠',     // NotebookLM - Memory & Context
-                        }
+                        const AgentIcon = agentIcons[agentId] || EyeIcon
+                        const agentColor = agentColors[agentId] || colors.textMuted
                         return (
                           <div
                             key={agentId}
-                            className="w-6 h-6 rounded-full flex items-center justify-center text-xs"
+                            className="w-6 h-6 rounded-full flex items-center justify-center"
                             style={{ background: colors.bg, border: `1px solid ${colors.border}` }}
                           >
-                            {icons[agentId]}
+                            <AgentIcon size={14} weight="duotone" color={agentColor} />
                           </div>
                         )
                       })}

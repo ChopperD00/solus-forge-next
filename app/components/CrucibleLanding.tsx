@@ -1,10 +1,26 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, ReactNode } from 'react'
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
 import GradientCircle from './GradientCircle'
 import SpectraNoiseBackground from './SpectraNoiseBackground'
 import SolusForgeIcon from './SolusForgeIcon'
+import {
+  Eye as EyeIcon,
+  Compass as CompassIcon,
+  MagnifyingGlass as MagnifyingGlassIcon,
+  Scales as ScalesIcon,
+  Sparkle as SparkleIcon,
+  Brain as BrainIcon,
+  EnvelopeSimple as EnvelopeIcon,
+  FilmSlate as FilmSlateIcon,
+  PaintBrush as PaintBrushIcon,
+  User as UserIcon,
+  DeviceMobile as DeviceMobileIcon,
+  MusicNotes as MusicNotesIcon,
+  Cube as CubeIcon,
+  Flask as FlaskIcon,
+} from '@phosphor-icons/react'
 
 // SSR-safe window dimensions hook
 function useWindowSize() {
@@ -34,12 +50,12 @@ const colors = {
   accentGlow: 'rgba(255, 107, 0, 0.3)',
 }
 
-// Agent configurations
+// Agent configurations with Phosphor duotone icons
 const agents = [
   {
     id: 'solus',
     name: 'Solus',
-    icon: '🔮',
+    icon: EyeIcon,
     role: 'Strategic Oversight',
     orbitOffset: 0,
     color: '#8B5CF6',
@@ -47,7 +63,7 @@ const agents = [
   {
     id: 'quintus',
     name: 'Quintus',
-    icon: '📐',
+    icon: CompassIcon,
     role: 'Planner/Optimization',
     orbitOffset: Math.PI / 3,
     color: '#06B6D4',
@@ -55,7 +71,7 @@ const agents = [
   {
     id: 'trion',
     name: 'Trion',
-    icon: '🔍',
+    icon: MagnifyingGlassIcon,
     role: 'Research & Discovery',
     orbitOffset: (Math.PI * 2) / 3,
     color: '#10B981',
@@ -63,7 +79,7 @@ const agents = [
   {
     id: 'lathe',
     name: 'Lathe',
-    icon: '⚖️',
+    icon: ScalesIcon,
     role: 'Quality Control/Reviewer',
     orbitOffset: Math.PI,
     color: '#F59E0B',
@@ -71,7 +87,7 @@ const agents = [
   {
     id: 'alchemist',
     name: 'Alchemist',
-    icon: '✨',
+    icon: SparkleIcon,
     role: 'Creative Generation',
     orbitOffset: (Math.PI * 4) / 3,
     color: '#EC4899',
@@ -79,24 +95,27 @@ const agents = [
   {
     id: 'cortex',
     name: 'Cortex',
-    icon: '🧠',
+    icon: BrainIcon,
     role: 'Archival',
     orbitOffset: (Math.PI * 5) / 3,
     color: '#EF4444',
   },
 ]
 
-// Workflow cards data
+// Workflow cards data with Phosphor duotone icons
 const workflows = [
-  { id: 'email_campaign', icon: '📧', title: 'Email Campaign', subtitle: 'Figma templates, copy, AI images', color: colors.accent },
-  { id: 'video_production', icon: '🎬', title: 'Video Production', subtitle: 'AI video generation & editing', color: '#FF8C00' },
-  { id: 'image_generation', icon: '🎨', title: 'Image Generation', subtitle: 'Concept art & product shots', color: '#F59E0B' },
-  { id: 'influencer_suite', icon: '👤', title: 'Influencer Suite', subtitle: 'LoRA training & clothing swap', color: '#E1306C' },
-  { id: 'social_paid_ads', icon: '📱', title: 'Social Paid Ads', subtitle: 'Multi-format ad creation', color: '#1877F2' },
-  { id: 'audio', icon: '🎵', title: 'Audio Production', subtitle: 'Music, SFX & voiceover', color: '#10B981' },
-  { id: '3d_assets', icon: '🎲', title: '3D Assets', subtitle: 'Models, textures & scenes', color: '#8B5CF6' },
-  { id: 'research', icon: '🔬', title: 'Research', subtitle: 'Parallel AI research', color: '#06B6D4' },
+  { id: 'email_campaign', icon: EnvelopeIcon, title: 'Email Campaign', subtitle: 'Figma templates, copy, AI images', color: colors.accent },
+  { id: 'video_production', icon: FilmSlateIcon, title: 'Video Production', subtitle: 'AI video generation & editing', color: '#FF8C00' },
+  { id: 'image_generation', icon: PaintBrushIcon, title: 'Image Generation', subtitle: 'Concept art & product shots', color: '#F59E0B' },
+  { id: 'influencer_suite', icon: UserIcon, title: 'Influencer Suite', subtitle: 'LoRA training & clothing swap', color: '#E1306C' },
+  { id: 'social_paid_ads', icon: DeviceMobileIcon, title: 'Social Paid Ads', subtitle: 'Multi-format ad creation', color: '#1877F2' },
+  { id: 'audio', icon: MusicNotesIcon, title: 'Audio Production', subtitle: 'Music, SFX & voiceover', color: '#10B981' },
+  { id: '3d_assets', icon: CubeIcon, title: '3D Assets', subtitle: 'Models, textures & scenes', color: '#8B5CF6' },
+  { id: 'research', icon: FlaskIcon, title: 'Research', subtitle: 'Parallel AI research', color: '#06B6D4' },
 ]
+
+// Icon component type
+type IconComponent = React.ForwardRefExoticComponent<React.PropsWithoutRef<{ size?: number | string; weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone'; color?: string }> & React.RefAttributes<SVGSVGElement>>
 
 // Morphing Agent Component - orbits then morphs to final position
 interface MorphingAgentProps {
@@ -185,12 +204,12 @@ function MorphingAgent({
             boxShadow: `0 0 ${20 + morphProgress * 30}px ${colors.accent}${Math.round((morphProgress) * 99).toString(16).padStart(2, '0')}`,
           }}
         >
-          <span
-            className="text-xl transition-opacity"
+          <div
+            className="transition-opacity"
             style={{ opacity: 1 - morphProgress * 1.5 }}
           >
-            {agent.icon}
-          </span>
+            <agent.icon size={24} weight="duotone" color={agent.color} />
+          </div>
         </div>
       </motion.div>
     </motion.div>
@@ -436,6 +455,7 @@ export default function CrucibleLanding({
             <div className="mb-4 flex justify-center gap-3 overflow-x-auto pb-2">
               {agents.map(agent => {
                 const isActive = localSelectedAgents.includes(agent.id)
+                const IconComponent = agent.icon
                 return (
                   <button
                     key={agent.id}
@@ -448,7 +468,7 @@ export default function CrucibleLanding({
                     }}
                   >
                     <div className="flex items-center gap-1.5">
-                      <span>{agent.icon}</span>
+                      <IconComponent size={16} weight="duotone" color={isActive ? agent.color : colors.textMuted} />
                       <span className="font-medium">{agent.name}</span>
                     </div>
                     <span className="text-[9px] opacity-70 mt-0.5">{agent.role}</span>
@@ -523,32 +543,37 @@ export default function CrucibleLanding({
           </h3>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl px-4">
-            {workflows.map((workflow, index) => (
-              <motion.button
-                key={workflow.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                onClick={() => onWorkflowSelect?.(workflow.id)}
-                className="flex flex-col items-center p-4 rounded-xl transition-all hover:scale-105"
-                style={{
-                  background: colors.surface,
-                  border: `1px solid ${colors.border}`,
-                }}
-                whileHover={{
-                  borderColor: workflow.color,
-                  boxShadow: `0 0 30px ${workflow.color}33`,
-                }}
-              >
-                <span className="text-3xl mb-2">{workflow.icon}</span>
-                <span className="font-medium text-sm" style={{ color: colors.text }}>
-                  {workflow.title}
-                </span>
-                <span className="text-[10px] text-center mt-1" style={{ color: colors.textDim }}>
-                  {workflow.subtitle}
-                </span>
-              </motion.button>
-            ))}
+            {workflows.map((workflow, index) => {
+              const IconComponent = workflow.icon
+              return (
+                <motion.button
+                  key={workflow.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => onWorkflowSelect?.(workflow.id)}
+                  className="flex flex-col items-center p-4 rounded-xl transition-all hover:scale-105"
+                  style={{
+                    background: colors.surface,
+                    border: `1px solid ${colors.border}`,
+                  }}
+                  whileHover={{
+                    borderColor: workflow.color,
+                    boxShadow: `0 0 30px ${workflow.color}33`,
+                  }}
+                >
+                  <div className="mb-2">
+                    <IconComponent size={32} weight="duotone" color={workflow.color} />
+                  </div>
+                  <span className="font-medium text-sm" style={{ color: colors.text }}>
+                    {workflow.title}
+                  </span>
+                  <span className="text-[10px] text-center mt-1" style={{ color: colors.textDim }}>
+                    {workflow.subtitle}
+                  </span>
+                </motion.button>
+              )
+            })}
           </div>
         </motion.div>
       </div>
