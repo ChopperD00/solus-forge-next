@@ -1,7 +1,8 @@
 'use client'
 
 import * as React from "react"
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface GlitchingTechEyeProps {
   size?: number
@@ -14,6 +15,118 @@ interface GlitchingTechEyeProps {
   maxAsciiRows?: number
   eyeFollow?: number
   style?: React.CSSProperties
+}
+
+// Circular text component with blur effect
+function CircularText({
+  text,
+  radius,
+  isVisible,
+  fontSize = 12,
+}: {
+  text: string
+  radius: number
+  isVisible: boolean
+  fontSize?: number
+}) {
+  const pathId = `circlePath-${radius}`
+  const circumference = 2 * Math.PI * radius
+  // Repeat text to fill the circle
+  const repeatCount = Math.ceil(circumference / (text.length * fontSize * 0.6))
+  const repeatedText = Array(repeatCount).fill(text).join(' · ')
+
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <svg
+            width="100%"
+            height="100%"
+            viewBox={`0 0 ${radius * 2 + 40} ${radius * 2 + 40}`}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              overflow: 'visible',
+            }}
+          >
+            <defs>
+              <path
+                id={pathId}
+                d={`M ${radius + 20}, ${radius + 20} m -${radius}, 0 a ${radius},${radius} 0 1,1 ${radius * 2},0 a ${radius},${radius} 0 1,1 -${radius * 2},0`}
+                fill="none"
+              />
+              <filter id="textBlur" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" />
+              </filter>
+            </defs>
+
+            {/* Blurred background text layer */}
+            <motion.text
+              fill="rgba(255, 140, 50, 0.3)"
+              fontSize={fontSize}
+              fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
+              fontWeight="300"
+              letterSpacing="0.15em"
+              filter="url(#textBlur)"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+            >
+              <textPath href={`#${pathId}`} startOffset="0%">
+                <motion.tspan
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {repeatedText}
+                </motion.tspan>
+              </textPath>
+              <animateTransform
+                attributeName="transform"
+                type="rotate"
+                from={`0 ${radius + 20} ${radius + 20}`}
+                to={`360 ${radius + 20} ${radius + 20}`}
+                dur="25s"
+                repeatCount="indefinite"
+              />
+            </motion.text>
+
+            {/* Sharp foreground text layer */}
+            <motion.text
+              fill="rgba(255, 180, 100, 0.7)"
+              fontSize={fontSize}
+              fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif"
+              fontWeight="300"
+              letterSpacing="0.15em"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+            >
+              <textPath href={`#${pathId}`} startOffset="0%">
+                {repeatedText}
+              </textPath>
+              <animateTransform
+                attributeName="transform"
+                type="rotate"
+                from={`0 ${radius + 20} ${radius + 20}`}
+                to={`360 ${radius + 20} ${radius + 20}`}
+                dur="25s"
+                repeatCount="indefinite"
+              />
+            </motion.text>
+          </svg>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
 }
 
 export default function GlitchingTechEye({
@@ -33,6 +146,7 @@ export default function GlitchingTechEye({
   const grainCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const rafRef = useRef<number | null>(null)
   const tRef = useRef(0)
+  const [isHovered, setIsHovered] = useState(false)
 
   const mouseRef = useRef<{ x: number; y: number; inside: boolean }>({
     x: 0,
@@ -294,6 +408,9 @@ export default function GlitchingTechEye({
     }
   }, [size, hueBase, rotationSpeed, glitchiness, grainStrength, asciiDensity, maxAsciiCols, maxAsciiRows, eyeFollow])
 
+  // Calculate the radius for the circular text (just outside the yellow stroke)
+  const textRadius = size * 0.48
+
   return (
     <div
       ref={containerRef}
@@ -304,6 +421,8 @@ export default function GlitchingTechEye({
         position: "relative",
         overflow: "visible",
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <canvas
         ref={canvasRef}
@@ -324,6 +443,14 @@ export default function GlitchingTechEye({
           pointerEvents: "none",
           mixBlendMode: "overlay",
         }}
+      />
+
+      {/* Circular text that appears on hover */}
+      <CircularText
+        text="SOLUS FORGE"
+        radius={textRadius}
+        isVisible={isHovered}
+        fontSize={11}
       />
     </div>
   )
