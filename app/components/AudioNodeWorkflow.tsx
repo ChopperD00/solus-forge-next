@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import NodeWorkflowCanvas, { WorkflowNode, NodeConnection } from './NodeWorkflowCanvas'
 
@@ -407,6 +407,7 @@ function NodeConfigPanel({ node, onClose, onUpdate }: NodeConfigPanelProps) {
 }
 
 export default function AudioNodeWorkflow() {
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [nodes, setNodes] = useState<WorkflowNode[]>([
     {
       id: 'recipe_1',
@@ -458,6 +459,35 @@ export default function AudioNodeWorkflow() {
   const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null)
   const [showPalette, setShowPalette] = useState(true)
 
+  // Delete node function
+  const handleDeleteNode = useCallback((nodeId: string) => {
+    // Remove the node
+    setNodes(prev => prev.filter(n => n.id !== nodeId))
+    // Remove any connections to/from this node
+    setConnections(prev => prev.filter(c => c.fromNode !== nodeId && c.toNode !== nodeId))
+    // Clear selection
+    setSelectedNodeId(null)
+    setSelectedNode(null)
+  }, [])
+
+  // Keyboard event handler for delete
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if Delete or Backspace is pressed and a node is selected
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeId) {
+        // Don't delete if user is typing in an input/textarea
+        const target = e.target as HTMLElement
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
+
+        e.preventDefault()
+        handleDeleteNode(selectedNodeId)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedNodeId, handleDeleteNode])
+
   const handleAddNode = (template: typeof nodeTemplates[0]) => {
     const newNode: WorkflowNode = {
       id: `${template.type}_${Date.now()}`,
@@ -501,8 +531,16 @@ export default function AudioNodeWorkflow() {
           >
             <div className="p-4">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-medium text-sm" style={{ color: colors.text }}>Audio Nodes</h3>
-                <button onClick={() => setShowPalette(false)} className="text-xs" style={{ color: colors.textMuted }}>Hide</button>
+                <h3 className="font-medium text-sm flex items-center gap-2" style={{ color: colors.text }}>
+                  <span style={{ color: colors.audio }}>🎵</span> Audio Nodes
+                </h3>
+                <button
+                  onClick={() => setShowPalette(false)}
+                  className="text-xs px-2 py-1 rounded-lg transition-colors"
+                  style={{ color: colors.textMuted, background: colors.bg }}
+                >
+                  Hide ✕
+                </button>
               </div>
 
               {Object.entries(templatesByCategory).map(([category, templates]) => (
@@ -510,17 +548,24 @@ export default function AudioNodeWorkflow() {
                   <div className="text-xs font-medium mb-2" style={{ color: colors.textDim }}>{category}</div>
                   <div className="space-y-2">
                     {templates.map(template => (
-                      <button
+                      <motion.button
                         key={template.type}
                         onClick={() => handleAddNode(template)}
-                        className="w-full p-3 rounded-xl text-left transition-all hover:scale-[1.02]"
+                        className="w-full p-3 rounded-xl text-left transition-all group"
                         style={{ background: colors.bg, border: `1px solid ${colors.border}` }}
+                        whileHover={{
+                          scale: 1.02,
+                          borderColor: colors.audio,
+                          boxShadow: `0 0 15px ${colors.audio}22`,
+                        }}
+                        whileTap={{ scale: 0.98 }}
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-lg">{template.icon}</span>
-                          <span className="text-sm" style={{ color: colors.text }}>{template.title}</span>
+                          <span className="text-sm flex-1" style={{ color: colors.text }}>{template.title}</span>
+                          <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: colors.audio }}>+ Add</span>
                         </div>
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 </div>
@@ -531,8 +576,20 @@ export default function AudioNodeWorkflow() {
       </AnimatePresence>
 
       {!showPalette && (
-        <button onClick={() => setShowPalette(true)} className="absolute left-4 top-4 z-20 px-3 py-2 rounded-xl text-sm"
-          style={{ background: colors.surface, color: colors.textMuted, border: `1px solid ${colors.border}` }}>+ Add Node</button>
+        <motion.button
+          onClick={() => setShowPalette(true)}
+          className="absolute left-4 top-4 z-20 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2"
+          style={{
+            background: `linear-gradient(135deg, ${colors.audio} 0%, #4CAF50 100%)`,
+            color: colors.bg,
+            border: 'none',
+            boxShadow: `0 4px 20px ${colors.audio}44, 0 0 30px ${colors.audio}22`,
+          }}
+          whileHover={{ scale: 1.05, boxShadow: `0 6px 25px ${colors.audio}66` }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <span style={{ fontSize: '18px' }}>➕</span> Add Node
+        </motion.button>
       )}
 
       {/* Canvas */}
@@ -542,9 +599,11 @@ export default function AudioNodeWorkflow() {
           connections={connections}
           onNodesChange={setNodes}
           onConnectionsChange={setConnections}
-          onNodeSelect={setSelectedNode}
+          onNodeSelect={(node) => {
+            setSelectedNodeId(node?.id || null)
+          }}
           onNodeDoubleClick={setSelectedNode}
-          selectedNodeId={selectedNode?.id}
+          selectedNodeId={selectedNodeId}
           accentColor={colors.audio}
         />
       </div>
@@ -559,7 +618,19 @@ export default function AudioNodeWorkflow() {
       {/* Toolbar */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 rounded-xl z-20"
         style={{ background: `${colors.surface}ee`, border: `1px solid ${colors.border}` }}>
-        <button className="px-3 py-1.5 rounded-lg text-sm" style={{ color: colors.textMuted }}>🗑️ Delete</button>
+        <button
+          onClick={() => selectedNodeId && handleDeleteNode(selectedNodeId)}
+          disabled={!selectedNodeId}
+          className="px-3 py-1.5 rounded-lg text-sm transition-all"
+          style={{
+            color: selectedNodeId ? '#FF5555' : colors.textDim,
+            background: selectedNodeId ? '#FF555515' : 'transparent',
+            cursor: selectedNodeId ? 'pointer' : 'not-allowed',
+            opacity: selectedNodeId ? 1 : 0.5,
+          }}
+        >
+          🗑️ Delete {selectedNodeId ? '' : '(select node)'}
+        </button>
         <div className="w-px h-6" style={{ background: colors.border }} />
         <button className="px-3 py-1.5 rounded-lg text-sm" style={{ color: colors.textMuted }}>↩️ Undo</button>
         <div className="w-px h-6" style={{ background: colors.border }} />
