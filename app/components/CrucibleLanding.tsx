@@ -157,29 +157,57 @@ function MorphingAgent({
   const orbitX = Math.cos(angle) * orbitRadius
   const orbitY = Math.sin(angle) * orbitRadius * 0.4
 
-  // Dissolve phase: agents scatter outward and fade like particles
-  // morphProgress 0-0.5: orbit to scatter, 0.5-1: fade out completely
-  const scatterProgress = Math.min(1, morphProgress * 2) // 0 to 1 over first half
-  const fadeProgress = Math.max(0, (morphProgress - 0.3) / 0.7) // 0 to 1 over last 70%
+  // Calculate target button position (chat bar area below center)
+  // Buttons are arranged horizontally, roughly 60px apart
+  const buttonSpacing = 70
+  const totalWidth = (totalAgents - 1) * buttonSpacing
+  const targetX = (index - (totalAgents - 1) / 2) * buttonSpacing
+  const targetY = 180 // Position where chat bar buttons will be
 
-  // Scatter outward in random-ish directions based on agent index
-  const scatterAngle = agent.orbitOffset + (index * 0.7) // Unique scatter angle per agent
-  const scatterDistance = 300 + (index % 3) * 100 // Varied distances
-  const scatterX = orbitX + Math.cos(scatterAngle) * scatterDistance * scatterProgress
-  const scatterY = orbitY + Math.sin(scatterAngle) * scatterDistance * scatterProgress - (scatterProgress * 200)
+  // Morph from orbit to button position
+  // morphProgress 0 = orbiting, 1 = at button position
+  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
+  const easedProgress = easeOutCubic(morphProgress)
 
-  // Final position is scattered outward
-  const currentX = scatterX
-  const currentY = scatterY
+  // Interpolate position from orbit to target
+  const currentX = orbitX * (1 - easedProgress) + targetX * easedProgress
+  const currentY = orbitY * (1 - easedProgress) + targetY * easedProgress
 
-  // Scale down as they dissolve
-  const scale = Math.max(0.1, 1 - morphProgress * 0.8)
+  // Scale stays constant during travel
+  const scale = 1
 
-  // Fade out completely
-  const opacity = 1 - fadeProgress
+  // Color transition: white -> agent color as morphProgress increases
+  // Icon starts white, transitions to agent color
+  const colorProgress = Math.min(1, morphProgress * 1.5) // Color changes faster than position
+
+  // Interpolate from white (#FFFFFF) to agent color
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 255, g: 255, b: 255 }
+  }
+
+  const agentRgb = hexToRgb(agent.color)
+  const currentR = Math.round(255 * (1 - colorProgress) + agentRgb.r * colorProgress)
+  const currentG = Math.round(255 * (1 - colorProgress) + agentRgb.g * colorProgress)
+  const currentB = Math.round(255 * (1 - colorProgress) + agentRgb.b * colorProgress)
+  const currentColor = `rgb(${currentR}, ${currentG}, ${currentB})`
+
+  // Glow color also transitions
+  const glowColor = colorProgress > 0.5 ? agent.color : '#FFFFFF'
+
+  // Fade out when reaching destination
+  const opacity = morphProgress > 0.8 ? 1 - (morphProgress - 0.8) / 0.2 : 1
 
   // Don't render if fully faded
   if (opacity <= 0) return null
+
+  // Calculate z-index based on Y position for depth effect
+  // Agents with higher Y (lower on screen) should be in front
+  const zIndex = Math.round(orbitY + 100)
 
   return (
     <motion.div
@@ -189,39 +217,32 @@ function MorphingAgent({
         y: currentY,
         scale,
         opacity,
-        zIndex: 10,
+        zIndex: morphProgress > 0.1 ? 30 : zIndex, // Move to front when traveling to buttons
       }}
     >
       <motion.div
         className="relative flex flex-col items-center"
         style={{ width: 56, height: 56 }}
       >
-        {/* Glow - becomes more orange/particle-like as it dissolves */}
+        {/* Glow */}
         <div
           className="absolute inset-0 rounded-full"
           style={{
-            background: `radial-gradient(circle, ${morphProgress > 0.3 ? colors.accent : agent.color}${Math.round((1 - fadeProgress) * 50).toString(16).padStart(2, '0')} 0%, transparent 70%)`,
-            transform: `scale(${1.5 + morphProgress * 2})`,
-            opacity: 0.8,
+            background: `radial-gradient(circle, ${glowColor}40 0%, transparent 70%)`,
+            transform: 'scale(1.5)',
+            opacity: 0.6 + morphProgress * 0.4,
           }}
         />
-        {/* Icon container - fades to just a glowing orb */}
+        {/* Icon container */}
         <div
           className="relative w-full h-full rounded-full flex items-center justify-center transition-all"
           style={{
-            background: morphProgress > 0.5
-              ? `radial-gradient(circle, ${colors.accent}66 0%, ${colors.accent}22 100%)`
-              : colors.surface,
-            border: `2px solid ${morphProgress > 0.5 ? colors.accent : colors.border}`,
-            boxShadow: `0 0 ${20 + morphProgress * 30}px ${colors.accent}${Math.round((morphProgress) * 99).toString(16).padStart(2, '0')}`,
+            background: colors.surface,
+            border: `2px solid ${morphProgress > 0.5 ? agent.color : colors.border}`,
+            boxShadow: `0 0 ${15 + morphProgress * 20}px ${glowColor}44`,
           }}
         >
-          <div
-            className="transition-opacity"
-            style={{ opacity: 1 - morphProgress * 1.5 }}
-          >
-            <agent.icon size={24} weight="duotone" color={agent.color} />
-          </div>
+          <agent.icon size={24} weight="duotone" color={currentColor} />
         </div>
       </motion.div>
     </motion.div>
@@ -309,6 +330,10 @@ export default function CrucibleLanding({
   const orbitPhraseOpacity = useTransform(smoothProgress, [0.2, 0.25, 0.35, 0.4], [0, 1, 1, 0])
   const morphProgress = useTransform(smoothProgress, [0.35, 0.45], [0, 1])
   const chatBarOpacity = useTransform(smoothProgress, [0.38, 0.45], [0, 1])
+
+  // "ex inferis" reveal on scroll - appears after initial phrase is visible
+  const exInferisOpacity = useTransform(smoothProgress, [0.25, 0.30], [0, 1])
+  const exInferisX = useTransform(smoothProgress, [0.25, 0.30], [20, 0])
 
   // Section 3 (Workflows): 55% - 100%
   const workflowsOpacity = useTransform(smoothProgress, [0.5, 0.6], [0, 1])
@@ -436,13 +461,29 @@ export default function CrucibleLanding({
           className="absolute inset-0 flex flex-col items-center justify-center"
           style={{ opacity: section2Opacity }}
         >
-          {/* Latin Phrase - Orbiting phase */}
+          {/* Morphing Agents - rendered BEHIND text (z-index controlled per agent based on Y) */}
+          <div className="absolute" style={{ width: 0, height: 0, zIndex: 5 }}>
+            {agents.map((agent, index) => (
+              <MorphingAgent
+                key={agent.id}
+                agent={agent}
+                index={index}
+                morphProgress={currentMorphProgress}
+                time={time}
+                isSelected={localSelectedAgents.includes(agent.id)}
+                onSelect={() => handleAgentSelect(agent.id)}
+                totalAgents={agents.length}
+              />
+            ))}
+          </div>
+
+          {/* Latin Phrase - Orbiting phase - rendered IN FRONT of orbiting agents */}
           <motion.div
-            className="absolute text-center"
+            className="absolute text-center z-20"
             style={{ opacity: orbitPhraseOpacity }}
           >
             <h2
-              className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-wide"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-wide"
               style={{
                 color: colors.text,
                 fontFamily: "'Dobla Sans', system-ui, sans-serif",
@@ -455,6 +496,8 @@ export default function CrucibleLanding({
                 style={{
                   color: colors.accent,
                   display: 'inline-block',
+                  opacity: exInferisOpacity,
+                  x: exInferisX,
                 }}
                 animate={{
                   textShadow: [
@@ -473,22 +516,6 @@ export default function CrucibleLanding({
               </motion.span>
             </h2>
           </motion.div>
-
-          {/* Morphing Agents */}
-          <div className="relative" style={{ width: 0, height: 0 }}>
-            {agents.map((agent, index) => (
-              <MorphingAgent
-                key={agent.id}
-                agent={agent}
-                index={index}
-                morphProgress={currentMorphProgress}
-                time={time}
-                isSelected={localSelectedAgents.includes(agent.id)}
-                onSelect={() => handleAgentSelect(agent.id)}
-                totalAgents={agents.length}
-              />
-            ))}
-          </div>
 
           {/* Chat Bar Section - appears after morph */}
           <motion.div
