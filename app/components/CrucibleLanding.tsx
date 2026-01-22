@@ -6,6 +6,7 @@ import GradientCircle from './GradientCircle'
 import SpectraNoiseBackground from './SpectraNoiseBackground'
 import GlitchingTechEye from './GlitchingTechEye'
 import ArcanaSplit from './ArcanaSplit'
+import BorderBeam from './BorderBeam'
 import {
   Eye as EyeIcon,
   Compass as CompassIcon,
@@ -276,6 +277,8 @@ export default function CrucibleLanding({
   const [prompt, setPrompt] = useState('')
   const windowSize = useWindowSize()
   const [localSelectedAgents, setLocalSelectedAgents] = useState<string[]>(selectedAgents)
+  const [agentsLanded, setAgentsLanded] = useState<Record<string, boolean>>({})
+  const prevMorphProgress = useRef(0)
 
   // Scroll-based animation
   const { scrollYProgress } = useScroll({
@@ -367,6 +370,25 @@ export default function CrucibleLanding({
     const unsubscribe = chatBarY.on('change', setCurrentChatBarY)
     return () => unsubscribe()
   }, [chatBarY])
+
+  // Detect when agents land in their boxes (morph progress crosses threshold)
+  useEffect(() => {
+    const landingThreshold = 0.85
+    // Check if we just crossed the landing threshold
+    if (currentMorphProgress >= landingThreshold && prevMorphProgress.current < landingThreshold) {
+      // Trigger landing for all agents with staggered timing
+      agents.forEach((agent, index) => {
+        setTimeout(() => {
+          setAgentsLanded(prev => ({ ...prev, [agent.id]: true }))
+          // Reset after animation completes
+          setTimeout(() => {
+            setAgentsLanded(prev => ({ ...prev, [agent.id]: false }))
+          }, 3000)
+        }, index * 100) // Stagger by 100ms per agent
+      })
+    }
+    prevMorphProgress.current = currentMorphProgress
+  }, [currentMorphProgress])
 
   return (
     <div
@@ -563,18 +585,22 @@ export default function CrucibleLanding({
             <div className="mb-4 flex justify-center gap-3 pb-2 px-4">
               {agents.map(agent => {
                 const isActive = localSelectedAgents.includes(agent.id)
+                const hasLanded = agentsLanded[agent.id]
                 const IconComponent = agent.icon
                 return (
                   <button
                     key={agent.id}
                     onClick={() => handleAgentSelect(agent.id)}
-                    className="flex flex-col items-center px-4 py-2 rounded-lg text-xs transition-all shrink-0"
+                    className="relative flex flex-col items-center px-4 py-2 rounded-lg text-xs transition-all shrink-0"
                     style={{
                       background: isActive ? `${agent.color}22` : colors.surface,
                       border: `1px solid ${isActive ? agent.color : colors.border}`,
                       color: isActive ? agent.color : colors.textMuted,
+                      boxShadow: hasLanded ? `0 0 25px ${agent.color}66, inset 0 0 15px ${agent.color}33` : 'none',
                     }}
                   >
+                    {/* Border Beam effect when agent lands */}
+                    <BorderBeam color={agent.color} isActive={hasLanded} duration={1.2} size={60} />
                     <div className="flex items-center gap-1.5">
                       <IconComponent size={16} weight="duotone" color={isActive ? agent.color : colors.textMuted} />
                       <span className="font-medium">{agent.name}</span>
