@@ -277,14 +277,15 @@ export default function ArcanaSplit({
 
       {/* Container for symbol and cards */}
       <div className="relative flex flex-col items-center justify-start">
-        {/* Unified Arcana Symbol - fixed height container for alignment */}
+        {/* Unified Arcana Symbol - collapses when not visible */}
         <motion.div
           className="flex flex-col items-center justify-center"
           style={{
             opacity: symbolOpacity,
             scale: symbolScale,
-            height: isMobile ? 80 : 100,
-            marginBottom: isMobile ? 16 : 24,
+            height: 0,
+            marginBottom: 0,
+            overflow: 'visible',
           }}
         >
           <div
