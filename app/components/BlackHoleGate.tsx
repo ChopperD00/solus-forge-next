@@ -181,19 +181,17 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
     }
   }, [initParticles])
 
-  // Handle unlock animation
+  // Handle unlock animation - faster collapse, quicker handoff to hyperspeed
   useEffect(() => {
     if (isUnlocking) {
       let progress = 0
       const unlockAnimation = setInterval(() => {
-        progress += 0.02
+        progress += 0.04 // Faster collapse
         pullStrengthRef.current = progress
 
-        if (progress >= 1) {
+        if (progress >= 0.6) { // Trigger hyperspeed earlier for seamless transition
           clearInterval(unlockAnimation)
-          setTimeout(() => {
-            onUnlock()
-          }, 500)
+          onUnlock()
         }
       }, 16)
 

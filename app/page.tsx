@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import SolusLogo from './components/SolusLogo'
 import BlackHoleGate from './components/BlackHoleGate'
+import HyperspeedTransition from './components/HyperspeedTransition'
 import EmailCampaignWorkflow from './components/EmailCampaignWorkflow'
 import VideoNodeWorkflow from './components/VideoNodeWorkflow'
 import ImageNodeWorkflow from './components/ImageNodeWorkflow'
@@ -52,18 +53,28 @@ const workflows = [
 ]
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [authPhase, setAuthPhase] = useState<'gate' | 'hyperspeed' | 'authenticated'>('gate')
   const [selectedIntent, setSelectedIntent] = useState<IntentId>(null)
   const [showLanding, setShowLanding] = useState(true)
   const [selectedAgents, setSelectedAgents] = useState<string[]>(['solus', 'trion'])
   const { isTransitioning, transitionOrigin, triggerTransition, handleComplete } = useRadialWipe()
 
-  // Password gate
-  if (!isAuthenticated) {
+  // Password gate with hyperspeed transition
+  if (authPhase === 'gate') {
     return (
       <BlackHoleGate
         password="liberateme"
-        onUnlock={() => setIsAuthenticated(true)}
+        onUnlock={() => setAuthPhase('hyperspeed')}
+      />
+    )
+  }
+
+  // Hyperspeed transition after password
+  if (authPhase === 'hyperspeed') {
+    return (
+      <HyperspeedTransition
+        isActive={true}
+        onComplete={() => setAuthPhase('authenticated')}
       />
     )
   }
