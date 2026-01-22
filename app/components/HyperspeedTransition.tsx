@@ -244,52 +244,6 @@ export default function HyperspeedTransition({
         )}
       </AnimatePresence>
 
-      {/* Event horizon text */}
-      <AnimatePresence>
-        {phase === 'sucking' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.5 }}
-            transition={{ duration: 0.5 }}
-            className="absolute inset-0 flex items-center justify-center"
-          >
-            <p
-              className="text-lg tracking-[0.3em] uppercase font-light"
-              style={{
-                color: 'rgba(255, 107, 0, 0.8)',
-                textShadow: '0 0 30px rgba(255, 107, 0, 0.5)',
-              }}
-            >
-              Crossing Event Horizon
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Hyperspeed text */}
-      <AnimatePresence>
-        {phase === 'hyperspeed' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 1, 1, 0] }}
-            transition={{ duration: 2, times: [0, 0.1, 0.8, 1] }}
-            className="absolute inset-0 flex items-center justify-center"
-          >
-            <motion.p
-              animate={{ letterSpacing: ['0.3em', '0.8em'] }}
-              transition={{ duration: 2 }}
-              className="text-2xl uppercase font-bold"
-              style={{
-                color: 'rgba(255, 255, 255, 0.9)',
-                textShadow: '0 0 40px rgba(255, 255, 255, 0.8)',
-              }}
-            >
-              Entering the Void
-            </motion.p>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Arrival text */}
       <AnimatePresence>

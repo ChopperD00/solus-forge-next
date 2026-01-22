@@ -177,64 +177,7 @@ export default function Home() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Header */}
-            <header className="fixed top-0 left-0 right-0 z-50 p-6">
-              <div className="max-w-7xl mx-auto flex justify-between items-center">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center gap-3"
-                >
-                  <span
-                    className="text-xl tracking-wide font-bold brand-text"
-                    style={{
-                      background: `linear-gradient(135deg, ${colors.accent} 0%, ${colors.accentAmber} 100%)`,
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    SOLUS FORGE
-                  </span>
-                  <span
-                    className="text-[10px] px-2 py-1 rounded-full"
-                    style={{ background: `${colors.accent}22`, color: colors.accent, border: `1px solid ${colors.accent}44` }}
-                  >
-                    PRE-ALPHA v3.4
-                  </span>
-                </motion.div>
-
-                {/* Workflow quick access */}
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center gap-2"
-                >
-                  {workflows.slice(0, 4).map((workflow) => {
-                    const IconComponent = workflow.icon
-                    return (
-                      <button
-                        key={workflow.id}
-                        onClick={(e) => handleSelectIntent(workflow.id, e)}
-                        className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-110"
-                        style={{
-                          background: colors.surface,
-                          border: `1px solid ${colors.border}`,
-                        }}
-                        title={workflow.title}
-                      >
-                        <IconComponent size={20} weight="duotone" color={workflow.color} />
-                      </button>
-                    )
-                  })}
-                  <div
-                    className="px-3 py-2 rounded-xl text-xs"
-                    style={{ background: colors.surface, color: colors.textMuted }}
-                  >
-                    +{workflows.length - 4} more
-                  </div>
-                </motion.div>
-              </div>
-            </header>
+            {/* Header - handled by CrucibleLanding */}
 
             {/* Crucible Landing with floating agents */}
             <CrucibleLanding
