@@ -337,14 +337,40 @@ export default function CrucibleLanding({
       {/* Sticky viewport container */}
       <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
 
-        {/* Version Badge - Fixed Header */}
-        <div className="absolute top-4 right-4 z-50">
+        {/* Fixed Header */}
+        <div className="absolute top-0 left-0 right-0 z-50 px-4 py-3 flex items-center justify-between">
+          {/* Left: Workflow Icons */}
+          <div className="flex items-center gap-1">
+            {workflows.map((workflow) => {
+              const IconComponent = workflow.icon
+              return (
+                <motion.button
+                  key={workflow.id}
+                  className="p-2 rounded-lg transition-all hover:bg-white/5"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  title={workflow.title}
+                  onClick={() => onWorkflowSelect?.(workflow.id)}
+                >
+                  <IconComponent
+                    size={20}
+                    weight="duotone"
+                    className="transition-colors"
+                    style={{ color: '#666666' }}
+                  />
+                </motion.button>
+              )
+            })}
+          </div>
+
+          {/* Right: Version Badge */}
           <div
             className="px-3 py-1.5 rounded-full text-xs font-medium tracking-wide"
             style={{
               background: 'rgba(255, 107, 0, 0.15)',
               border: '1px solid rgba(255, 107, 0, 0.3)',
               color: colors.accent,
+              fontFamily: "'Dobla Sans', system-ui, sans-serif",
             }}
           >
             Pre-Alpha v3.4
