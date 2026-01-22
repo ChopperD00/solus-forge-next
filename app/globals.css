@@ -125,6 +125,17 @@ body {
   letter-spacing: 0.05em;
 }
 
+/* Tarot Card Hover Effects */
+.tarot-card:hover .tarot-icon svg {
+  color: #FF6B00 !important;
+  filter: drop-shadow(0 0 15px rgba(255, 107, 0, 0.8));
+  transform: scale(1.1);
+}
+
+.tarot-card:hover .tarot-subtitle {
+  opacity: 1 !important;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

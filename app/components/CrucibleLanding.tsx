@@ -107,24 +107,53 @@ const agents = [
   },
 ]
 
-// Workflow cards data with Phosphor duotone icons - monochromatic color scheme
-const workflowIconColor = '#AAAAAA' // Subtle gray for all icons
-const workflowHoverColor = colors.accent // Orange on hover
-const workflows = [
-  { id: 'email_campaign', icon: EnvelopeIcon, title: 'Email Campaign', subtitle: 'Figma templates, copy, AI images', color: workflowIconColor, hoverColor: workflowHoverColor },
-  { id: 'video_production', icon: FilmSlateIcon, title: 'Video Production', subtitle: 'AI video generation & editing', color: workflowIconColor, hoverColor: workflowHoverColor },
-  { id: 'image_generation', icon: PaintBrushIcon, title: 'Image Generation', subtitle: 'Concept art & product shots', color: workflowIconColor, hoverColor: workflowHoverColor },
-  { id: 'influencer_suite', icon: UserIcon, title: 'Influencer Suite', subtitle: 'LoRA training & clothing swap', color: workflowIconColor, hoverColor: workflowHoverColor },
-  { id: 'social_paid_ads', icon: DeviceMobileIcon, title: 'Social Paid Ads', subtitle: 'Multi-format ad creation', color: workflowIconColor, hoverColor: workflowHoverColor },
-  { id: 'audio', icon: MusicNotesIcon, title: 'Audio Production', subtitle: 'Music, SFX & voiceover', color: workflowIconColor, hoverColor: workflowHoverColor },
-  { id: '3d_assets', icon: CubeIcon, title: '3D Assets', subtitle: 'Models, textures & scenes', color: workflowIconColor, hoverColor: workflowHoverColor },
-  { id: 'research', icon: FlaskIcon, title: 'Research', subtitle: 'Parallel AI research', color: workflowIconColor, hoverColor: workflowHoverColor },
-  { id: 'automation', icon: LightningIcon, title: 'Automation', subtitle: 'Workflow triggers & sequences', color: workflowIconColor, hoverColor: workflowHoverColor },
-  { id: 'repurposing', icon: ArrowsClockwiseIcon, title: 'Content Repurpose', subtitle: 'Transform across formats', color: workflowIconColor, hoverColor: workflowHoverColor },
-  { id: 'analytics', icon: ChartBarIcon, title: 'Analytics', subtitle: 'Performance insights', color: workflowIconColor, hoverColor: workflowHoverColor },
-  { id: 'asset_vault', icon: VaultIcon, title: 'Asset Vault', subtitle: 'Organize & version control', color: workflowIconColor, hoverColor: workflowHoverColor },
-  { id: 'osint', icon: DetectiveIcon, title: 'OSINT', subtitle: 'Intelligence gathering', color: workflowIconColor, hoverColor: workflowHoverColor },
+// Workflow decks - grouped by theme like tarot card stacks
+const workflowDecks = [
+  {
+    id: 'visual',
+    name: 'The Visionary',
+    subtitle: 'Creative Production',
+    cards: [
+      { id: 'video_production', icon: FilmSlateIcon, title: 'Video Production', subtitle: 'AI video generation & editing' },
+      { id: 'image_generation', icon: PaintBrushIcon, title: 'Image Generation', subtitle: 'Concept art & product shots' },
+      { id: '3d_assets', icon: CubeIcon, title: '3D Assets', subtitle: 'Models, textures & scenes' },
+      { id: 'repurposing', icon: ArrowsClockwiseIcon, title: 'Content Repurpose', subtitle: 'Transform across formats' },
+    ],
+  },
+  {
+    id: 'marketing',
+    name: 'The Merchant',
+    subtitle: 'Marketing Stack',
+    cards: [
+      { id: 'email_campaign', icon: EnvelopeIcon, title: 'Email Campaign', subtitle: 'Figma templates, copy, AI images' },
+      { id: 'social_paid_ads', icon: DeviceMobileIcon, title: 'Social Paid Ads', subtitle: 'Multi-format ad creation' },
+      { id: 'influencer_suite', icon: UserIcon, title: 'Influencer Suite', subtitle: 'LoRA training & clothing swap' },
+      { id: 'automation', icon: LightningIcon, title: 'Automation', subtitle: 'Workflow triggers & sequences' },
+    ],
+  },
+  {
+    id: 'intelligence',
+    name: 'The Oracle',
+    subtitle: 'Research & Strategy',
+    cards: [
+      { id: 'research', icon: FlaskIcon, title: 'Research', subtitle: 'Parallel AI research' },
+      { id: 'analytics', icon: ChartBarIcon, title: 'Analytics', subtitle: 'Performance insights' },
+      { id: 'lupin_iii', icon: DetectiveIcon, title: 'Lupin III', subtitle: 'OSINT & Intelligence' },
+    ],
+  },
+  {
+    id: 'misc',
+    name: 'The Alchemist',
+    subtitle: 'Arcane Tools',
+    cards: [
+      { id: 'audio', icon: MusicNotesIcon, title: 'Audio Production', subtitle: 'Music, SFX & voiceover' },
+      { id: 'asset_vault', icon: VaultIcon, title: 'Asset Vault', subtitle: 'Organize & version control' },
+    ],
+  },
 ]
+
+// Flat list for header icons
+const workflows = workflowDecks.flatMap(deck => deck.cards)
 
 // Icon component type
 type IconComponent = React.ForwardRefExoticComponent<React.PropsWithoutRef<{ size?: number | string; weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone'; color?: string }> & React.RefAttributes<SVGSVGElement>>
@@ -634,9 +663,9 @@ export default function CrucibleLanding({
           }}
         />
 
-        {/* SECTION 3: Workflow Cards */}
+        {/* SECTION 3: Workflow Cards - Tarot-style Deck Layout */}
         <motion.div
-          className="absolute inset-0 flex flex-col items-center justify-center pt-20"
+          className="absolute inset-0 flex flex-col items-center justify-center pt-16"
           style={{ opacity: workflowsOpacity, y: workflowsY }}
         >
           {/* Subtle background overlay for workflows section */}
@@ -648,7 +677,7 @@ export default function CrucibleLanding({
           />
 
           <h3
-            className="text-2xl md:text-3xl font-bold mb-8 text-center relative z-10"
+            className="text-2xl md:text-3xl font-bold mb-6 text-center relative z-10"
             style={{
               color: colors.text,
               fontFamily: "'Dobla Sans', system-ui, sans-serif",
@@ -656,59 +685,111 @@ export default function CrucibleLanding({
               letterSpacing: '0.05em',
             }}
           >
-            Choose Your Workflow
+            Draw Your Path
           </h3>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 max-w-5xl px-4 relative z-10">
-            {workflows.map((workflow, index) => {
-              const IconComponent = workflow.icon
-              return (
-                <motion.button
-                  key={workflow.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.03 }}
-                  onClick={() => onWorkflowSelect?.(workflow.id)}
-                  className="group flex flex-col items-center p-4 rounded-xl transition-all hover:scale-105"
-                  style={{
-                    background: `${colors.surface}ee`,
-                    border: `1px solid ${colors.border}`,
-                    backdropFilter: 'blur(8px)',
-                  }}
-                  whileHover={{
-                    borderColor: colors.accent,
-                    boxShadow: `0 0 30px ${colors.accent}33`,
-                  }}
-                >
-                  <div className="mb-2 transition-colors">
-                    <IconComponent
-                      size={32}
-                      weight="duotone"
-                      className="transition-all duration-200 group-hover:scale-110"
-                      style={{ color: workflow.color }}
-                    />
-                  </div>
-                  <span
-                    className="font-medium text-sm transition-colors group-hover:text-white"
+          {/* Tarot Deck Layout - 4 stacks side by side */}
+          <div className="flex flex-wrap justify-center gap-8 md:gap-12 px-4 relative z-10 max-w-6xl">
+            {workflowDecks.map((deck, deckIndex) => (
+              <motion.div
+                key={deck.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: deckIndex * 0.15 }}
+                className="flex flex-col items-center"
+              >
+                {/* Deck Title */}
+                <div className="text-center mb-4">
+                  <h4
+                    className="text-lg font-bold tracking-wide"
                     style={{
-                      color: colors.textMuted,
+                      color: colors.accent,
                       fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                      textShadow: `0 0 20px ${colors.accent}44`,
                     }}
                   >
-                    {workflow.title}
-                  </span>
+                    {deck.name}
+                  </h4>
                   <span
-                    className="text-[10px] text-center mt-1"
-                    style={{
-                      color: colors.textDim,
-                      fontFamily: "'Dobla Sans', system-ui, sans-serif",
-                    }}
+                    className="text-xs tracking-wider uppercase"
+                    style={{ color: colors.textDim }}
                   >
-                    {workflow.subtitle}
+                    {deck.subtitle}
                   </span>
-                </motion.button>
-              )
-            })}
+                </div>
+
+                {/* Stacked Cards */}
+                <div className="relative" style={{ height: deck.cards.length * 20 + 140 }}>
+                  {deck.cards.map((card, cardIndex) => {
+                    const IconComponent = card.icon
+                    const stackOffset = cardIndex * 20
+                    const rotation = (cardIndex - (deck.cards.length - 1) / 2) * 2 // Slight fan effect
+
+                    return (
+                      <motion.button
+                        key={card.id}
+                        initial={{ opacity: 0, y: 20, rotate: rotation }}
+                        animate={{ opacity: 1, y: 0, rotate: rotation }}
+                        transition={{ delay: deckIndex * 0.15 + cardIndex * 0.08 }}
+                        onClick={() => onWorkflowSelect?.(card.id)}
+                        className="tarot-card absolute flex flex-col items-center p-5 rounded-xl transition-all duration-300"
+                        style={{
+                          width: 140,
+                          height: 160,
+                          top: stackOffset,
+                          left: '50%',
+                          marginLeft: -70,
+                          background: 'transparent',
+                          border: `2px solid ${colors.accent}66`,
+                          boxShadow: `0 0 15px ${colors.accent}22, inset 0 0 30px ${colors.bg}`,
+                          zIndex: deck.cards.length - cardIndex,
+                        }}
+                        whileHover={{
+                          y: -10,
+                          zIndex: 50,
+                          background: colors.surface,
+                          boxShadow: `0 0 30px ${colors.accent}55, 0 10px 40px rgba(0,0,0,0.5)`,
+                          transition: { duration: 0.2 },
+                        }}
+                      >
+                        {/* Icon - white default, orange on hover via CSS class */}
+                        <div className="mb-3 tarot-icon">
+                          <IconComponent
+                            size={40}
+                            weight="duotone"
+                            className="transition-all duration-300"
+                            color="#FFFFFF"
+                          />
+                        </div>
+
+                        {/* Title */}
+                        <span
+                          className="font-bold text-base text-center leading-tight"
+                          style={{
+                            color: '#FFFFFF',
+                            fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                          }}
+                        >
+                          {card.title}
+                        </span>
+
+                        {/* Subtitle - visible on hover */}
+                        <span
+                          className="tarot-subtitle text-[10px] text-center mt-2 transition-opacity absolute bottom-3 left-2 right-2"
+                          style={{
+                            color: colors.textMuted,
+                            fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                            opacity: 0,
+                          }}
+                        >
+                          {card.subtitle}
+                        </span>
+                      </motion.button>
+                    )
+                  })}
+                </div>
+              </motion.div>
+            ))}
           </div>
 
           {/* Footer */}
