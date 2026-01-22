@@ -262,11 +262,11 @@ function MorphingAgent({
   // Glow color also transitions
   const glowColor = colorProgress > 0.5 ? agent.color : '#FFFFFF'
 
-  // Fade out when landing in box (the static icon in box takes over)
-  const opacity = morphProgress > 0.85 ? 1 - (morphProgress - 0.85) / 0.15 : 1
+  // Fade out when landing in box (the static icon in box takes over) - fade faster
+  const opacity = morphProgress > 0.7 ? 1 - (morphProgress - 0.7) / 0.3 : 1
 
-  // Don't render if fully faded
-  if (opacity <= 0) return null
+  // Don't render if fully faded or morph is complete
+  if (opacity <= 0 || morphProgress >= 1) return null
 
   // Calculate z-index based on Y position for depth effect
   const zIndex = Math.round(orbitY + 100)
@@ -423,8 +423,8 @@ export default function CrucibleLanding({
   const chatBarY = useTransform(smoothProgress, [0.28, 0.40], [300, 0]) // Starts 300px below, moves to center
   const chatBarOpacity = useTransform(smoothProgress, [0.28, 0.36], [0, 1])
 
-  // Morph progress - agents fly into boxes as UI slides up
-  const morphProgress = useTransform(smoothProgress, [0.30, 0.42], [0, 1])
+  // Morph progress - agents fly into boxes as UI slides up (complete earlier)
+  const morphProgress = useTransform(smoothProgress, [0.22, 0.30], [0, 1])
 
   // "ex inferis" reveal and fade on scroll - appears then fades with glow
   const exInferisOpacity = useTransform(smoothProgress, [0.18, 0.22, 0.28, 0.34], [0, 1, 1, 0])
