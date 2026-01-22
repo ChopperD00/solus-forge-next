@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
 import GradientCircle from './GradientCircle'
 import SpectraNoiseBackground from './SpectraNoiseBackground'
 import SolusForgeIcon from './SolusForgeIcon'
+import ArcanaSplit from './ArcanaSplit'
 import {
   Eye as EyeIcon,
   Compass as CompassIcon,
@@ -324,33 +325,36 @@ export default function CrucibleLanding({
     }
   }
 
-  // Animation phases based on scroll
-  // Section 1 (Hero): 0% - 20%
-  const heroOpacity = useTransform(smoothProgress, [0, 0.15, 0.2], [1, 1, 0])
-  const heroScale = useTransform(smoothProgress, [0, 0.2], [1, 1.2])
-  const auroraOpacity = useTransform(smoothProgress, [0, 0.15], [1, 0])
+  // Animation phases based on scroll (now with 600vh total)
+  // Section 1 (Hero): 0% - 15%
+  const heroOpacity = useTransform(smoothProgress, [0, 0.10, 0.15], [1, 1, 0])
+  const heroScale = useTransform(smoothProgress, [0, 0.15], [1, 1.2])
+  const auroraOpacity = useTransform(smoothProgress, [0, 0.10], [1, 0])
 
-  // Section 2 (Orbit + Morph): 20% - 55%
-  // Sub-phase 2a: Orbiting around Latin phrase (20% - 35%)
-  // Sub-phase 2b: UI slides up, agents fly into boxes (35% - 48%)
-  // Sub-phase 2c: Chat bar fully visible (48% - 55%)
-  const section2Opacity = useTransform(smoothProgress, [0.15, 0.25, 0.5, 0.55], [0, 1, 1, 0])
-  const orbitPhraseOpacity = useTransform(smoothProgress, [0.2, 0.25, 0.35, 0.40], [0, 1, 1, 0])
+  // Section 2 (Orbit + Morph): 15% - 40%
+  // Sub-phase 2a: Orbiting around Latin phrase (15% - 25%)
+  // Sub-phase 2b: UI slides up, agents fly into boxes (25% - 35%)
+  // Sub-phase 2c: Chat bar fully visible (35% - 40%)
+  const section2Opacity = useTransform(smoothProgress, [0.10, 0.18, 0.36, 0.40], [0, 1, 1, 0])
+  const orbitPhraseOpacity = useTransform(smoothProgress, [0.15, 0.18, 0.25, 0.28], [0, 1, 1, 0])
 
   // Chat bar slides up from below
-  const chatBarY = useTransform(smoothProgress, [0.35, 0.48], [300, 0]) // Starts 300px below, moves to center
-  const chatBarOpacity = useTransform(smoothProgress, [0.35, 0.42], [0, 1])
+  const chatBarY = useTransform(smoothProgress, [0.25, 0.35], [300, 0]) // Starts 300px below, moves to center
+  const chatBarOpacity = useTransform(smoothProgress, [0.25, 0.30], [0, 1])
 
   // Morph progress - agents fly into boxes as UI slides up
-  const morphProgress = useTransform(smoothProgress, [0.38, 0.50], [0, 1])
+  const morphProgress = useTransform(smoothProgress, [0.27, 0.36], [0, 1])
 
   // "ex inferis" reveal on scroll - appears after initial phrase is visible
-  const exInferisOpacity = useTransform(smoothProgress, [0.25, 0.30], [0, 1])
-  const exInferisX = useTransform(smoothProgress, [0.25, 0.30], [20, 0])
+  const exInferisOpacity = useTransform(smoothProgress, [0.18, 0.22], [0, 1])
+  const exInferisX = useTransform(smoothProgress, [0.18, 0.22], [20, 0])
 
-  // Section 3 (Workflows): 55% - 100%
-  const workflowsOpacity = useTransform(smoothProgress, [0.5, 0.6], [0, 1])
-  const workflowsY = useTransform(smoothProgress, [0.5, 0.6], [50, 0])
+  // Section 3 (Arcana Split Workflows): 40% - 100%
+  // Unified symbols appear: 40% - 55%
+  // Split animation: 55% - 75%
+  // Cards fully revealed: 75% - 100%
+  const workflowsOpacity = useTransform(smoothProgress, [0.36, 0.44], [0, 1])
+  const workflowsY = useTransform(smoothProgress, [0.36, 0.44], [50, 0])
 
   // Get current morph progress and chatBarY values
   const [currentMorphProgress, setCurrentMorphProgress] = useState(0)
@@ -368,7 +372,7 @@ export default function CrucibleLanding({
     <div
       ref={containerRef}
       className="relative"
-      style={{ height: '400vh', background: colors.bg }}
+      style={{ height: '600vh', background: colors.bg }}
     >
       {/* SpectraNoise Background */}
       <SpectraNoiseBackground
@@ -416,7 +420,7 @@ export default function CrucibleLanding({
               fontFamily: "'Dobla Sans', system-ui, sans-serif",
             }}
           >
-            Pre-Alpha v3.4
+            Pre-Alpha v3.5
           </div>
         </div>
 
@@ -656,7 +660,7 @@ export default function CrucibleLanding({
           }}
         />
 
-        {/* SECTION 3: Tarot Card Arc Animation */}
+        {/* SECTION 3: Arcana Split Animation - Symbols fracture into workflow cards */}
         <motion.div
           className="absolute inset-0 flex flex-col items-center justify-center"
           style={{ opacity: workflowsOpacity }}
@@ -669,10 +673,13 @@ export default function CrucibleLanding({
             }}
           />
 
-          {/* Section Title */}
+          {/* Section Title - fades in then moves up as cards appear */}
           <motion.div
-            className="text-center relative z-10 mb-6"
-            style={{ y: workflowsY }}
+            className="text-center relative z-10 mb-8"
+            style={{
+              y: useTransform(smoothProgress, [0.40, 0.50, 0.60], [30, 0, -40]),
+              opacity: useTransform(smoothProgress, [0.40, 0.48, 0.58, 0.65], [0, 1, 1, 0.7]),
+            }}
           >
             <h3
               className="text-xl md:text-2xl font-semibold tracking-wide mb-2"
@@ -691,160 +698,68 @@ export default function CrucibleLanding({
             </p>
           </motion.div>
 
-          {/* Cards laid out in 4 arcana columns - simple grid, no arc animation */}
+          {/* Arcana Split Columns - unified symbols that fracture into cards */}
           <div className="relative w-full max-w-5xl mx-auto z-10 px-8">
-            <div className="flex justify-center gap-6">
-              {/* The Visionary Column */}
-              <motion.div
-                className="flex flex-col items-center gap-3"
-                style={{ opacity: useTransform(smoothProgress, [0.55, 0.65], [0, 1]) }}
-              >
-                <span
-                  className="text-[10px] uppercase tracking-widest mb-2"
-                  style={{ color: colors.accent, opacity: 0.7 }}
-                >
-                  The Visionary
-                </span>
-                {tarotCards.slice(0, 4).map((card) => {
-                  const IconComponent = card.icon
-                  return (
-                    <motion.button
-                      key={card.id}
-                      className="w-[130px] h-[60px] rounded-xl flex items-center gap-3 px-3 transition-all"
-                      style={{
-                        background: 'transparent',
-                        border: `1px solid ${colors.accent}66`,
-                        boxShadow: `0 0 15px ${colors.accent}22`,
-                      }}
-                      whileHover={{
-                        background: `${colors.accent}15`,
-                        boxShadow: `0 0 25px ${colors.accent}44`,
-                        scale: 1.02,
-                      }}
-                      onClick={() => onWorkflowSelect?.(card.id)}
-                    >
-                      <IconComponent size={24} weight="duotone" color={colors.text} />
-                      <span className="text-xs text-left leading-tight" style={{ color: colors.text }}>
-                        {card.title}
-                      </span>
-                    </motion.button>
-                  )
-                })}
-              </motion.div>
+            <div className="flex justify-center gap-8">
+              {/* The Visionary - Orange */}
+              <ArcanaSplit
+                arcanaName="The Visionary"
+                arcanaColor={colors.accent}
+                arcanaSymbol={
+                  <EyeIcon size={48} weight="duotone" color={colors.accent} />
+                }
+                cards={tarotCards.slice(0, 4)}
+                scrollProgress={smoothProgress}
+                splitStart={0.44}
+                splitEnd={0.58}
+                columnIndex={0}
+                onCardSelect={onWorkflowSelect}
+              />
 
-              {/* The Merchant Column */}
-              <motion.div
-                className="flex flex-col items-center gap-3"
-                style={{ opacity: useTransform(smoothProgress, [0.58, 0.68], [0, 1]) }}
-              >
-                <span
-                  className="text-[10px] uppercase tracking-widest mb-2"
-                  style={{ color: '#10B981', opacity: 0.7 }}
-                >
-                  The Merchant
-                </span>
-                {tarotCards.slice(4, 8).map((card) => {
-                  const IconComponent = card.icon
-                  return (
-                    <motion.button
-                      key={card.id}
-                      className="w-[130px] h-[60px] rounded-xl flex items-center gap-3 px-3 transition-all"
-                      style={{
-                        background: 'transparent',
-                        border: `1px solid #10B98166`,
-                        boxShadow: `0 0 15px #10B98122`,
-                      }}
-                      whileHover={{
-                        background: `#10B98115`,
-                        boxShadow: `0 0 25px #10B98144`,
-                        scale: 1.02,
-                      }}
-                      onClick={() => onWorkflowSelect?.(card.id)}
-                    >
-                      <IconComponent size={24} weight="duotone" color={colors.text} />
-                      <span className="text-xs text-left leading-tight" style={{ color: colors.text }}>
-                        {card.title}
-                      </span>
-                    </motion.button>
-                  )
-                })}
-              </motion.div>
+              {/* The Merchant - Green */}
+              <ArcanaSplit
+                arcanaName="The Merchant"
+                arcanaColor="#10B981"
+                arcanaSymbol={
+                  <ScalesIcon size={48} weight="duotone" color="#10B981" />
+                }
+                cards={tarotCards.slice(4, 8)}
+                scrollProgress={smoothProgress}
+                splitStart={0.44}
+                splitEnd={0.58}
+                columnIndex={1}
+                onCardSelect={onWorkflowSelect}
+              />
 
-              {/* The Oracle Column */}
-              <motion.div
-                className="flex flex-col items-center gap-3"
-                style={{ opacity: useTransform(smoothProgress, [0.61, 0.71], [0, 1]) }}
-              >
-                <span
-                  className="text-[10px] uppercase tracking-widest mb-2"
-                  style={{ color: '#8B5CF6', opacity: 0.7 }}
-                >
-                  The Oracle
-                </span>
-                {tarotCards.slice(8, 11).map((card) => {
-                  const IconComponent = card.icon
-                  return (
-                    <motion.button
-                      key={card.id}
-                      className="w-[130px] h-[60px] rounded-xl flex items-center gap-3 px-3 transition-all"
-                      style={{
-                        background: 'transparent',
-                        border: `1px solid #8B5CF666`,
-                        boxShadow: `0 0 15px #8B5CF622`,
-                      }}
-                      whileHover={{
-                        background: `#8B5CF615`,
-                        boxShadow: `0 0 25px #8B5CF644`,
-                        scale: 1.02,
-                      }}
-                      onClick={() => onWorkflowSelect?.(card.id)}
-                    >
-                      <IconComponent size={24} weight="duotone" color={colors.text} />
-                      <span className="text-xs text-left leading-tight" style={{ color: colors.text }}>
-                        {card.title}
-                      </span>
-                    </motion.button>
-                  )
-                })}
-              </motion.div>
+              {/* The Oracle - Purple */}
+              <ArcanaSplit
+                arcanaName="The Oracle"
+                arcanaColor="#8B5CF6"
+                arcanaSymbol={
+                  <BrainIcon size={48} weight="duotone" color="#8B5CF6" />
+                }
+                cards={tarotCards.slice(8, 11)}
+                scrollProgress={smoothProgress}
+                splitStart={0.44}
+                splitEnd={0.58}
+                columnIndex={2}
+                onCardSelect={onWorkflowSelect}
+              />
 
-              {/* The Alchemist Column */}
-              <motion.div
-                className="flex flex-col items-center gap-3"
-                style={{ opacity: useTransform(smoothProgress, [0.64, 0.74], [0, 1]) }}
-              >
-                <span
-                  className="text-[10px] uppercase tracking-widest mb-2"
-                  style={{ color: '#EC4899', opacity: 0.7 }}
-                >
-                  The Alchemist
-                </span>
-                {tarotCards.slice(11, 13).map((card) => {
-                  const IconComponent = card.icon
-                  return (
-                    <motion.button
-                      key={card.id}
-                      className="w-[130px] h-[60px] rounded-xl flex items-center gap-3 px-3 transition-all"
-                      style={{
-                        background: 'transparent',
-                        border: `1px solid #EC489966`,
-                        boxShadow: `0 0 15px #EC489922`,
-                      }}
-                      whileHover={{
-                        background: `#EC489915`,
-                        boxShadow: `0 0 25px #EC489944`,
-                        scale: 1.02,
-                      }}
-                      onClick={() => onWorkflowSelect?.(card.id)}
-                    >
-                      <IconComponent size={24} weight="duotone" color={colors.text} />
-                      <span className="text-xs text-left leading-tight" style={{ color: colors.text }}>
-                        {card.title}
-                      </span>
-                    </motion.button>
-                  )
-                })}
-              </motion.div>
+              {/* The Alchemist - Pink */}
+              <ArcanaSplit
+                arcanaName="The Alchemist"
+                arcanaColor="#EC4899"
+                arcanaSymbol={
+                  <SparkleIcon size={48} weight="duotone" color="#EC4899" />
+                }
+                cards={tarotCards.slice(11, 13)}
+                scrollProgress={smoothProgress}
+                splitStart={0.44}
+                splitEnd={0.58}
+                columnIndex={3}
+                onCardSelect={onWorkflowSelect}
+              />
             </div>
           </div>
 

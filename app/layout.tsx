@@ -39,7 +39,7 @@ const futuriataLine = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'SOLUS FORGE Pre-Alpha v3.0 - Creative Command Center',
+  title: 'SOLUS FORGE Pre-Alpha v3.5 - Creative Command Center',
   description: 'AI-powered creative production platform with multi-agent orchestration, Figma integration, and generative AI workflows',
   keywords: ['AI', 'creative', 'automation', 'video generation', 'image generation', 'email marketing', 'influencer'],
 }
