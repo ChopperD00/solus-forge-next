@@ -484,10 +484,23 @@ export default function CrucibleLanding({
             })}
           </div>
 
-          {/* Center: MCP/API Status Indicators */}
-          <div className="relative">
+          {/* Right: Version Badge + Status Dropdown */}
+          <div className="relative flex flex-col items-end gap-2">
+            <div
+              className="px-3 py-1.5 rounded-full text-xs font-medium tracking-wide"
+              style={{
+                background: 'rgba(255, 107, 0, 0.15)',
+                border: '1px solid rgba(255, 107, 0, 0.3)',
+                color: colors.accent,
+                fontFamily: "system-ui, -apple-system, sans-serif",
+              }}
+            >
+              Pre-Alpha v3.5
+            </div>
+
+            {/* MCP/API Status Indicators - below version badge */}
             <motion.button
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all hover:bg-white/5"
+              className="flex items-center gap-2 px-2 py-1 rounded-lg transition-all hover:bg-white/5"
               onClick={() => setStatusExpanded(!statusExpanded)}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -539,7 +552,7 @@ export default function CrucibleLanding({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 p-3 rounded-xl min-w-[280px] max-h-[400px] overflow-y-auto"
+                  className="absolute top-full right-0 mt-2 p-3 rounded-xl min-w-[280px] max-h-[400px] overflow-y-auto z-50"
                   style={{
                     background: colors.surface,
                     border: `1px solid ${colors.border}`,
@@ -593,19 +606,6 @@ export default function CrucibleLanding({
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-
-          {/* Right: Version Badge */}
-          <div
-            className="px-3 py-1.5 rounded-full text-xs font-medium tracking-wide"
-            style={{
-              background: 'rgba(255, 107, 0, 0.15)',
-              border: '1px solid rgba(255, 107, 0, 0.3)',
-              color: colors.accent,
-              fontFamily: "system-ui, -apple-system, sans-serif",
-            }}
-          >
-            Pre-Alpha v3.5
           </div>
         </div>
 

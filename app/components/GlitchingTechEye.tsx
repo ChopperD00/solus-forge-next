@@ -114,17 +114,19 @@ export default function GlitchingTechEye({
       const hueShift = (Math.sin(t * 0.5) * 0.5 + 0.5) * 20
       const hue = (hueBase + hueShift) % 360
 
-      // Background glow gradient
+      // Background glow gradient - draw as circle, not rectangle
       const bgGrad = ctx.createRadialGradient(
         cx, cy - 20, 0,
-        cx, cy, Math.max(wCss, hCss) * 0.6
+        cx, cy, radius * 2
       )
       bgGrad.addColorStop(0, `hsla(${hue + 15}, 90%, 65%, 0.4)`)
       bgGrad.addColorStop(0.3, `hsla(${hue}, 70%, 45%, 0.25)`)
       bgGrad.addColorStop(0.6, `hsla(${hue - 10}, 50%, 25%, 0.15)`)
       bgGrad.addColorStop(1, "rgba(0,0,0,0)")
       ctx.fillStyle = bgGrad
-      ctx.fillRect(0, 0, wCss, hCss)
+      ctx.beginPath()
+      ctx.arc(cx, cy, radius * 2, 0, Math.PI * 2)
+      ctx.fill()
 
       const rotation = t * rotationSpeed * Math.PI * 0.5
 
@@ -139,14 +141,16 @@ export default function GlitchingTechEye({
         ctx.scale(gScale, 1 / (gScale || 1))
       }
 
-      // Inner orb glow - orange palette
+      // Inner orb glow - orange palette - draw as circle
       const orbGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * 1.5)
       orbGrad.addColorStop(0, `hsla(${hue + 10}, 100%, 95%, 0.9)`)
       orbGrad.addColorStop(0.2, `hsla(${hue + 20}, 90%, 80%, 0.7)`)
       orbGrad.addColorStop(0.5, `hsla(${hue}, 70%, 50%, 0.4)`)
       orbGrad.addColorStop(1, "rgba(0,0,0,0)")
       ctx.fillStyle = orbGrad
-      ctx.fillRect(0, 0, wCss, hCss)
+      ctx.beginPath()
+      ctx.arc(cx, cy, radius * 1.5, 0, Math.PI * 2)
+      ctx.fill()
 
       // Eye follow logic
       const target = mouseRef.current
