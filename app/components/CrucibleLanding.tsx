@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, ReactNode } from 'react'
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion'
 import GradientCircle from './GradientCircle'
 import SpectraNoiseBackground from './SpectraNoiseBackground'
 import GlitchingTechEye from './GlitchingTechEye'
@@ -28,7 +28,44 @@ import {
   Vault as VaultIcon,
   Detective as DetectiveIcon,
   QrCode as QrCodeIcon,
+  Circle as CircleIcon,
+  Image as ImageIcon,
+  VideoCamera as VideoCameraIcon,
+  Waveform as WaveformIcon,
+  Robot as RobotIcon,
+  Plug as PlugIcon,
+  FigmaLogo as FigmaLogoIcon,
 } from '@phosphor-icons/react'
+
+// Service status types
+interface ServiceStatus {
+  name: string
+  configured: boolean
+  description: string
+  category: string
+}
+
+interface StatusResponse {
+  services: Record<string, ServiceStatus>
+  byCategory: Record<string, Array<ServiceStatus & { id: string }>>
+  summary: {
+    connected: number
+    total: number
+    status: 'all_connected' | 'partial' | 'none_connected'
+  }
+}
+
+// Category icons and colors
+const categoryConfig: Record<string, { icon: any; color: string; label: string }> = {
+  image: { icon: ImageIcon, color: '#10B981', label: 'Image' },
+  video: { icon: VideoCameraIcon, color: '#8B5CF6', label: 'Video' },
+  audio: { icon: WaveformIcon, color: '#F59E0B', label: 'Audio' },
+  llm: { icon: RobotIcon, color: '#06B6D4', label: 'LLM' },
+  research: { icon: MagnifyingGlassIcon, color: '#EC4899', label: 'Research' },
+  ml: { icon: BrainIcon, color: '#EF4444', label: 'ML' },
+  integration: { icon: PlugIcon, color: '#84CC16', label: 'Apps' },
+  design: { icon: FigmaLogoIcon, color: '#A855F7', label: 'Design' },
+}
 
 // SSR-safe window dimensions hook
 function useWindowSize() {
@@ -279,6 +316,16 @@ export default function CrucibleLanding({
   const [prompt, setPrompt] = useState('')
   const windowSize = useWindowSize()
   const [localSelectedAgents, setLocalSelectedAgents] = useState<string[]>(selectedAgents)
+  const [serviceStatus, setServiceStatus] = useState<StatusResponse | null>(null)
+  const [statusExpanded, setStatusExpanded] = useState(false)
+
+  // Fetch API/MCP status on mount
+  useEffect(() => {
+    fetch('/api/status')
+      .then(res => res.json())
+      .then(data => setServiceStatus(data))
+      .catch(err => console.error('Failed to fetch status:', err))
+  }, [])
 
   // Scroll-based animation
   const { scrollYProgress } = useScroll({
@@ -435,6 +482,117 @@ export default function CrucibleLanding({
                 </motion.button>
               )
             })}
+          </div>
+
+          {/* Center: MCP/API Status Indicators */}
+          <div className="relative">
+            <motion.button
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all hover:bg-white/5"
+              onClick={() => setStatusExpanded(!statusExpanded)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {serviceStatus ? (
+                <>
+                  {/* Category dots */}
+                  <div className="flex items-center gap-1">
+                    {Object.entries(serviceStatus.byCategory || {}).map(([cat, services]) => {
+                      const config = categoryConfig[cat]
+                      if (!config) return null
+                      const connectedCount = services.filter((s: any) => s.configured).length
+                      const isActive = connectedCount > 0
+                      return (
+                        <div
+                          key={cat}
+                          className="relative group"
+                          title={`${config.label}: ${connectedCount}/${services.length} active`}
+                        >
+                          <div
+                            className="w-2 h-2 rounded-full transition-all"
+                            style={{
+                              background: isActive ? config.color : colors.textDim,
+                              boxShadow: isActive ? `0 0 6px ${config.color}` : 'none',
+                            }}
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+                  {/* Summary text */}
+                  <span
+                    className="text-[10px] font-medium"
+                    style={{ color: colors.textMuted }}
+                  >
+                    {serviceStatus.summary.connected}/{serviceStatus.summary.total}
+                  </span>
+                </>
+              ) : (
+                <span className="text-[10px]" style={{ color: colors.textDim }}>Loading...</span>
+              )}
+            </motion.button>
+
+            {/* Expanded dropdown */}
+            <AnimatePresence>
+              {statusExpanded && serviceStatus && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 p-3 rounded-xl min-w-[280px] max-h-[400px] overflow-y-auto"
+                  style={{
+                    background: colors.surface,
+                    border: `1px solid ${colors.border}`,
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                  }}
+                >
+                  <div className="text-xs font-semibold mb-3 flex items-center justify-between" style={{ color: colors.text }}>
+                    <span>Service Status</span>
+                    <span style={{ color: colors.textMuted }}>
+                      {serviceStatus.summary.connected} connected
+                    </span>
+                  </div>
+                  {Object.entries(serviceStatus.byCategory || {}).map(([cat, services]) => {
+                    const config = categoryConfig[cat]
+                    if (!config) return null
+                    const CatIcon = config.icon
+                    return (
+                      <div key={cat} className="mb-3 last:mb-0">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <CatIcon size={14} weight="duotone" color={config.color} />
+                          <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: config.color }}>
+                            {config.label}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {services.map((service: any) => (
+                            <div
+                              key={service.id}
+                              className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px]"
+                              style={{
+                                background: service.configured ? `${config.color}15` : 'rgba(255,255,255,0.03)',
+                                border: `1px solid ${service.configured ? `${config.color}33` : colors.border}`,
+                                color: service.configured ? colors.text : colors.textDim,
+                              }}
+                              title={service.description}
+                            >
+                              <div
+                                className="w-1.5 h-1.5 rounded-full"
+                                style={{
+                                  background: service.configured ? config.color : colors.textDim,
+                                  boxShadow: service.configured ? `0 0 4px ${config.color}` : 'none',
+                                }}
+                              />
+                              {service.name}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Right: Version Badge */}
