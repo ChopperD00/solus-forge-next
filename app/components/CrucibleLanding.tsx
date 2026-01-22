@@ -369,7 +369,7 @@ export default function CrucibleLanding({
       {/* SpectraNoise Background - activates after logo click */}
       {(heroPhase === 'spectraNoise' || heroPhase === 'crucible') && (
         <SpectraNoiseBackground
-          isExpanded={heroPhase === 'novaGlow'}
+          isExpanded={false}
           logoCenter={{ x: windowSize.width / 2, y: windowSize.height / 2 }}
           logoSize={200}
         />
