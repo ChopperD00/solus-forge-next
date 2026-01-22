@@ -33,9 +33,9 @@ const colors = {
   textDim: '#555555',
 }
 
-// Playing card dimensions (2.5:3.5 ratio like standard cards)
-const CARD_WIDTH = 120
-const CARD_HEIGHT = 168
+// Playing card dimensions (2.5:3.5 ratio like standard cards) - larger for legibility
+const CARD_WIDTH = 140
+const CARD_HEIGHT = 196
 
 // Flippable Tarot Card component
 function FlippableCard({
@@ -79,7 +79,7 @@ function FlippableCard({
       >
         {/* Front of card */}
         <div
-          className="absolute inset-0 rounded-xl flex flex-col items-center justify-center p-3"
+          className="absolute inset-0 rounded-xl flex flex-col items-center justify-center p-4"
           style={{
             backfaceVisibility: 'hidden',
             background: `linear-gradient(145deg, ${colors.surface} 0%, ${colors.bg} 100%)`,
@@ -99,18 +99,18 @@ function FlippableCard({
 
           {/* Icon */}
           <div
-            className="w-12 h-12 rounded-lg flex items-center justify-center mb-2"
+            className="w-14 h-14 rounded-lg flex items-center justify-center mb-3"
             style={{
               background: `${arcanaColor}15`,
               border: `1px solid ${arcanaColor}33`,
             }}
           >
-            <IconComponent size={28} weight="duotone" color={arcanaColor} />
+            <IconComponent size={32} weight="duotone" color={arcanaColor} />
           </div>
 
           {/* Title */}
           <span
-            className="text-xs font-medium text-center leading-tight"
+            className="text-sm font-semibold text-center leading-tight"
             style={{ color: colors.text }}
           >
             {card.title}
@@ -118,7 +118,7 @@ function FlippableCard({
 
           {/* Subtitle */}
           <span
-            className="text-[9px] text-center mt-1 opacity-60 leading-tight px-2"
+            className="text-xs text-center mt-1.5 opacity-70 leading-tight px-2"
             style={{ color: colors.textMuted }}
           >
             {card.subtitle}
@@ -126,7 +126,7 @@ function FlippableCard({
 
           {/* Arcana indicator */}
           <div
-            className="absolute bottom-3 text-[7px] uppercase tracking-wider opacity-50"
+            className="absolute bottom-3 text-[9px] uppercase tracking-wider opacity-60"
             style={{ color: arcanaColor }}
           >
             {card.arcana}
@@ -135,7 +135,7 @@ function FlippableCard({
 
         {/* Back of card (capabilities) */}
         <div
-          className="absolute inset-0 rounded-xl flex flex-col p-3"
+          className="absolute inset-0 rounded-xl flex flex-col p-4"
           style={{
             backfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
@@ -149,23 +149,23 @@ function FlippableCard({
           }}
         >
           {/* Header */}
-          <div className="flex items-center gap-2 mb-2 pb-2 border-b" style={{ borderColor: `${arcanaColor}33` }}>
-            <IconComponent size={16} weight="duotone" color={arcanaColor} />
-            <span className="text-[10px] font-semibold" style={{ color: arcanaColor }}>
+          <div className="flex items-center gap-2 mb-3 pb-2 border-b" style={{ borderColor: `${arcanaColor}33` }}>
+            <IconComponent size={18} weight="duotone" color={arcanaColor} />
+            <span className="text-xs font-semibold" style={{ color: arcanaColor }}>
               {card.title}
             </span>
           </div>
 
           {/* Capabilities list */}
-          <div className="flex-1 flex flex-col gap-1.5">
+          <div className="flex-1 flex flex-col gap-2">
             {card.capabilities.map((cap, i) => (
               <div
                 key={i}
-                className="flex items-center gap-1.5 text-[8px]"
+                className="flex items-center gap-2 text-[11px]"
                 style={{ color: colors.text }}
               >
                 <div
-                  className="w-1 h-1 rounded-full"
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                   style={{ background: arcanaColor }}
                 />
                 <span className="leading-tight">{cap}</span>
@@ -175,7 +175,7 @@ function FlippableCard({
 
           {/* Click to select indicator */}
           <div
-            className="text-[8px] text-center mt-2 pt-2 border-t opacity-70"
+            className="text-[10px] text-center mt-2 pt-2 border-t opacity-80 font-medium"
             style={{ borderColor: `${arcanaColor}33`, color: arcanaColor }}
           >
             Click to select →
@@ -258,14 +258,14 @@ export default function ArcanaSplit({
   return (
     <div
       className="relative flex flex-col items-center flex-1"
-      style={{ minWidth: CARD_WIDTH + 20, maxWidth: CARD_WIDTH + 40, minHeight: 600 }}
+      style={{ minWidth: CARD_WIDTH + 24, maxWidth: CARD_WIDTH + 48, minHeight: 650 }}
     >
       {/* Arcana Name - positioned above everything */}
       <motion.span
-        className="text-[10px] uppercase tracking-widest mb-6 whitespace-nowrap"
+        className="text-xs uppercase tracking-widest mb-6 whitespace-nowrap font-medium"
         style={{
           color: arcanaColor,
-          opacity: useTransform(scrollProgress, [adjustedStart, adjustedStart + 0.03], [0, 0.8]),
+          opacity: useTransform(scrollProgress, [adjustedStart, adjustedStart + 0.03], [0, 0.9]),
           fontFamily: "system-ui, -apple-system, sans-serif",
         }}
       >
