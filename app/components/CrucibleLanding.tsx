@@ -327,12 +327,10 @@ export default function CrucibleLanding({
   initialScrollToWorkflows = false,
 }: CrucibleLandingProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const hasScrolledToWorkflows = useRef(false)
 
   // Scroll to workflows section on mount if requested
   useEffect(() => {
-    if (initialScrollToWorkflows && containerRef.current && !hasScrolledToWorkflows.current) {
-      hasScrolledToWorkflows.current = true
+    if (initialScrollToWorkflows && containerRef.current) {
       // Scroll to ~70% which is where workflows are fully visible
       const scrollTarget = containerRef.current.scrollHeight * 0.70
       setTimeout(() => {

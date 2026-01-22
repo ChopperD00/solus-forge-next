@@ -18,6 +18,7 @@ import SocialPaidAdsWorkflow from './components/SocialPaidAdsWorkflow'
 import EmailAutomationWorkflow from './components/EmailAutomationWorkflow'
 import SocialAdsAutomationWorkflow from './components/SocialAdsAutomationWorkflow'
 import OSINTWorkflow from './components/OSINTWorkflow'
+import AnalyticsWorkflow from './components/AnalyticsWorkflow'
 import CrucibleLanding from './components/CrucibleLanding'
 import RadialWipeTransition, { useRadialWipe } from './components/RadialWipeTransition'
 import {
@@ -43,7 +44,7 @@ import {
   CaretDoubleLeft as CaretDoubleLeftIcon,
 } from '@phosphor-icons/react'
 
-type IntentId = 'email_campaign' | 'video_production' | 'image_generation' | 'audio' | '3d_assets' | 'research' | 'automation' | 'prompt_vault' | 'influencer_suite' | 'social_paid_ads' | 'email_automation' | 'social_ads_automation' | 'lupin_iii' | null
+type IntentId = 'email_campaign' | 'video_production' | 'image_generation' | 'audio' | '3d_assets' | 'research' | 'automation' | 'prompt_vault' | 'influencer_suite' | 'social_paid_ads' | 'email_automation' | 'social_ads_automation' | 'lupin_iii' | 'analytics' | null
 
 // SOLUS color palette - Darker, more cinematic
 const colors = {
@@ -93,6 +94,7 @@ const workflows = [
   { id: 'social_ads_automation', icon: ChartBarIcon, title: 'Social Ads Automation', subtitle: 'Auto-optimize campaigns', color: '#EC4899' },
   { id: 'prompt_vault', icon: VaultIcon, title: 'Prompt Vault', subtitle: 'Pony, SDXL & LoRA prompts', color: '#FF69B4' },
   { id: 'lupin_iii', icon: DetectiveIcon, title: 'Lupin III', subtitle: 'OSINT & Intelligence Suite', color: '#8B5CF6' },
+  { id: 'analytics', icon: ChartBarIcon, title: 'Analytics', subtitle: 'Performance insights', color: '#3B82F6' },
 ]
 
 export default function Home() {
@@ -135,6 +137,7 @@ export default function Home() {
     // Trigger transition, then switch view
     triggerTransition(origin, () => {
       setSelectedIntent(intentId as IntentId)
+      setScrollToWorkflows(false)  // Reset scroll flag when entering a workflow
       setShowLanding(false)
     })
   }
@@ -292,6 +295,7 @@ export default function Home() {
               {selectedIntent === 'social_ads_automation' && <SocialAdsAutomationWorkflow />}
               {selectedIntent === 'prompt_vault' && <PromptVaultWorkflow />}
               {selectedIntent === 'lupin_iii' && <OSINTWorkflow />}
+              {selectedIntent === 'analytics' && <AnalyticsWorkflow />}
             </main>
           </motion.div>
         )}

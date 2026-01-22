@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import NodeWorkflowCanvas, { WorkflowNode, NodeConnection } from './NodeWorkflowCanvas'
 
@@ -507,8 +507,31 @@ export default function EmailAutomationWorkflow() {
   ])
 
   const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null)
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [showPalette, setShowPalette] = useState(true)
   const [activeTab, setActiveTab] = useState<'nodes' | 'templates'>('nodes')
+
+  // Delete node function
+  const handleDeleteNode = useCallback((nodeId: string) => {
+    setNodes(prev => prev.filter(n => n.id !== nodeId))
+    setConnections(prev => prev.filter(c => c.fromNode !== nodeId && c.toNode !== nodeId))
+    setSelectedNodeId(null)
+    setSelectedNode(null)
+  }, [])
+
+  // Keyboard delete support
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeId) {
+        const target = e.target as HTMLElement
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
+        e.preventDefault()
+        handleDeleteNode(selectedNodeId)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedNodeId, handleDeleteNode])
 
   // Node templates for palette
   const nodeTemplates = [
@@ -690,13 +713,20 @@ export default function EmailAutomationWorkflow() {
       </AnimatePresence>
 
       {!showPalette && (
-        <button
+        <motion.button
           onClick={() => setShowPalette(true)}
-          className="absolute left-4 top-4 z-20 px-3 py-2 rounded-xl text-sm"
-          style={{ background: colors.surface, color: colors.textMuted, border: `1px solid ${colors.border}` }}
+          className="absolute left-4 top-4 z-20 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2"
+          style={{
+            background: `linear-gradient(135deg, ${colors.email} 0%, #2563EB 100%)`,
+            color: '#fff',
+            border: 'none',
+            boxShadow: `0 4px 20px ${colors.email}44, 0 0 30px ${colors.email}22`,
+          }}
+          whileHover={{ scale: 1.05, boxShadow: `0 6px 25px ${colors.email}66` }}
+          whileTap={{ scale: 0.95 }}
         >
-          + Add Node
-        </button>
+          <span style={{ fontSize: '18px' }}>➕</span> Add Node
+        </motion.button>
       )}
 
       {/* Canvas */}
@@ -706,9 +736,9 @@ export default function EmailAutomationWorkflow() {
           connections={connections}
           onNodesChange={setNodes}
           onConnectionsChange={setConnections}
-          onNodeSelect={setSelectedNode}
+          onNodeSelect={(node) => setSelectedNodeId(node?.id || null)}
           onNodeDoubleClick={setSelectedNode}
-          selectedNodeId={selectedNode?.id}
+          selectedNodeId={selectedNodeId}
           accentColor={colors.email}
         />
       </div>
@@ -759,8 +789,18 @@ export default function EmailAutomationWorkflow() {
         className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 rounded-xl z-20"
         style={{ background: `${colors.surface}ee`, border: `1px solid ${colors.border}` }}
       >
-        <button className="px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-white/5" style={{ color: colors.textMuted }}>
-          🗑️ Delete
+        <button
+          onClick={() => selectedNodeId && handleDeleteNode(selectedNodeId)}
+          disabled={!selectedNodeId}
+          className="px-3 py-1.5 rounded-lg text-sm transition-all"
+          style={{
+            color: selectedNodeId ? '#FF5555' : colors.textDim,
+            background: selectedNodeId ? '#FF555515' : 'transparent',
+            cursor: selectedNodeId ? 'pointer' : 'not-allowed',
+            opacity: selectedNodeId ? 1 : 0.5,
+          }}
+        >
+          🗑️ Delete {selectedNodeId ? '' : '(select)'}
         </button>
         <div className="w-px h-6" style={{ background: colors.border }} />
         <button className="px-3 py-1.5 rounded-lg text-sm transition-colors hover:bg-white/5" style={{ color: colors.textMuted }}>

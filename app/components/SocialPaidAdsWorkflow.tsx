@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import NeuralNodeCanvas, { NeuralNode, NeuralConnection } from './NeuralNodeCanvas'
 
@@ -412,8 +412,31 @@ export default function SocialPaidAdsWorkflow() {
   ])
 
   const [selectedNode, setSelectedNode] = useState<NeuralNode | null>(null)
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [selectedFormats, setSelectedFormats] = useState<string[]>(['fb-feed', 'ig-feed', 'ig-story', 'ig-reels'])
   const [activeTab, setActiveTab] = useState<'formats' | 'tools' | 'templates'>('formats')
+
+  // Delete node function
+  const handleDeleteNode = useCallback((nodeId: string) => {
+    setNodes(prev => prev.filter(n => n.id !== nodeId))
+    setConnections(prev => prev.filter(c => c.fromNode !== nodeId && c.toNode !== nodeId))
+    setSelectedNodeId(null)
+    setSelectedNode(null)
+  }, [])
+
+  // Keyboard delete support
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeId) {
+        const target = e.target as HTMLElement
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
+        e.preventDefault()
+        handleDeleteNode(selectedNodeId)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedNodeId, handleDeleteNode])
 
   const toggleFormat = (formatId: string) => {
     setSelectedFormats(prev =>
@@ -465,13 +488,32 @@ export default function SocialPaidAdsWorkflow() {
           {activeTab === 'templates' && <TemplateGallery onSelect={(id) => console.log('Template:', id)} />}
         </div>
 
-        {/* Summary */}
+        {/* Node Actions & Summary */}
         <div className="p-4 border-t" style={{ borderColor: colors.border, background: colors.bg }}>
+          {/* Delete button */}
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium" style={{ color: colors.text }}>Export Summary</span>
-            <span className="text-xs px-2 py-1 rounded" style={{ background: `${colors.accent}22`, color: colors.accent }}>
-              {totalSelected} formats
-            </span>
+            <div className="flex items-center gap-2">
+              <motion.button
+                onClick={() => selectedNodeId && handleDeleteNode(selectedNodeId)}
+                disabled={!selectedNodeId}
+                className="px-2 py-1 rounded-lg text-xs font-medium flex items-center gap-1"
+                style={{
+                  color: selectedNodeId ? '#FF5555' : colors.textDim,
+                  background: selectedNodeId ? '#FF555515' : 'transparent',
+                  border: `1px solid ${selectedNodeId ? '#FF555544' : colors.border}`,
+                  cursor: selectedNodeId ? 'pointer' : 'not-allowed',
+                  opacity: selectedNodeId ? 1 : 0.5,
+                }}
+                whileHover={selectedNodeId ? { scale: 1.05 } : {}}
+                whileTap={selectedNodeId ? { scale: 0.95 } : {}}
+              >
+                🗑️
+              </motion.button>
+              <span className="text-xs px-2 py-1 rounded" style={{ background: `${colors.accent}22`, color: colors.accent }}>
+                {totalSelected} formats
+              </span>
+            </div>
           </div>
           <div className="flex flex-wrap gap-1">
             {platforms.map(p => {
@@ -494,9 +536,9 @@ export default function SocialPaidAdsWorkflow() {
           connections={connections}
           onNodesChange={setNodes}
           onConnectionsChange={setConnections}
-          onNodeSelect={setSelectedNode}
+          onNodeSelect={(node) => setSelectedNodeId(node?.id || null)}
           onNodeDoubleClick={setSelectedNode}
-          selectedNodeId={selectedNode?.id}
+          selectedNodeId={selectedNodeId}
           accentColor={colors.accent}
         />
       </div>

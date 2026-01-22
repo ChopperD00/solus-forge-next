@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import NeuralNodeCanvas, { NeuralNode, NeuralConnection } from './NeuralNodeCanvas'
 
@@ -394,7 +394,30 @@ export default function InfluencerSuiteWorkflow() {
   ])
 
   const [selectedNode, setSelectedNode] = useState<NeuralNode | null>(null)
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [activePanel, setActivePanel] = useState<'identity' | 'products' | 'export'>('identity')
+
+  // Delete node function
+  const handleDeleteNode = useCallback((nodeId: string) => {
+    setNodes(prev => prev.filter(n => n.id !== nodeId))
+    setConnections(prev => prev.filter(c => c.fromNode !== nodeId && c.toNode !== nodeId))
+    setSelectedNodeId(null)
+    setSelectedNode(null)
+  }, [])
+
+  // Keyboard delete support
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeId) {
+        const target = e.target as HTMLElement
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
+        e.preventDefault()
+        handleDeleteNode(selectedNodeId)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedNodeId, handleDeleteNode])
 
   const handleAddNode = (template: typeof nodeTemplates[0]) => {
     const newNode: NeuralNode = {
@@ -456,23 +479,54 @@ export default function InfluencerSuiteWorkflow() {
           {activePanel === 'export' && <ExportPanel onFormatSelect={(formats) => console.log('Formats:', formats)} />}
         </div>
 
-        {/* Node Templates */}
+        {/* Node Templates & Actions */}
         <div className="border-t p-4" style={{ borderColor: colors.border }}>
-          <h4 className="text-xs font-medium mb-3" style={{ color: colors.textMuted }}>Add Nodes</h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-xs font-medium" style={{ color: colors.textMuted }}>Add Nodes</h4>
+            {/* Delete Button */}
+            <motion.button
+              onClick={() => selectedNodeId && handleDeleteNode(selectedNodeId)}
+              disabled={!selectedNodeId}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all"
+              style={{
+                color: selectedNodeId ? '#FF5555' : colors.textDim,
+                background: selectedNodeId ? '#FF555515' : 'transparent',
+                border: `1px solid ${selectedNodeId ? '#FF555544' : colors.border}`,
+                cursor: selectedNodeId ? 'pointer' : 'not-allowed',
+                opacity: selectedNodeId ? 1 : 0.5,
+              }}
+              whileHover={selectedNodeId ? { scale: 1.05 } : {}}
+              whileTap={selectedNodeId ? { scale: 0.95 } : {}}
+            >
+              🗑️ Delete
+            </motion.button>
+          </div>
           <div className="flex flex-wrap gap-2">
             {Object.entries(templatesByCategory).slice(0, 2).map(([category, templates]) => (
               templates.slice(0, 2).map(t => (
-                <button
+                <motion.button
                   key={t.type}
                   onClick={() => handleAddNode(t)}
-                  className="w-10 h-10 rounded-lg flex items-center justify-center text-lg transition-all hover:scale-110"
+                  className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
                   style={{ background: colors.bg, border: `1px solid ${colors.border}` }}
                   title={t.title}
+                  whileHover={{ scale: 1.1, borderColor: colors.accent }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {t.icon}
-                </button>
+                </motion.button>
               ))
             ))}
+            {/* More nodes button */}
+            <motion.button
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
+              style={{ background: `${colors.accent}22`, border: `1px solid ${colors.accent}44`, color: colors.accent }}
+              title="More nodes..."
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              ➕
+            </motion.button>
           </div>
         </div>
       </div>
@@ -484,9 +538,9 @@ export default function InfluencerSuiteWorkflow() {
           connections={connections}
           onNodesChange={setNodes}
           onConnectionsChange={setConnections}
-          onNodeSelect={setSelectedNode}
+          onNodeSelect={(node) => setSelectedNodeId(node?.id || null)}
           onNodeDoubleClick={setSelectedNode}
-          selectedNodeId={selectedNode?.id}
+          selectedNodeId={selectedNodeId}
           accentColor={colors.accent}
         />
       </div>

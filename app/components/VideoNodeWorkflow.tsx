@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import NodeWorkflowCanvas, { WorkflowNode, NodeConnection } from './NodeWorkflowCanvas'
 
@@ -403,7 +403,30 @@ export default function VideoNodeWorkflow() {
   ])
 
   const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null)
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [showPalette, setShowPalette] = useState(true)
+
+  // Delete node function
+  const handleDeleteNode = useCallback((nodeId: string) => {
+    setNodes(prev => prev.filter(n => n.id !== nodeId))
+    setConnections(prev => prev.filter(c => c.fromNode !== nodeId && c.toNode !== nodeId))
+    setSelectedNodeId(null)
+    setSelectedNode(null)
+  }, [])
+
+  // Keyboard delete support
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeId) {
+        const target = e.target as HTMLElement
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
+        e.preventDefault()
+        handleDeleteNode(selectedNodeId)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedNodeId, handleDeleteNode])
 
   const handleAddNode = (template: typeof nodeTemplates[0]) => {
     const newNode: WorkflowNode = {
@@ -429,15 +452,7 @@ export default function VideoNodeWorkflow() {
     setNodes(nodes.map(n => n.id === nodeId ? { ...n, data: { ...n.data, ...data } } : n))
   }
 
-  const handleDeleteSelected = () => {
-    if (!selectedNode) return
-    setNodes(nodes.filter(n => n.id !== selectedNode.id))
-    setConnections(connections.filter(c =>
-      c.fromNode !== selectedNode.id && c.toNode !== selectedNode.id
-    ))
-    setSelectedNode(null)
-  }
-
+  
   // Group templates by category
   const templatesByCategory = nodeTemplates.reduce((acc, t) => {
     const cat = t.category || 'Other'
@@ -509,19 +524,22 @@ export default function VideoNodeWorkflow() {
         )}
       </AnimatePresence>
 
-      {/* Toggle palette button */}
+      {/* Toggle palette button - Distinct styling */}
       {!showPalette && (
-        <button
+        <motion.button
           onClick={() => setShowPalette(true)}
-          className="absolute left-4 top-4 z-20 px-3 py-2 rounded-xl text-sm"
+          className="absolute left-4 top-4 z-20 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2"
           style={{
-            background: colors.surface,
-            color: colors.textMuted,
-            border: `1px solid ${colors.border}`,
+            background: `linear-gradient(135deg, ${colors.video} 0%, ${colors.accent} 100%)`,
+            color: '#fff',
+            border: 'none',
+            boxShadow: `0 4px 20px ${colors.video}44, 0 0 30px ${colors.video}22`,
           }}
+          whileHover={{ scale: 1.05, boxShadow: `0 6px 25px ${colors.video}66` }}
+          whileTap={{ scale: 0.95 }}
         >
-          + Add Node
-        </button>
+          <span style={{ fontSize: '18px' }}>➕</span> Add Node
+        </motion.button>
       )}
 
       {/* Main Canvas */}
@@ -531,9 +549,9 @@ export default function VideoNodeWorkflow() {
           connections={connections}
           onNodesChange={setNodes}
           onConnectionsChange={setConnections}
-          onNodeSelect={setSelectedNode}
+          onNodeSelect={(node) => setSelectedNodeId(node?.id || null)}
           onNodeDoubleClick={setSelectedNode}
-          selectedNodeId={selectedNode?.id}
+          selectedNodeId={selectedNodeId}
           accentColor={colors.accent}
         />
       </div>
@@ -558,12 +576,17 @@ export default function VideoNodeWorkflow() {
         }}
       >
         <button
-          onClick={handleDeleteSelected}
-          disabled={!selectedNode}
-          className="px-3 py-1.5 rounded-lg text-sm transition-all disabled:opacity-50"
-          style={{ color: colors.textMuted }}
+          onClick={() => selectedNodeId && handleDeleteNode(selectedNodeId)}
+          disabled={!selectedNodeId}
+          className="px-3 py-1.5 rounded-lg text-sm transition-all"
+          style={{
+            color: selectedNodeId ? '#FF5555' : colors.textDim,
+            background: selectedNodeId ? '#FF555515' : 'transparent',
+            cursor: selectedNodeId ? 'pointer' : 'not-allowed',
+            opacity: selectedNodeId ? 1 : 0.5,
+          }}
         >
-          🗑️ Delete
+          🗑️ Delete {selectedNodeId ? '' : '(select node)'}
         </button>
         <div className="w-px h-6" style={{ background: colors.border }} />
         <button
