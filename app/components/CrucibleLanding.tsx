@@ -446,7 +446,7 @@ export default function CrucibleLanding({
     <div
       ref={containerRef}
       className="relative"
-      style={{ height: '900vh', background: colors.bg }}
+      style={{ height: '1100vh', background: colors.bg }}
     >
       {/* SpectraNoise Background */}
       <SpectraNoiseBackground

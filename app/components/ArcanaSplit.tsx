@@ -33,9 +33,9 @@ const colors = {
   textDim: '#555555',
 }
 
-// Playing card dimensions - more compact for grid layout
-const CARD_WIDTH = 130
-const CARD_HEIGHT = 170
+// Playing card dimensions - larger for better text legibility
+const CARD_WIDTH = 150
+const CARD_HEIGHT = 200
 
 // Flippable Tarot Card component
 function FlippableCard({
@@ -99,18 +99,18 @@ function FlippableCard({
 
           {/* Icon */}
           <div
-            className="w-12 h-12 rounded-lg flex items-center justify-center mb-2"
+            className="w-14 h-14 rounded-lg flex items-center justify-center mb-3"
             style={{
               background: `${arcanaColor}15`,
               border: `1px solid ${arcanaColor}33`,
             }}
           >
-            <IconComponent size={28} weight="duotone" color={arcanaColor} />
+            <IconComponent size={32} weight="duotone" color={arcanaColor} />
           </div>
 
           {/* Title - larger */}
           <span
-            className="text-base font-bold text-center leading-tight"
+            className="text-lg font-bold text-center leading-tight"
             style={{ color: colors.text }}
           >
             {card.title}
@@ -118,7 +118,7 @@ function FlippableCard({
 
           {/* Subtitle - larger, more legible */}
           <span
-            className="text-sm text-center mt-2 leading-snug px-1"
+            className="text-sm text-center mt-2 leading-snug px-2"
             style={{ color: colors.textMuted }}
           >
             {card.subtitle}
