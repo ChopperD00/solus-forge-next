@@ -5,7 +5,6 @@ import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
 import GradientCircle from './GradientCircle'
 import SpectraNoiseBackground from './SpectraNoiseBackground'
 import SolusForgeIcon from './SolusForgeIcon'
-import TarotCard from './TarotCard'
 import {
   Eye as EyeIcon,
   Compass as CompassIcon,
@@ -135,11 +134,12 @@ const workflows = tarotCards.map(card => ({ id: card.id, icon: card.icon, title:
 // Icon component type
 type IconComponent = React.ForwardRefExoticComponent<React.PropsWithoutRef<{ size?: number | string; weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone'; color?: string }> & React.RefAttributes<SVGSVGElement>>
 
-// Morphing Agent Component - orbits then morphs to final position
+// Morphing Agent Component - orbits then flies into sliding UI boxes
 interface MorphingAgentProps {
   agent: typeof agents[0]
   index: number
-  morphProgress: number // 0 = orbiting, 1 = in final position
+  morphProgress: number // 0 = orbiting, 1 = in final position (inside box)
+  chatBarY: number // Current Y position of chat bar (for targeting)
   time: number
   isSelected: boolean
   onSelect: () => void
@@ -150,6 +150,7 @@ function MorphingAgent({
   agent,
   index,
   morphProgress,
+  chatBarY,
   time,
   isSelected,
   onSelect,
@@ -158,33 +159,35 @@ function MorphingAgent({
   const orbitRadius = 200
   const orbitSpeed = 0.3
 
-  // Orbital position
+  // Orbital position (around center)
   const angle = agent.orbitOffset + time * orbitSpeed
   const orbitX = Math.cos(angle) * orbitRadius
   const orbitY = Math.sin(angle) * orbitRadius * 0.4
 
-  // Calculate target button position (chat bar area below center)
-  // Buttons are arranged horizontally, roughly 60px apart
-  const buttonSpacing = 70
-  const totalWidth = (totalAgents - 1) * buttonSpacing
+  // Target position: the agent selector box in the sliding UI
+  // Boxes are arranged horizontally, roughly 105px apart
+  const buttonSpacing = 105
   const targetX = (index - (totalAgents - 1) / 2) * buttonSpacing
-  const targetY = 180 // Position where chat bar buttons will be
+  // Target Y follows the chat bar as it slides up, offset to hit the box center
+  const targetY = -85 + chatBarY // Boxes are above the search bar
 
   // Morph from orbit to button position
-  // morphProgress 0 = orbiting, 1 = at button position
-  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
-  const easedProgress = easeOutCubic(morphProgress)
+  const easeOutBack = (t: number) => {
+    const c1 = 1.70158
+    const c3 = c1 + 1
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2)
+  }
+  const easedProgress = easeOutBack(Math.min(1, morphProgress))
 
   // Interpolate position from orbit to target
   const currentX = orbitX * (1 - easedProgress) + targetX * easedProgress
   const currentY = orbitY * (1 - easedProgress) + targetY * easedProgress
 
-  // Scale stays constant during travel
-  const scale = 1
+  // Scale down slightly as it lands in the box
+  const scale = 1 - easedProgress * 0.3
 
   // Color transition: white -> agent color as morphProgress increases
-  // Icon starts white, transitions to agent color
-  const colorProgress = Math.min(1, morphProgress * 1.5) // Color changes faster than position
+  const colorProgress = Math.min(1, morphProgress * 1.2)
 
   // Interpolate from white (#FFFFFF) to agent color
   const hexToRgb = (hex: string) => {
@@ -205,14 +208,13 @@ function MorphingAgent({
   // Glow color also transitions
   const glowColor = colorProgress > 0.5 ? agent.color : '#FFFFFF'
 
-  // Fade out when reaching destination
-  const opacity = morphProgress > 0.8 ? 1 - (morphProgress - 0.8) / 0.2 : 1
+  // Fade out when landing in box (the static icon in box takes over)
+  const opacity = morphProgress > 0.85 ? 1 - (morphProgress - 0.85) / 0.15 : 1
 
   // Don't render if fully faded
   if (opacity <= 0) return null
 
   // Calculate z-index based on Y position for depth effect
-  // Agents with higher Y (lower on screen) should be in front
   const zIndex = Math.round(orbitY + 100)
 
   return (
@@ -223,32 +225,32 @@ function MorphingAgent({
         y: currentY,
         scale,
         opacity,
-        zIndex: morphProgress > 0.1 ? 30 : zIndex, // Move to front when traveling to buttons
+        zIndex: morphProgress > 0.1 ? 50 : zIndex,
       }}
     >
       <motion.div
         className="relative flex flex-col items-center"
-        style={{ width: 56, height: 56 }}
+        style={{ width: 48, height: 48 }}
       >
         {/* Glow */}
         <div
           className="absolute inset-0 rounded-full"
           style={{
-            background: `radial-gradient(circle, ${glowColor}40 0%, transparent 70%)`,
-            transform: 'scale(1.5)',
-            opacity: 0.6 + morphProgress * 0.4,
+            background: `radial-gradient(circle, ${glowColor}50 0%, transparent 70%)`,
+            transform: 'scale(1.8)',
+            opacity: 0.5 + morphProgress * 0.5,
           }}
         />
         {/* Icon container */}
         <div
-          className="relative w-full h-full rounded-full flex items-center justify-center transition-all"
+          className="relative w-full h-full rounded-full flex items-center justify-center"
           style={{
-            background: colors.surface,
-            border: `2px solid ${morphProgress > 0.5 ? agent.color : colors.border}`,
-            boxShadow: `0 0 ${15 + morphProgress * 20}px ${glowColor}44`,
+            background: `${colors.surface}dd`,
+            border: `2px solid ${morphProgress > 0.3 ? agent.color : colors.border}`,
+            boxShadow: `0 0 ${10 + morphProgress * 25}px ${glowColor}66`,
           }}
         >
-          <agent.icon size={24} weight="duotone" color={currentColor} />
+          <agent.icon size={22} weight="duotone" color={currentColor} />
         </div>
       </motion.div>
     </motion.div>
@@ -330,12 +332,17 @@ export default function CrucibleLanding({
 
   // Section 2 (Orbit + Morph): 20% - 55%
   // Sub-phase 2a: Orbiting around Latin phrase (20% - 35%)
-  // Sub-phase 2b: Morphing to chat bar (35% - 45%)
-  // Sub-phase 2c: Chat bar fully visible (45% - 55%)
+  // Sub-phase 2b: UI slides up, agents fly into boxes (35% - 48%)
+  // Sub-phase 2c: Chat bar fully visible (48% - 55%)
   const section2Opacity = useTransform(smoothProgress, [0.15, 0.25, 0.5, 0.55], [0, 1, 1, 0])
-  const orbitPhraseOpacity = useTransform(smoothProgress, [0.2, 0.25, 0.35, 0.4], [0, 1, 1, 0])
-  const morphProgress = useTransform(smoothProgress, [0.35, 0.45], [0, 1])
-  const chatBarOpacity = useTransform(smoothProgress, [0.38, 0.45], [0, 1])
+  const orbitPhraseOpacity = useTransform(smoothProgress, [0.2, 0.25, 0.35, 0.40], [0, 1, 1, 0])
+
+  // Chat bar slides up from below
+  const chatBarY = useTransform(smoothProgress, [0.35, 0.48], [300, 0]) // Starts 300px below, moves to center
+  const chatBarOpacity = useTransform(smoothProgress, [0.35, 0.42], [0, 1])
+
+  // Morph progress - agents fly into boxes as UI slides up
+  const morphProgress = useTransform(smoothProgress, [0.38, 0.50], [0, 1])
 
   // "ex inferis" reveal on scroll - appears after initial phrase is visible
   const exInferisOpacity = useTransform(smoothProgress, [0.25, 0.30], [0, 1])
@@ -345,12 +352,17 @@ export default function CrucibleLanding({
   const workflowsOpacity = useTransform(smoothProgress, [0.5, 0.6], [0, 1])
   const workflowsY = useTransform(smoothProgress, [0.5, 0.6], [50, 0])
 
-  // Get current morph progress value
+  // Get current morph progress and chatBarY values
   const [currentMorphProgress, setCurrentMorphProgress] = useState(0)
+  const [currentChatBarY, setCurrentChatBarY] = useState(300)
   useEffect(() => {
     const unsubscribe = morphProgress.on('change', setCurrentMorphProgress)
     return () => unsubscribe()
   }, [morphProgress])
+  useEffect(() => {
+    const unsubscribe = chatBarY.on('change', setCurrentChatBarY)
+    return () => unsubscribe()
+  }, [chatBarY])
 
   return (
     <div
@@ -477,6 +489,7 @@ export default function CrucibleLanding({
                 agent={agent}
                 index={index}
                 morphProgress={currentMorphProgress}
+                chatBarY={currentChatBarY}
                 time={time}
                 isSelected={localSelectedAgents.includes(agent.id)}
                 onSelect={() => handleAgentSelect(agent.id)}
@@ -525,11 +538,12 @@ export default function CrucibleLanding({
             </h2>
           </motion.div>
 
-          {/* Chat Bar Section - appears after morph */}
+          {/* Chat Bar Section - slides up from below */}
           <motion.div
             className="absolute w-full max-w-3xl px-4"
             style={{
               top: '50%',
+              y: chatBarY,
               opacity: chatBarOpacity,
             }}
           >
@@ -655,218 +669,183 @@ export default function CrucibleLanding({
             }}
           />
 
-          {/* Section Title - morphs from English to Latin */}
+          {/* Section Title */}
           <motion.div
-            className="text-center relative z-10 mb-2"
+            className="text-center relative z-10 mb-6"
             style={{ y: workflowsY }}
           >
-            <motion.h3
-              className="text-2xl md:text-3xl font-bold"
+            <h3
+              className="text-xl md:text-2xl font-semibold tracking-wide mb-2"
               style={{
                 color: colors.text,
-                fontFamily: "'Dobla Sans', system-ui, sans-serif",
-                fontStretch: 'expanded',
-                letterSpacing: '0.05em',
-                position: 'relative',
+                fontFamily: "var(--font-futuriata), system-ui, sans-serif",
               }}
             >
-              {/* English phrase - fades out */}
-              <motion.span
-                style={{
-                  opacity: useTransform(smoothProgress, [0.55, 0.65], [1, 0]),
-                  position: 'absolute',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                Draw Your Path
-              </motion.span>
-              {/* Latin phrase - fades in */}
-              <motion.span
-                style={{
-                  opacity: useTransform(smoothProgress, [0.65, 0.75], [0, 1]),
-                  color: colors.accent,
-                  textShadow: `0 0 30px ${colors.accent}66`,
-                }}
-              >
-                Non viribus sed mente labores
-              </motion.span>
-            </motion.h3>
+              Select Your Workflow
+            </h3>
+            <p
+              className="text-sm"
+              style={{ color: colors.textDim }}
+            >
+              Choose a creative pathway to begin
+            </p>
           </motion.div>
-          <motion.p
-            className="text-sm mb-8 text-center relative z-10"
-            style={{
-              color: colors.textDim,
-              fontFamily: "'Dobla Sans', system-ui, sans-serif",
-              y: workflowsY,
-            }}
-          >
-            Those who are brave find fortune
-          </motion.p>
 
-          {/* Arcana Group Labels and Glow Zones */}
-          <div className="absolute inset-0 pointer-events-none z-0">
-            {/* The Visionary - Creative (left) */}
-            <motion.div
-              className="absolute"
-              style={{
-                left: 'calc(50% - 380px)',
-                top: 'calc(50% + 20px)',
-                width: '180px',
-                height: '280px',
-                opacity: useTransform(smoothProgress, [0.7, 0.85], [0, 0.6]),
-              }}
-            >
-              <div
-                className="absolute inset-0 rounded-3xl"
-                style={{
-                  border: `1px solid ${colors.accent}33`,
-                  background: `radial-gradient(ellipse at center, ${colors.accent}08 0%, transparent 70%)`,
-                }}
-              />
-              <span
-                className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest whitespace-nowrap"
-                style={{ color: colors.accent, opacity: 0.6 }}
+          {/* Cards laid out in 4 arcana columns - simple grid, no arc animation */}
+          <div className="relative w-full max-w-5xl mx-auto z-10 px-8">
+            <div className="flex justify-center gap-6">
+              {/* The Visionary Column */}
+              <motion.div
+                className="flex flex-col items-center gap-3"
+                style={{ opacity: useTransform(smoothProgress, [0.55, 0.65], [0, 1]) }}
               >
-                The Visionary
-              </span>
-            </motion.div>
+                <span
+                  className="text-[10px] uppercase tracking-widest mb-2"
+                  style={{ color: colors.accent, opacity: 0.7 }}
+                >
+                  The Visionary
+                </span>
+                {tarotCards.slice(0, 4).map((card) => {
+                  const IconComponent = card.icon
+                  return (
+                    <motion.button
+                      key={card.id}
+                      className="w-[130px] h-[60px] rounded-xl flex items-center gap-3 px-3 transition-all"
+                      style={{
+                        background: 'transparent',
+                        border: `1px solid ${colors.accent}66`,
+                        boxShadow: `0 0 15px ${colors.accent}22`,
+                      }}
+                      whileHover={{
+                        background: `${colors.accent}15`,
+                        boxShadow: `0 0 25px ${colors.accent}44`,
+                        scale: 1.02,
+                      }}
+                      onClick={() => onWorkflowSelect?.(card.id)}
+                    >
+                      <IconComponent size={24} weight="duotone" color={colors.text} />
+                      <span className="text-xs text-left leading-tight" style={{ color: colors.text }}>
+                        {card.title}
+                      </span>
+                    </motion.button>
+                  )
+                })}
+              </motion.div>
 
-            {/* The Merchant - Marketing (center-left) */}
-            <motion.div
-              className="absolute"
-              style={{
-                left: 'calc(50% - 180px)',
-                top: 'calc(50% + 20px)',
-                width: '180px',
-                height: '280px',
-                opacity: useTransform(smoothProgress, [0.72, 0.87], [0, 0.6]),
-              }}
-            >
-              <div
-                className="absolute inset-0 rounded-3xl"
-                style={{
-                  border: `1px solid #10B98133`,
-                  background: `radial-gradient(ellipse at center, #10B98108 0%, transparent 70%)`,
-                }}
-              />
-              <span
-                className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest whitespace-nowrap"
-                style={{ color: '#10B981', opacity: 0.6 }}
+              {/* The Merchant Column */}
+              <motion.div
+                className="flex flex-col items-center gap-3"
+                style={{ opacity: useTransform(smoothProgress, [0.58, 0.68], [0, 1]) }}
               >
-                The Merchant
-              </span>
-            </motion.div>
+                <span
+                  className="text-[10px] uppercase tracking-widest mb-2"
+                  style={{ color: '#10B981', opacity: 0.7 }}
+                >
+                  The Merchant
+                </span>
+                {tarotCards.slice(4, 8).map((card) => {
+                  const IconComponent = card.icon
+                  return (
+                    <motion.button
+                      key={card.id}
+                      className="w-[130px] h-[60px] rounded-xl flex items-center gap-3 px-3 transition-all"
+                      style={{
+                        background: 'transparent',
+                        border: `1px solid #10B98166`,
+                        boxShadow: `0 0 15px #10B98122`,
+                      }}
+                      whileHover={{
+                        background: `#10B98115`,
+                        boxShadow: `0 0 25px #10B98144`,
+                        scale: 1.02,
+                      }}
+                      onClick={() => onWorkflowSelect?.(card.id)}
+                    >
+                      <IconComponent size={24} weight="duotone" color={colors.text} />
+                      <span className="text-xs text-left leading-tight" style={{ color: colors.text }}>
+                        {card.title}
+                      </span>
+                    </motion.button>
+                  )
+                })}
+              </motion.div>
 
-            {/* The Oracle - Intelligence (center-right) */}
-            <motion.div
-              className="absolute"
-              style={{
-                left: 'calc(50% + 20px)',
-                top: 'calc(50% + 20px)',
-                width: '150px',
-                height: '280px',
-                opacity: useTransform(smoothProgress, [0.74, 0.89], [0, 0.6]),
-              }}
-            >
-              <div
-                className="absolute inset-0 rounded-3xl"
-                style={{
-                  border: `1px solid #8B5CF633`,
-                  background: `radial-gradient(ellipse at center, #8B5CF608 0%, transparent 70%)`,
-                }}
-              />
-              <span
-                className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest whitespace-nowrap"
-                style={{ color: '#8B5CF6', opacity: 0.6 }}
+              {/* The Oracle Column */}
+              <motion.div
+                className="flex flex-col items-center gap-3"
+                style={{ opacity: useTransform(smoothProgress, [0.61, 0.71], [0, 1]) }}
               >
-                The Oracle
-              </span>
-            </motion.div>
+                <span
+                  className="text-[10px] uppercase tracking-widest mb-2"
+                  style={{ color: '#8B5CF6', opacity: 0.7 }}
+                >
+                  The Oracle
+                </span>
+                {tarotCards.slice(8, 11).map((card) => {
+                  const IconComponent = card.icon
+                  return (
+                    <motion.button
+                      key={card.id}
+                      className="w-[130px] h-[60px] rounded-xl flex items-center gap-3 px-3 transition-all"
+                      style={{
+                        background: 'transparent',
+                        border: `1px solid #8B5CF666`,
+                        boxShadow: `0 0 15px #8B5CF622`,
+                      }}
+                      whileHover={{
+                        background: `#8B5CF615`,
+                        boxShadow: `0 0 25px #8B5CF644`,
+                        scale: 1.02,
+                      }}
+                      onClick={() => onWorkflowSelect?.(card.id)}
+                    >
+                      <IconComponent size={24} weight="duotone" color={colors.text} />
+                      <span className="text-xs text-left leading-tight" style={{ color: colors.text }}>
+                        {card.title}
+                      </span>
+                    </motion.button>
+                  )
+                })}
+              </motion.div>
 
-            {/* The Alchemist - Arcane (right) */}
-            <motion.div
-              className="absolute"
-              style={{
-                left: 'calc(50% + 190px)',
-                top: 'calc(50% + 20px)',
-                width: '140px',
-                height: '280px',
-                opacity: useTransform(smoothProgress, [0.76, 0.91], [0, 0.6]),
-              }}
-            >
-              <div
-                className="absolute inset-0 rounded-3xl"
-                style={{
-                  border: `1px solid #EC489933`,
-                  background: `radial-gradient(ellipse at center, #EC489908 0%, transparent 70%)`,
-                }}
-              />
-              <span
-                className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-widest whitespace-nowrap"
-                style={{ color: '#EC4899', opacity: 0.6 }}
+              {/* The Alchemist Column */}
+              <motion.div
+                className="flex flex-col items-center gap-3"
+                style={{ opacity: useTransform(smoothProgress, [0.64, 0.74], [0, 1]) }}
               >
-                The Alchemist
-              </span>
-            </motion.div>
-          </div>
-
-          {/* Cards in Arc Formation - scroll triggers arc-to-grid animation */}
-          <div className="relative w-full max-w-6xl h-[500px] z-10">
-            {tarotCards.map((card, index) => {
-              const totalCards = tarotCards.length
-
-              // Arc formation (initial) - cards spread in a semicircle arc
-              const arcAngle = (index / (totalCards - 1)) * Math.PI - Math.PI / 2 // -90° to 90°
-              const arcRadius = 350
-              const arcX = Math.sin(arcAngle) * arcRadius
-              const arcY = -Math.cos(arcAngle) * arcRadius * 0.4 + 100
-              const arcRotation = (index - (totalCards - 1) / 2) * 8 // Fan rotation
-
-              // Grid formation by arcana groups (horizontal arrangement)
-              // Group 1: Visionary (0-3), Group 2: Merchant (4-7), Group 3: Oracle (8-10), Group 4: Alchemist (11-12)
-              let groupIndex = 0
-              let indexInGroup = index
-              if (index < 4) {
-                groupIndex = 0
-                indexInGroup = index
-              } else if (index < 8) {
-                groupIndex = 1
-                indexInGroup = index - 4
-              } else if (index < 11) {
-                groupIndex = 2
-                indexInGroup = index - 8
-              } else {
-                groupIndex = 3
-                indexInGroup = index - 11
-              }
-
-              // Calculate grid position based on group
-              const groupOffsets = [-290, -90, 110, 280] // X offset for each group
-              const gridX = groupOffsets[groupIndex]
-              const gridY = indexInGroup * 70 - 70 // Stack vertically within group
-              const gridRotation = 0
-
-              const cardDelay = index * 0.03
-
-              return (
-                <TarotCard
-                  key={card.id}
-                  card={card}
-                  index={index}
-                  arcX={arcX}
-                  arcY={arcY}
-                  arcRotation={arcRotation}
-                  gridX={gridX}
-                  gridY={gridY}
-                  gridRotation={gridRotation}
-                  cardDelay={cardDelay}
-                  onSelect={() => onWorkflowSelect?.(card.id)}
-                  scrollProgress={progress}
-                />
-              )
-            })}
+                <span
+                  className="text-[10px] uppercase tracking-widest mb-2"
+                  style={{ color: '#EC4899', opacity: 0.7 }}
+                >
+                  The Alchemist
+                </span>
+                {tarotCards.slice(11, 13).map((card) => {
+                  const IconComponent = card.icon
+                  return (
+                    <motion.button
+                      key={card.id}
+                      className="w-[130px] h-[60px] rounded-xl flex items-center gap-3 px-3 transition-all"
+                      style={{
+                        background: 'transparent',
+                        border: `1px solid #EC489966`,
+                        boxShadow: `0 0 15px #EC489922`,
+                      }}
+                      whileHover={{
+                        background: `#EC489915`,
+                        boxShadow: `0 0 25px #EC489944`,
+                        scale: 1.02,
+                      }}
+                      onClick={() => onWorkflowSelect?.(card.id)}
+                    >
+                      <IconComponent size={24} weight="duotone" color={colors.text} />
+                      <span className="text-xs text-left leading-tight" style={{ color: colors.text }}>
+                        {card.title}
+                      </span>
+                    </motion.button>
+                  )
+                })}
+              </motion.div>
+            </div>
           </div>
 
           {/* Footer */}
