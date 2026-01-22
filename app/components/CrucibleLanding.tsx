@@ -331,11 +331,21 @@ export default function CrucibleLanding({
   // Scroll to workflows section on mount if requested
   useEffect(() => {
     if (initialScrollToWorkflows && containerRef.current) {
-      // Scroll to ~70% which is where workflows are fully visible
-      const scrollTarget = containerRef.current.scrollHeight * 0.70
-      setTimeout(() => {
-        containerRef.current?.scrollTo({ top: scrollTarget, behavior: 'instant' })
-      }, 100)
+      // Use a longer delay to ensure content is fully rendered after transition
+      // and use requestAnimationFrame for smooth scroll timing
+      const scrollToWorkflows = () => {
+        if (containerRef.current) {
+          const scrollTarget = containerRef.current.scrollHeight * 0.70
+          containerRef.current.scrollTo({ top: scrollTarget, behavior: 'instant' })
+        }
+      }
+
+      // Wait for transition to complete and content to render
+      const timeoutId = setTimeout(() => {
+        requestAnimationFrame(scrollToWorkflows)
+      }, 350) // After radial wipe transition (0.8s duration / 2 + buffer)
+
+      return () => clearTimeout(timeoutId)
     }
   }, [initialScrollToWorkflows])
   const [time, setTime] = useState(0)
