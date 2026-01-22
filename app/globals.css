@@ -2,6 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Dobla Sans Font Family */
+@font-face {
+  font-family: 'Dobla Sans';
+  src: url('/fonts/dobla-sans/DoblaSans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dobla Sans';
+  src: url('/fonts/dobla-sans/DoblaSans-SemiCondensed.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: semi-condensed;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dobla Sans';
+  src: url('/fonts/dobla-sans/DoblaSans-Condensed.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: condensed;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dobla Sans';
+  src: url('/fonts/dobla-sans/DoblaSans-SemiExpanded.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: semi-expanded;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dobla Sans';
+  src: url('/fonts/dobla-sans/DoblaSans-Expanded.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: expanded;
+  font-display: swap;
+}
+
 :root {
   /* Legacy dark theme (v2) */
   --bg-primary: #0a0a0a;
@@ -38,23 +83,23 @@ body.theme-ocean {
   color: var(--ocean-text);
 }
 
-/* Typography - Futuriata display font + Inter for body */
-/* Fonts are loaded via next/font in layout.tsx for optimal performance */
+/* Typography - Dobla Sans for clean, legible UI */
+/* Futuriata kept for brand elements, Dobla Sans for body/UI */
 
 h1, h2, h3, .font-display {
-  font-family: var(--font-futuriata), var(--font-inter), system-ui, sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-family: 'Dobla Sans', var(--font-inter), system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
-/* Body text uses Inter */
+/* Body text uses Dobla Sans */
 body {
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: 'Dobla Sans', var(--font-inter), system-ui, sans-serif;
 }
 
-/* Explicit brand class for logo/branding elements */
+/* Explicit brand class for logo/branding elements - keep Futuriata */
 .brand-text {
-  font-family: var(--font-futuriata), var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-futuriata), 'Dobla Sans', system-ui, sans-serif;
   letter-spacing: 0.08em;
   font-weight: 700;
   text-transform: uppercase;
@@ -65,6 +110,19 @@ body {
   font-family: var(--font-futuriata-line), var(--font-futuriata), system-ui, sans-serif;
   letter-spacing: 0.1em;
   font-weight: 300;
+}
+
+/* Dobla Sans condensed for compact UI elements */
+.font-condensed {
+  font-family: 'Dobla Sans', system-ui, sans-serif;
+  font-stretch: condensed;
+}
+
+/* Dobla Sans expanded for headings that need presence */
+.font-expanded {
+  font-family: 'Dobla Sans', system-ui, sans-serif;
+  font-stretch: expanded;
+  letter-spacing: 0.05em;
 }
 
 /* Custom scrollbar */
