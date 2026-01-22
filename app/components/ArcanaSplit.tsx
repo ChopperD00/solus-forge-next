@@ -189,42 +189,43 @@ export default function ArcanaSplit({
   columnIndex,
   onCardSelect,
 }: ArcanaSplitProps) {
-  const stagger = columnIndex * 0.02
+  // Minimal stagger for subtle wave effect - all columns reveal together
+  const stagger = columnIndex * 0.005
   const adjustedStart = splitStart + stagger
   const adjustedEnd = splitEnd + stagger
 
-  // Symbol animations
+  // Symbol animations - shorter duration, fades out quickly
   const symbolOpacity = useTransform(
     scrollProgress,
-    [adjustedStart, adjustedStart + 0.05, adjustedEnd - 0.05, adjustedEnd],
+    [adjustedStart, adjustedStart + 0.03, adjustedEnd - 0.08, adjustedEnd - 0.03],
     [0, 1, 1, 0]
   )
 
   const symbolScale = useTransform(
     scrollProgress,
-    [adjustedStart, adjustedStart + 0.05, adjustedEnd - 0.02, adjustedEnd],
+    [adjustedStart, adjustedStart + 0.03, adjustedEnd - 0.05, adjustedEnd - 0.02],
     [0.5, 1.2, 1, 0.3]
   )
 
-  // Cards fade in
+  // Cards fade in as symbols fade out - tighter timing
   const cardsOpacity = useTransform(
     scrollProgress,
-    [adjustedEnd - 0.05, adjustedEnd + 0.03],
+    [adjustedEnd - 0.06, adjustedEnd - 0.02],
     [0, 1]
   )
 
   // Card position transforms - simple fade in with slight stagger
-  const getCardTransform = (cardIndex: number, totalCards: number) => {
+  const getCardTransform = (cardIndex: number, _totalCards: number) => {
     // No Y movement - cards are already stacked by flexbox
     const y = useTransform(scrollProgress, [0, 1], [0, 0])
 
     // No X movement
     const x = useTransform(scrollProgress, [0, 1], [0, 0])
 
-    // Simple scale in
+    // Simple scale in with minimal card stagger
     const scale = useTransform(
       scrollProgress,
-      [adjustedEnd - 0.05 + cardIndex * 0.01, adjustedEnd + cardIndex * 0.01],
+      [adjustedEnd - 0.06 + cardIndex * 0.005, adjustedEnd - 0.02 + cardIndex * 0.005],
       [0.8, 1]
     )
 
