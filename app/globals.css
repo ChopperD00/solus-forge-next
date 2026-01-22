@@ -2,50 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dobla Sans Font Family */
-@font-face {
-  font-family: 'Dobla Sans';
-  src: url('/fonts/dobla-sans/DoblaSans-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Dobla Sans';
-  src: url('/fonts/dobla-sans/DoblaSans-SemiCondensed.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-stretch: semi-condensed;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Dobla Sans';
-  src: url('/fonts/dobla-sans/DoblaSans-Condensed.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-stretch: condensed;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Dobla Sans';
-  src: url('/fonts/dobla-sans/DoblaSans-SemiExpanded.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-stretch: semi-expanded;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Dobla Sans';
-  src: url('/fonts/dobla-sans/DoblaSans-Expanded.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-stretch: expanded;
-  font-display: swap;
-}
+/* System font stack - using native fonts for performance and reliability */
 
 :root {
   /* Legacy dark theme (v2) */
@@ -83,23 +40,22 @@ body.theme-ocean {
   color: var(--ocean-text);
 }
 
-/* Typography - Dobla Sans for clean, legible UI */
-/* Futuriata kept for brand elements, Dobla Sans for body/UI */
+/* Typography - System fonts for clean, reliable rendering */
 
 h1, h2, h3, .font-display {
-  font-family: 'Dobla Sans', var(--font-inter), system-ui, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 400;
   letter-spacing: 0.02em;
 }
 
-/* Body text uses Dobla Sans */
+/* Body text */
 body {
-  font-family: 'Dobla Sans', var(--font-inter), system-ui, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* Explicit brand class for logo/branding elements - keep Futuriata */
+/* Brand text class for logo/branding elements */
 .brand-text {
-  font-family: var(--font-futuriata), 'Dobla Sans', system-ui, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   letter-spacing: 0.08em;
   font-weight: 700;
   text-transform: uppercase;
@@ -107,20 +63,20 @@ body {
 
 /* Line variant for special effects */
 .brand-text-line {
-  font-family: var(--font-futuriata-line), var(--font-futuriata), system-ui, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   letter-spacing: 0.1em;
   font-weight: 300;
 }
 
-/* Dobla Sans condensed for compact UI elements */
+/* Condensed style for compact UI elements */
 .font-condensed {
-  font-family: 'Dobla Sans', system-ui, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-stretch: condensed;
 }
 
-/* Dobla Sans expanded for headings that need presence */
+/* Expanded style for headings that need presence */
 .font-expanded {
-  font-family: 'Dobla Sans', system-ui, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-stretch: expanded;
   letter-spacing: 0.05em;
 }

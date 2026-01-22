@@ -176,7 +176,7 @@ export default function TarotCard({
                 className="text-xs font-semibold leading-tight"
                 style={{
                   color: isHovered ? colors.accent : colors.text,
-                  fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                  fontFamily: "system-ui, -apple-system, sans-serif",
                 }}
               >
                 {card.title}
@@ -229,7 +229,7 @@ export default function TarotCard({
               className="text-sm font-bold mb-2 text-center"
               style={{
                 color: colors.accent,
-                fontFamily: "'Dobla Sans', system-ui, sans-serif",
+                fontFamily: "system-ui, -apple-system, sans-serif",
               }}
             >
               {card.title}

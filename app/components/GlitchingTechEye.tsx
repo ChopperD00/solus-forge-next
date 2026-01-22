@@ -1,240 +1,288 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import * as React from "react"
+import { useRef, useEffect } from "react"
 
 interface GlitchingTechEyeProps {
   size?: number
-  glitchIntensity?: number
+  hueBase?: number // Will be converted to orange palette
+  rotationSpeed?: number
+  glitchiness?: number
+  grainStrength?: number
+  eyeFollow?: number
+  style?: React.CSSProperties
+}
+
+// SOLUS FORGE color palette
+const colors = {
+  bg: 'transparent',
+  accent: '#FF6B00',
+  accentLight: '#FF8C33',
+  accentDark: '#CC5500',
+  accentGlow: 'rgba(255, 107, 0, 0.3)',
 }
 
 export default function GlitchingTechEye({
-  size = 120,
-  glitchIntensity = 0.5
+  size = 200,
+  hueBase = 25, // Orange hue
+  rotationSpeed = 0.8,
+  glitchiness = 0.5,
+  grainStrength = 0.3,
+  eyeFollow = 0.7,
+  style,
 }: GlitchingTechEyeProps) {
-  const [glitchOffset, setGlitchOffset] = useState({ x: 0, y: 0 })
-  const [isGlitching, setIsGlitching] = useState(false)
-  const [scanlineY, setScanlineY] = useState(0)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const rafRef = useRef<number | null>(null)
+  const tRef = useRef(0)
 
-  // Random glitch effect
+  const mouseRef = useRef<{ x: number; y: number; inside: boolean }>({
+    x: 0,
+    y: 0,
+    inside: false,
+  })
+  const eyeOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
+
   useEffect(() => {
-    const glitchInterval = setInterval(() => {
-      if (Math.random() < glitchIntensity * 0.3) {
-        setIsGlitching(true)
-        setGlitchOffset({
-          x: (Math.random() - 0.5) * 8,
-          y: (Math.random() - 0.5) * 4,
-        })
-        setTimeout(() => {
-          setIsGlitching(false)
-          setGlitchOffset({ x: 0, y: 0 })
-        }, 50 + Math.random() * 100)
+    const el = containerRef.current
+    if (!el) return
+
+    const onMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      mouseRef.current = {
+        x,
+        y,
+        inside: x >= 0 && y >= 0 && x <= rect.width && y <= rect.height,
       }
-    }, 150)
+    }
 
-    return () => clearInterval(glitchInterval)
-  }, [glitchIntensity])
+    const onLeave = () => {
+      mouseRef.current.inside = false
+    }
 
-  // Scanline animation
-  useEffect(() => {
-    const scanInterval = setInterval(() => {
-      setScanlineY(prev => (prev + 2) % 100)
-    }, 50)
-    return () => clearInterval(scanInterval)
+    window.addEventListener("mousemove", onMove, { passive: true })
+    window.addEventListener("mouseout", onLeave, { passive: true })
+
+    return () => {
+      window.removeEventListener("mousemove", onMove as any)
+      window.removeEventListener("mouseout", onLeave as any)
+    }
   }, [])
 
-  const scale = size / 120
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    const asciiDensity = " .:-=+*#%@"
+
+    const render = () => {
+      tRef.current += 0.016
+      const t = tRef.current
+      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1))
+      const wCss = canvas.clientWidth || size
+      const hCss = canvas.clientHeight || size
+      const w = Math.floor(wCss * dpr)
+      const h = Math.floor(hCss * dpr)
+
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w
+        canvas.height = h
+      }
+
+      ctx.save()
+      ctx.scale(dpr, dpr)
+
+      // Clear with transparent background
+      ctx.clearRect(0, 0, wCss, hCss)
+
+      const cx = wCss / 2
+      const cy = hCss / 2
+      const radius = Math.min(wCss, hCss) * 0.35
+
+      // Orange hue shift for SOLUS FORGE palette
+      const hueShift = (Math.sin(t * 0.5) * 0.5 + 0.5) * 15
+      const hue = (hueBase + hueShift) % 360
+
+      const rotation = t * rotationSpeed * Math.PI * 0.5
+      const shouldGlitch = Math.random() < 0.06 * glitchiness
+      const gOffset = shouldGlitch ? (Math.random() - 0.5) * 15 * glitchiness : 0
+      const gScale = shouldGlitch ? 1 + (Math.random() - 0.5) * 0.2 * glitchiness : 1
+
+      ctx.save()
+      if (shouldGlitch) {
+        ctx.translate(gOffset, gOffset * 0.8)
+        ctx.scale(gScale, 1 / (gScale || 1))
+      }
+
+      // Inner orb glow - orange palette
+      const orbGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * 1.3)
+      orbGrad.addColorStop(0, `hsla(${hue + 10}, 100%, 70%, 0.9)`)
+      orbGrad.addColorStop(0.3, `hsla(${hue}, 90%, 55%, 0.6)`)
+      orbGrad.addColorStop(0.6, `hsla(${hue - 5}, 80%, 40%, 0.3)`)
+      orbGrad.addColorStop(1, "rgba(0,0,0,0)")
+      ctx.fillStyle = orbGrad
+      ctx.beginPath()
+      ctx.arc(cx, cy, radius * 1.3, 0, Math.PI * 2)
+      ctx.fill()
+
+      // Eye follow logic
+      const target = mouseRef.current
+      const maxOffset = radius * 0.15 * eyeFollow
+      let tx = 0, ty = 0
+
+      if (target.inside) {
+        const dx = target.x - cx
+        const dy = target.y - cy
+        const len = Math.hypot(dx, dy) || 1
+        const k = Math.min(1, len / (radius * 1.2))
+        tx = (dx / len) * maxOffset * k
+        ty = (dy / len) * maxOffset * k
+      }
+
+      const lerp = (a: number, b: number, t: number) => a + (b - a) * t
+      eyeOffsetRef.current.x = lerp(eyeOffsetRef.current.x, tx, 0.1 + 0.15 * eyeFollow)
+      eyeOffsetRef.current.y = lerp(eyeOffsetRef.current.y, ty, 0.1 + 0.15 * eyeFollow)
+
+      // Pupil/center bright spot - orange
+      const cRad = radius * 0.25
+      const pupilGrad = ctx.createRadialGradient(
+        cx + eyeOffsetRef.current.x,
+        cy + eyeOffsetRef.current.y,
+        0,
+        cx + eyeOffsetRef.current.x,
+        cy + eyeOffsetRef.current.y,
+        cRad
+      )
+      pupilGrad.addColorStop(0, `hsla(${hue + 15}, 100%, 85%, 1)`)
+      pupilGrad.addColorStop(0.5, `hsla(${hue + 10}, 95%, 65%, 0.9)`)
+      pupilGrad.addColorStop(1, `hsla(${hue}, 90%, 50%, 0.6)`)
+
+      ctx.fillStyle = pupilGrad
+      ctx.beginPath()
+      ctx.arc(
+        cx + eyeOffsetRef.current.x,
+        cy + eyeOffsetRef.current.y,
+        cRad,
+        0,
+        Math.PI * 2
+      )
+      ctx.fill()
+
+      // Outer ring with glitch effect
+      ctx.strokeStyle = `hsla(${hue}, 70%, 60%, 0.5)`
+      ctx.lineWidth = 1.5
+
+      if (shouldGlitch) {
+        const segments = 8
+        for (let i = 0; i < segments; i++) {
+          const a0 = (i / segments) * Math.PI * 2
+          const a1 = ((i + 1) / segments) * Math.PI * 2
+          const rr = radius * 1.1 + (Math.random() - 0.5) * 8 * glitchiness
+          ctx.beginPath()
+          ctx.arc(cx, cy, rr, a0, a1)
+          ctx.stroke()
+        }
+      } else {
+        ctx.beginPath()
+        ctx.arc(cx, cy, radius * 1.1, 0, Math.PI * 2)
+        ctx.stroke()
+      }
+
+      ctx.restore()
+
+      // ASCII particles on the sphere
+      ctx.font = `${Math.max(6, Math.floor(8))}px monospace`
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
+
+      const spacing = 7
+      const cols = Math.min(30, Math.floor(wCss / spacing))
+      const rows = Math.min(30, Math.floor(hCss / spacing))
+
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          const x = (i - cols / 2) * spacing + cx
+          const y = (j - rows / 2) * spacing + cy
+          const dx = x - cx
+          const dy = y - cy
+          const dist = Math.hypot(dx, dy)
+
+          if (dist < radius * 0.9 && dist > radius * 0.3 && Math.random() > 0.5) {
+            const z = Math.sqrt(Math.max(0, radius * radius - dx * dx - dy * dy))
+            const rotZ = dx * Math.sin(rotation) + z * Math.cos(rotation)
+            const bright = (rotZ + radius) / (radius * 2)
+
+            if (rotZ > -radius * 0.3) {
+              let idx = Math.floor(bright * (asciiDensity.length - 1))
+              idx = Math.min(asciiDensity.length - 1, Math.max(0, idx))
+              let ch = asciiDensity[idx]
+
+              // Glitch characters
+              if (glitchiness > 0.6 && Math.random() < 0.2) {
+                const glitchChars = ["█", "▓", "▒", "░", "▄", "▀", "■", "□"]
+                ch = glitchChars[Math.floor(Math.random() * glitchChars.length)]
+              }
+
+              const alpha = Math.max(0.15, bright * 0.6)
+              ctx.fillStyle = `hsla(${hue}, 80%, 70%, ${alpha})`
+              ctx.fillText(ch, x, y)
+            }
+          }
+        }
+      }
+
+      // Subtle grain overlay
+      if (grainStrength > 0) {
+        for (let i = 0; i < 50; i++) {
+          const gx = Math.random() * wCss
+          const gy = Math.random() * hCss
+          const gdist = Math.hypot(gx - cx, gy - cy)
+          if (gdist < radius * 1.2) {
+            const op = Math.random() * 0.15 * grainStrength
+            ctx.fillStyle = `rgba(255, 150, 50, ${op})`
+            ctx.beginPath()
+            ctx.arc(gx, gy, Math.random() * 1.5, 0, Math.PI * 2)
+            ctx.fill()
+          }
+        }
+      }
+
+      ctx.restore()
+
+      rafRef.current = requestAnimationFrame(render)
+    }
+
+    rafRef.current = requestAnimationFrame(render)
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [size, hueBase, rotationSpeed, glitchiness, grainStrength, eyeFollow])
 
   return (
     <div
-      className="relative"
+      ref={containerRef}
       style={{
+        ...style,
         width: size,
-        height: size * 0.6,
-        filter: isGlitching ? 'brightness(1.2)' : 'none',
+        height: size,
+        position: "relative",
+        overflow: "visible",
       }}
     >
-      {/* Glitch layers */}
-      {isGlitching && (
-        <>
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              transform: `translate(${glitchOffset.x * 2}px, ${glitchOffset.y}px)`,
-              opacity: 0.7,
-              mixBlendMode: 'screen',
-            }}
-          >
-            <EyeSVG scale={scale} color="cyan" />
-          </div>
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              transform: `translate(${-glitchOffset.x * 2}px, ${-glitchOffset.y}px)`,
-              opacity: 0.7,
-              mixBlendMode: 'screen',
-            }}
-          >
-            <EyeSVG scale={scale} color="red" />
-          </div>
-        </>
-      )}
-
-      {/* Main eye */}
-      <motion.div
-        animate={{
-          x: glitchOffset.x,
-          y: glitchOffset.y,
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
         }}
-        transition={{ duration: 0.05 }}
-        className="relative"
-      >
-        <EyeSVG scale={scale} />
-      </motion.div>
-
-      {/* Scanline overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none overflow-hidden"
-        style={{ opacity: 0.1 }}
-      >
-        <div
-          className="absolute w-full h-[2px]"
-          style={{
-            top: `${scanlineY}%`,
-            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)',
-          }}
-        />
-      </div>
-
-      {/* CRT flicker */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        animate={{
-          opacity: [0, 0.02, 0, 0.01, 0],
-        }}
-        transition={{
-          duration: 0.15,
-          repeat: Infinity,
-          repeatDelay: Math.random() * 2,
-        }}
-        style={{ background: 'white' }}
       />
     </div>
-  )
-}
-
-function EyeSVG({ scale = 1, color }: { scale?: number; color?: string }) {
-  const irisColor = color || '#D4853B'
-  const pupilColor = color ? color : '#1a1a1a'
-  const outlineColor = color || '#FFFFFF'
-
-  return (
-    <svg
-      width={120 * scale}
-      height={72 * scale}
-      viewBox="0 0 120 72"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Outer eye shape - almond */}
-      <path
-        d="M60 8C30 8 8 36 8 36C8 36 30 64 60 64C90 64 112 36 112 36C112 36 90 8 60 8Z"
-        fill="#1a1a1a"
-        stroke={outlineColor}
-        strokeWidth="2"
-      />
-
-      {/* Inner eye outline */}
-      <path
-        d="M60 14C35 14 16 36 16 36C16 36 35 58 60 58C85 58 104 36 104 36C104 36 85 14 60 14Z"
-        fill="none"
-        stroke={outlineColor}
-        strokeWidth="1"
-        strokeOpacity="0.3"
-      />
-
-      {/* Iris - outer glow */}
-      <defs>
-        <radialGradient id={`irisGlow-${color || 'main'}`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor={irisColor} stopOpacity="0.8" />
-          <stop offset="70%" stopColor={irisColor} stopOpacity="0.4" />
-          <stop offset="100%" stopColor={irisColor} stopOpacity="0" />
-        </radialGradient>
-      </defs>
-
-      {/* Iris glow */}
-      <circle
-        cx="60"
-        cy="36"
-        r="22"
-        fill={`url(#irisGlow-${color || 'main'})`}
-      />
-
-      {/* Iris - main */}
-      <circle
-        cx="60"
-        cy="36"
-        r="16"
-        fill={irisColor}
-      />
-
-      {/* Iris texture rings */}
-      <circle
-        cx="60"
-        cy="36"
-        r="14"
-        fill="none"
-        stroke="#B67030"
-        strokeWidth="0.5"
-        strokeOpacity="0.5"
-      />
-      <circle
-        cx="60"
-        cy="36"
-        r="11"
-        fill="none"
-        stroke="#8B5A2B"
-        strokeWidth="0.5"
-        strokeOpacity="0.3"
-      />
-
-      {/* Pupil */}
-      <circle
-        cx="60"
-        cy="36"
-        r="7"
-        fill={pupilColor}
-      />
-
-      {/* Pupil highlight */}
-      <circle
-        cx="57"
-        cy="33"
-        r="2"
-        fill="white"
-        fillOpacity="0.4"
-      />
-
-      {/* Tech circuit lines */}
-      <g stroke={outlineColor} strokeWidth="0.5" strokeOpacity="0.4">
-        {/* Horizontal circuit */}
-        <line x1="20" y1="36" x2="38" y2="36" />
-        <line x1="82" y1="36" x2="100" y2="36" />
-
-        {/* Corner accents */}
-        <polyline points="24,28 28,28 28,32" fill="none" />
-        <polyline points="96,28 92,28 92,32" fill="none" />
-        <polyline points="24,44 28,44 28,40" fill="none" />
-        <polyline points="96,44 92,44 92,40" fill="none" />
-      </g>
-
-      {/* Outer frame corners - tech style */}
-      <g stroke={outlineColor} strokeWidth="1.5" strokeOpacity="0.6">
-        <path d="M12 24 L12 18 L24 18" fill="none" />
-        <path d="M108 24 L108 18 L96 18" fill="none" />
-        <path d="M12 48 L12 54 L24 54" fill="none" />
-        <path d="M108 48 L108 54 L96 54" fill="none" />
-      </g>
-    </svg>
   )
 }

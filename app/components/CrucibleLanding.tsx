@@ -277,8 +277,6 @@ export default function CrucibleLanding({
   const [prompt, setPrompt] = useState('')
   const windowSize = useWindowSize()
   const [localSelectedAgents, setLocalSelectedAgents] = useState<string[]>(selectedAgents)
-  const [agentsLanded, setAgentsLanded] = useState<Record<string, boolean>>({})
-  const prevMorphProgress = useRef(0)
 
   // Scroll-based animation
   const { scrollYProgress } = useScroll({
@@ -362,6 +360,9 @@ export default function CrucibleLanding({
   // Get current morph progress and chatBarY values
   const [currentMorphProgress, setCurrentMorphProgress] = useState(0)
   const [currentChatBarY, setCurrentChatBarY] = useState(300)
+  const [agentsLanded, setAgentsLanded] = useState<Record<string, boolean>>({})
+  const prevMorphProgress = useRef(0)
+
   useEffect(() => {
     const unsubscribe = morphProgress.on('change', setCurrentMorphProgress)
     return () => unsubscribe()
@@ -371,20 +372,19 @@ export default function CrucibleLanding({
     return () => unsubscribe()
   }, [chatBarY])
 
-  // Detect when agents land in their boxes (morph progress crosses threshold)
+  // Detect when agents land in boxes (morph reaches threshold)
   useEffect(() => {
     const landingThreshold = 0.85
-    // Check if we just crossed the landing threshold
     if (currentMorphProgress >= landingThreshold && prevMorphProgress.current < landingThreshold) {
-      // Trigger landing for all agents with staggered timing
+      // Stagger the landing glow effect for each agent
       agents.forEach((agent, index) => {
         setTimeout(() => {
           setAgentsLanded(prev => ({ ...prev, [agent.id]: true }))
-          // Reset after animation completes
+          // Clear glow after animation
           setTimeout(() => {
             setAgentsLanded(prev => ({ ...prev, [agent.id]: false }))
-          }, 3000)
-        }, index * 100) // Stagger by 100ms per agent
+          }, 2500)
+        }, index * 80)
       })
     }
     prevMorphProgress.current = currentMorphProgress
@@ -394,7 +394,7 @@ export default function CrucibleLanding({
     <div
       ref={containerRef}
       className="relative"
-      style={{ height: '600vh', background: colors.bg }}
+      style={{ height: '900vh', background: colors.bg }}
     >
       {/* SpectraNoise Background */}
       <SpectraNoiseBackground
@@ -432,39 +432,34 @@ export default function CrucibleLanding({
             })}
           </div>
 
-          {/* Right: Name + Version Badge */}
-          <div className="flex items-center gap-3">
-            <span
-              className="text-sm font-medium tracking-widest"
-              style={{
-                color: colors.accent,
-                fontFamily: "var(--font-futuriata), 'Futuriata', system-ui, sans-serif",
-                letterSpacing: '0.15em',
-              }}
-            >
-              SOLUS FORGE
-            </span>
-            <div
-              className="px-3 py-1.5 rounded-full text-xs font-medium tracking-wide"
-              style={{
-                background: 'rgba(255, 107, 0, 0.15)',
-                border: '1px solid rgba(255, 107, 0, 0.3)',
-                color: colors.accent,
-                fontFamily: "var(--font-futuriata), 'Futuriata', system-ui, sans-serif",
-              }}
-            >
-              Pre-Alpha v3.5
-            </div>
+          {/* Right: Version Badge */}
+          <div
+            className="px-3 py-1.5 rounded-full text-xs font-medium tracking-wide"
+            style={{
+              background: 'rgba(255, 107, 0, 0.15)',
+              border: '1px solid rgba(255, 107, 0, 0.3)',
+              color: colors.accent,
+              fontFamily: "system-ui, -apple-system, sans-serif",
+            }}
+          >
+            Pre-Alpha v3.5
           </div>
         </div>
 
-        {/* SECTION 1: Hero with Gradient Circle + Glitching Eye */}
+        {/* SECTION 1: Hero with Gradient Circle + Glitching Tech Eye */}
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           style={{ opacity: heroOpacity, scale: heroScale }}
         >
           <GradientCircle scrollProgress={0}>
-            <GlitchingTechEye size={180} glitchIntensity={0.4} />
+            <GlitchingTechEye
+              size={220}
+              hueBase={25}
+              rotationSpeed={0.6}
+              glitchiness={0.4}
+              grainStrength={0.25}
+              eyeFollow={0.8}
+            />
           </GradientCircle>
         </motion.div>
 
@@ -567,8 +562,13 @@ export default function CrucibleLanding({
               opacity: chatBarOpacity,
             }}
           >
-            {/* Latin Phrase for chat phase */}
-            <div className="text-center mb-6">
+            {/* Latin Phrase - fades in AFTER bar reaches sticky point */}
+            <motion.div
+              className="text-center mb-6"
+              style={{
+                opacity: useTransform(smoothProgress, [0.32, 0.38], [0, 1]),
+              }}
+            >
               <h2
                 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-wide"
                 style={{
@@ -579,39 +579,39 @@ export default function CrucibleLanding({
               >
                 Aut viam inveniam aut faciam
               </h2>
-            </div>
+            </motion.div>
 
-            {/* Agent selector chips - single line, no overflow clipping */}
+            {/* Agent selector chips - with BorderBeam glow when agents land */}
             <div className="mb-4 flex justify-center gap-3 pb-2 px-4">
               {agents.map(agent => {
                 const isActive = localSelectedAgents.includes(agent.id)
-                const hasLanded = agentsLanded[agent.id]
+                const hasLanded = agentsLanded[agent.id] || false
                 const IconComponent = agent.icon
                 return (
                   <button
                     key={agent.id}
                     onClick={() => handleAgentSelect(agent.id)}
-                    className="relative flex flex-col items-center px-4 py-2 rounded-lg text-xs transition-all shrink-0"
+                    className="relative flex flex-col items-center px-5 py-3 rounded-lg transition-all shrink-0 overflow-hidden"
                     style={{
                       background: isActive ? `${agent.color}22` : colors.surface,
                       border: `1px solid ${isActive ? agent.color : colors.border}`,
                       color: isActive ? agent.color : colors.textMuted,
-                      boxShadow: hasLanded ? `0 0 25px ${agent.color}66, inset 0 0 15px ${agent.color}33` : 'none',
+                      boxShadow: hasLanded ? `0 0 25px ${agent.color}66, inset 0 0 15px ${agent.color}22` : 'none',
                     }}
                   >
-                    {/* Border Beam effect when agent lands */}
+                    {/* BorderBeam effect when agent lands */}
                     <BorderBeam color={agent.color} isActive={hasLanded} duration={1.2} size={60} />
-                    <div className="flex items-center gap-1.5">
-                      <IconComponent size={16} weight="duotone" color={isActive ? agent.color : colors.textMuted} />
-                      <span className="font-medium">{agent.name}</span>
+                    <div className="flex items-center gap-2">
+                      <IconComponent size={18} weight="duotone" color={isActive ? agent.color : colors.textMuted} />
+                      <span className="font-medium text-sm">{agent.name}</span>
                     </div>
-                    <span className="text-[9px] opacity-70 mt-0.5">{agent.role}</span>
+                    <span className="text-[10px] opacity-70 mt-1">{agent.role}</span>
                   </button>
                 )
               })}
             </div>
 
-            {/* Search bar */}
+            {/* Search bar - bigger text for legibility */}
             <div
               className="relative rounded-2xl overflow-hidden"
               style={{
@@ -626,15 +626,16 @@ export default function CrucibleLanding({
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="What would you like to create today?"
-                  className="flex-1 px-6 py-4 bg-transparent text-base focus:outline-none"
-                  style={{ color: colors.text }}
+                  className="flex-1 px-6 py-5 bg-transparent text-lg focus:outline-none"
+                  style={{ color: colors.text, fontFamily: "system-ui, -apple-system, sans-serif" }}
                 />
                 <button
                   type="submit"
-                  className="px-6 py-3 m-2 rounded-xl font-medium transition-all hover:brightness-110"
+                  className="px-8 py-4 m-2 rounded-xl font-semibold text-base transition-all hover:brightness-110"
                   style={{
                     background: colors.accent,
                     color: colors.text,
+                    fontFamily: "system-ui, -apple-system, sans-serif",
                   }}
                 >
                   Create →
@@ -642,18 +643,19 @@ export default function CrucibleLanding({
               </form>
             </div>
 
-            {/* Quick suggestions */}
-            <div className="mt-3 flex justify-center gap-2 flex-wrap">
+            {/* Quick suggestions - slightly bigger for legibility */}
+            <div className="mt-4 flex justify-center gap-2 flex-wrap">
               {['Generate product images', 'Research competitors', 'Create video ad', 'Build email campaign'].map(
                 suggestion => (
                   <button
                     key={suggestion}
                     onClick={() => setPrompt(suggestion)}
-                    className="px-3 py-1 rounded-lg text-xs transition-all hover:bg-white/10"
+                    className="px-4 py-2 rounded-lg text-sm transition-all hover:bg-white/10"
                     style={{
                       background: `${colors.bg}cc`,
                       border: `1px solid ${colors.border}`,
                       color: colors.textMuted,
+                      fontFamily: "system-ui, -apple-system, sans-serif",
                     }}
                   >
                     {suggestion}
@@ -718,9 +720,9 @@ export default function CrucibleLanding({
             </p>
           </motion.div>
 
-          {/* Arcana Split Columns - unified symbols that fracture into cards */}
+          {/* Arcana Split Columns - unified symbols that fracture into playing cards */}
           <div className="relative w-full max-w-6xl mx-auto z-10 px-4">
-            <div className="flex justify-between gap-4">
+            <div className="flex justify-center gap-4">
               {/* The Visionary - Orange */}
               <ArcanaSplit
                 arcanaName="The Visionary"

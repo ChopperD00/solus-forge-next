@@ -318,16 +318,34 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.5 }}
-            className="absolute inset-0 flex flex-col items-center justify-center z-10"
+            className="absolute inset-0 z-10"
           >
-            {/* Password input - centered in the black hole core */}
+            {/* Title - positioned at top */}
+            <motion.div
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="absolute top-[15%] left-0 right-0 text-center"
+            >
+              <h1
+                className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-widest"
+                style={{
+                  color: colors.text,
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  textShadow: '0 0 40px rgba(100, 100, 100, 0.3)',
+                }}
+              >
+                SOLUS FORGE
+              </h1>
+            </motion.div>
+
+            {/* Password input - absolute center (input only) */}
             <motion.form
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.5 }}
               onSubmit={handleSubmit}
-              className="flex flex-col items-center gap-4"
-              style={{ marginTop: '-40px' }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
             >
               <div className="relative">
                 <input
@@ -352,27 +370,34 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="absolute -bottom-8 left-0 right-0 text-center text-sm"
-                    style={{ color: '#EF4444' }}
+                    style={{ color: '#EF4444', fontFamily: "system-ui, -apple-system, sans-serif" }}
                   >
                     Access Denied
                   </motion.div>
                 )}
               </div>
-
-              <motion.button
-                type="submit"
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-16 h-16 rounded-full font-medium tracking-wider transition-all flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(135deg, #555555 0%, #777777 100%)',
-                  color: colors.text,
-                  boxShadow: '0 0 40px rgba(100, 100, 100, 0.25)',
-                }}
-              >
-                <HandEye size={36} weight="duotone" />
-              </motion.button>
             </motion.form>
+
+            {/* Submit button - positioned below center */}
+            <motion.button
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              type="submit"
+              form="password-form"
+              onClick={handleSubmit}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="absolute top-[58%] left-1/2 -translate-x-1/2 px-8 py-3 rounded-full font-medium tracking-wider transition-all flex items-center gap-3"
+              style={{
+                background: 'linear-gradient(135deg, #666666 0%, #888888 100%)',
+                color: colors.text,
+                fontFamily: "system-ui, -apple-system, sans-serif",
+                boxShadow: '0 0 30px rgba(100, 100, 100, 0.2)',
+              }}
+            >
+              <HandEye size={24} weight="duotone" />
+            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
@@ -396,7 +421,7 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                   className="text-4xl md:text-6xl font-bold tracking-widest lowercase"
                   style={{
                     color: colors.textMuted,
-                    fontFamily: "var(--font-futuriata), 'Futuriata', system-ui, sans-serif",
+                    fontFamily: "system-ui, -apple-system, sans-serif",
                   }}
                 >
                   engaged...
@@ -420,7 +445,7 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                   className="text-5xl md:text-7xl font-bold tracking-widest lowercase"
                   style={{
                     color: colors.text,
-                    fontFamily: "var(--font-futuriata), 'Futuriata', system-ui, sans-serif",
+                    fontFamily: "system-ui, -apple-system, sans-serif",
                   }}
                 >
                   save
@@ -444,7 +469,7 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                   className="text-5xl md:text-7xl font-bold tracking-widest lowercase"
                   style={{
                     color: colors.accent,
-                    fontFamily: "var(--font-futuriata), 'Futuriata', system-ui, sans-serif",
+                    fontFamily: "system-ui, -apple-system, sans-serif",
                     textShadow: `0 0 60px ${colors.accent}`,
                   }}
                 >

@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, MotionValue, useTransform } from 'framer-motion'
-import { ReactNode, ComponentType } from 'react'
+import { ReactNode, ComponentType, useState } from 'react'
 
 interface ArcanaCard {
   id: string
@@ -18,9 +18,9 @@ interface ArcanaSplitProps {
   arcanaSymbol: ReactNode
   cards: ArcanaCard[]
   scrollProgress: MotionValue<number>
-  splitStart: number // When the split animation starts (0-1)
-  splitEnd: number // When the split animation ends (0-1)
-  columnIndex: number // For staggering
+  splitStart: number
+  splitEnd: number
+  columnIndex: number
   onCardSelect?: (cardId: string) => void
 }
 
@@ -31,6 +31,159 @@ const colors = {
   text: '#FFFFFF',
   textMuted: '#888888',
   textDim: '#555555',
+}
+
+// Playing card dimensions (2.5:3.5 ratio like standard cards)
+const CARD_WIDTH = 120
+const CARD_HEIGHT = 168
+
+// Flippable Tarot Card component
+function FlippableCard({
+  card,
+  arcanaColor,
+  transforms,
+  onSelect,
+}: {
+  card: ArcanaCard
+  arcanaColor: string
+  transforms: { x: MotionValue<number>; y: MotionValue<number>; scale: MotionValue<number>; rotate: MotionValue<number> }
+  onSelect?: (id: string) => void
+}) {
+  const [isFlipped, setIsFlipped] = useState(false)
+  const IconComponent = card.icon
+
+  return (
+    <motion.div
+      className="relative cursor-pointer"
+      style={{
+        width: CARD_WIDTH,
+        height: CARD_HEIGHT,
+        x: transforms.x,
+        y: transforms.y,
+        scale: transforms.scale,
+        rotate: transforms.rotate,
+        perspective: 1000,
+      }}
+      onMouseEnter={() => setIsFlipped(true)}
+      onMouseLeave={() => setIsFlipped(false)}
+      onClick={() => onSelect?.(card.id)}
+    >
+      {/* Card container with 3D flip */}
+      <motion.div
+        className="relative w-full h-full"
+        style={{
+          transformStyle: 'preserve-3d',
+        }}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+      >
+        {/* Front of card */}
+        <div
+          className="absolute inset-0 rounded-xl flex flex-col items-center justify-center p-3"
+          style={{
+            backfaceVisibility: 'hidden',
+            background: `linear-gradient(145deg, ${colors.surface} 0%, ${colors.bg} 100%)`,
+            border: `1px solid ${arcanaColor}55`,
+            boxShadow: `
+              0 4px 20px rgba(0,0,0,0.4),
+              0 0 20px ${arcanaColor}22,
+              inset 0 1px 0 rgba(255,255,255,0.05)
+            `,
+          }}
+        >
+          {/* Corner decorations */}
+          <div className="absolute top-2 left-2 w-3 h-3 border-l border-t" style={{ borderColor: `${arcanaColor}44` }} />
+          <div className="absolute top-2 right-2 w-3 h-3 border-r border-t" style={{ borderColor: `${arcanaColor}44` }} />
+          <div className="absolute bottom-2 left-2 w-3 h-3 border-l border-b" style={{ borderColor: `${arcanaColor}44` }} />
+          <div className="absolute bottom-2 right-2 w-3 h-3 border-r border-b" style={{ borderColor: `${arcanaColor}44` }} />
+
+          {/* Icon */}
+          <div
+            className="w-12 h-12 rounded-lg flex items-center justify-center mb-2"
+            style={{
+              background: `${arcanaColor}15`,
+              border: `1px solid ${arcanaColor}33`,
+            }}
+          >
+            <IconComponent size={28} weight="duotone" color={arcanaColor} />
+          </div>
+
+          {/* Title */}
+          <span
+            className="text-xs font-medium text-center leading-tight"
+            style={{ color: colors.text }}
+          >
+            {card.title}
+          </span>
+
+          {/* Subtitle */}
+          <span
+            className="text-[9px] text-center mt-1 opacity-60 leading-tight px-2"
+            style={{ color: colors.textMuted }}
+          >
+            {card.subtitle}
+          </span>
+
+          {/* Arcana indicator */}
+          <div
+            className="absolute bottom-3 text-[7px] uppercase tracking-wider opacity-50"
+            style={{ color: arcanaColor }}
+          >
+            {card.arcana}
+          </div>
+        </div>
+
+        {/* Back of card (capabilities) */}
+        <div
+          className="absolute inset-0 rounded-xl flex flex-col p-3"
+          style={{
+            backfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+            background: `linear-gradient(145deg, ${arcanaColor}22 0%, ${colors.bg} 100%)`,
+            border: `1px solid ${arcanaColor}`,
+            boxShadow: `
+              0 4px 20px rgba(0,0,0,0.4),
+              0 0 30px ${arcanaColor}44,
+              inset 0 0 40px ${arcanaColor}11
+            `,
+          }}
+        >
+          {/* Header */}
+          <div className="flex items-center gap-2 mb-2 pb-2 border-b" style={{ borderColor: `${arcanaColor}33` }}>
+            <IconComponent size={16} weight="duotone" color={arcanaColor} />
+            <span className="text-[10px] font-semibold" style={{ color: arcanaColor }}>
+              {card.title}
+            </span>
+          </div>
+
+          {/* Capabilities list */}
+          <div className="flex-1 flex flex-col gap-1.5">
+            {card.capabilities.map((cap, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-1.5 text-[8px]"
+                style={{ color: colors.text }}
+              >
+                <div
+                  className="w-1 h-1 rounded-full"
+                  style={{ background: arcanaColor }}
+                />
+                <span className="leading-tight">{cap}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Click to select indicator */}
+          <div
+            className="text-[8px] text-center mt-2 pt-2 border-t opacity-70"
+            style={{ borderColor: `${arcanaColor}33`, color: arcanaColor }}
+          >
+            Click to select →
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
 }
 
 export default function ArcanaSplit({
@@ -44,40 +197,36 @@ export default function ArcanaSplit({
   columnIndex,
   onCardSelect,
 }: ArcanaSplitProps) {
-  // Stagger the animation slightly per column
   const stagger = columnIndex * 0.02
   const adjustedStart = splitStart + stagger
   const adjustedEnd = splitEnd + stagger
 
-  // Symbol opacity fades out as split progresses
+  // Symbol animations
   const symbolOpacity = useTransform(
     scrollProgress,
     [adjustedStart, adjustedStart + 0.05, adjustedEnd - 0.05, adjustedEnd],
     [0, 1, 1, 0]
   )
 
-  // Symbol scale pulses then shrinks
   const symbolScale = useTransform(
     scrollProgress,
     [adjustedStart, adjustedStart + 0.05, adjustedEnd - 0.02, adjustedEnd],
     [0.5, 1.2, 1, 0.3]
   )
 
-  // Cards opacity (inverse of symbol - fade in as symbol fades out)
+  // Cards fade in
   const cardsOpacity = useTransform(
     scrollProgress,
     [adjustedEnd - 0.05, adjustedEnd + 0.03],
     [0, 1]
   )
 
-  // Card positions - they split outward from center
+  // Card position transforms
   const getCardTransform = (cardIndex: number, totalCards: number) => {
-    // Cards start stacked at center, then spread out vertically
     const centerOffset = (totalCards - 1) / 2
-    const finalY = (cardIndex - centerOffset) * 70 // Final vertical spacing
-
-    // Add slight horizontal jitter during split
-    const jitterX = (cardIndex % 2 === 0 ? -1 : 1) * 20
+    // More vertical spacing for taller playing cards
+    const finalY = (cardIndex - centerOffset) * (CARD_HEIGHT + 16)
+    const jitterX = (cardIndex % 2 === 0 ? -1 : 1) * 15
 
     const y = useTransform(
       scrollProgress,
@@ -94,26 +243,29 @@ export default function ArcanaSplit({
     const scale = useTransform(
       scrollProgress,
       [adjustedEnd - 0.05, adjustedEnd],
-      [0.8, 1]
+      [0.6, 1]
     )
 
     const rotate = useTransform(
       scrollProgress,
       [adjustedEnd - 0.05, adjustedEnd - 0.02, adjustedEnd + 0.02],
-      [cardIndex * 5 - totalCards * 2.5, cardIndex * 3, 0]
+      [cardIndex * 8 - totalCards * 4, cardIndex * 3, 0]
     )
 
     return { x, y, scale, rotate }
   }
 
   return (
-    <div className="relative flex flex-col items-center flex-1" style={{ minWidth: 150, maxWidth: 180, minHeight: 400 }}>
-      {/* Arcana Name - always visible once section starts */}
+    <div
+      className="relative flex flex-col items-center flex-1"
+      style={{ minWidth: CARD_WIDTH + 20, maxWidth: CARD_WIDTH + 40, minHeight: 600 }}
+    >
+      {/* Arcana Name - positioned above everything */}
       <motion.span
-        className="text-[10px] uppercase tracking-widest mb-4 whitespace-nowrap"
+        className="text-[10px] uppercase tracking-widest mb-6 whitespace-nowrap"
         style={{
           color: arcanaColor,
-          opacity: useTransform(scrollProgress, [adjustedStart, adjustedStart + 0.03], [0, 0.7]),
+          opacity: useTransform(scrollProgress, [adjustedStart, adjustedStart + 0.03], [0, 0.8]),
           fontFamily: "system-ui, -apple-system, sans-serif",
         }}
       >
@@ -121,37 +273,32 @@ export default function ArcanaSplit({
       </motion.span>
 
       {/* Container for symbol and cards */}
-      <div className="relative flex-1 flex items-center justify-center" style={{ minHeight: 320 }}>
-        {/* Unified Arcana Symbol - fades/scales out during split */}
+      <div className="relative flex-1 flex items-start justify-center pt-4" style={{ minHeight: 550 }}>
+        {/* Unified Arcana Symbol */}
         <motion.div
           className="absolute flex flex-col items-center justify-center"
           style={{
             opacity: symbolOpacity,
             scale: symbolScale,
+            top: '20%',
           }}
         >
-          {/* Glowing backdrop */}
           <div
             className="absolute w-32 h-32 rounded-full blur-2xl"
             style={{ background: `${arcanaColor}30` }}
           />
-
-          {/* Symbol container */}
           <div
-            className="relative w-24 h-24 rounded-2xl flex items-center justify-center"
+            className="relative w-20 h-20 rounded-2xl flex items-center justify-center"
             style={{
               background: `linear-gradient(135deg, ${colors.surface} 0%, ${colors.bg} 100%)`,
               border: `2px solid ${arcanaColor}`,
-              boxShadow: `
-                0 0 40px ${arcanaColor}44,
-                inset 0 0 30px ${arcanaColor}22
-              `,
+              boxShadow: `0 0 40px ${arcanaColor}44, inset 0 0 30px ${arcanaColor}22`,
             }}
           >
             {arcanaSymbol}
           </div>
 
-          {/* Fracture lines that appear before split */}
+          {/* Fracture lines */}
           <motion.div
             className="absolute inset-0 flex items-center justify-center pointer-events-none"
             style={{
@@ -162,9 +309,8 @@ export default function ArcanaSplit({
               ),
             }}
           >
-            {/* Crack lines */}
             <svg
-              className="absolute w-32 h-32"
+              className="absolute w-28 h-28"
               viewBox="0 0 100 100"
               style={{ filter: `drop-shadow(0 0 4px ${arcanaColor})` }}
             >
@@ -194,23 +340,10 @@ export default function ArcanaSplit({
                   ),
                 }}
               />
-              <motion.path
-                d="M35 60 L45 55 L55 58 L65 55"
-                stroke={arcanaColor}
-                strokeWidth="0.5"
-                fill="none"
-                style={{
-                  pathLength: useTransform(
-                    scrollProgress,
-                    [adjustedEnd - 0.05, adjustedEnd],
-                    [0, 1]
-                  ),
-                }}
-              />
             </svg>
           </motion.div>
 
-          {/* Particle burst on split */}
+          {/* Particle burst */}
           <motion.div
             className="absolute inset-0 flex items-center justify-center pointer-events-none"
             style={{
@@ -221,8 +354,8 @@ export default function ArcanaSplit({
               ),
             }}
           >
-            {[...Array(8)].map((_, i) => {
-              const angle = (i / 8) * Math.PI * 2
+            {[...Array(6)].map((_, i) => {
+              const angle = (i / 6) * Math.PI * 2
               return (
                 <motion.div
                   key={i}
@@ -233,12 +366,12 @@ export default function ArcanaSplit({
                     x: useTransform(
                       scrollProgress,
                       [adjustedEnd - 0.02, adjustedEnd + 0.02],
-                      [0, Math.cos(angle) * 60]
+                      [0, Math.cos(angle) * 50]
                     ),
                     y: useTransform(
                       scrollProgress,
                       [adjustedEnd - 0.02, adjustedEnd + 0.02],
-                      [0, Math.sin(angle) * 60]
+                      [0, Math.sin(angle) * 50]
                     ),
                     scale: useTransform(
                       scrollProgress,
@@ -252,40 +385,21 @@ export default function ArcanaSplit({
           </motion.div>
         </motion.div>
 
-        {/* Individual Cards - emerge from split */}
+        {/* Playing Cards - emerge from split */}
         <motion.div
-          className="absolute flex flex-col items-center gap-3"
-          style={{ opacity: cardsOpacity }}
+          className="absolute flex flex-col items-center"
+          style={{ opacity: cardsOpacity, top: '5%' }}
         >
           {cards.map((card, cardIndex) => {
-            const IconComponent = card.icon
             const transforms = getCardTransform(cardIndex, cards.length)
-
             return (
-              <motion.button
+              <FlippableCard
                 key={card.id}
-                className="w-[140px] h-[60px] rounded-xl flex items-center gap-3 px-3 transition-all"
-                style={{
-                  background: 'transparent',
-                  border: `1px solid ${arcanaColor}66`,
-                  boxShadow: `0 0 15px ${arcanaColor}22`,
-                  x: transforms.x,
-                  y: transforms.y,
-                  scale: transforms.scale,
-                  rotate: transforms.rotate,
-                }}
-                whileHover={{
-                  background: `${arcanaColor}15`,
-                  boxShadow: `0 0 25px ${arcanaColor}44`,
-                  scale: 1.05,
-                }}
-                onClick={() => onCardSelect?.(card.id)}
-              >
-                <IconComponent size={24} weight="duotone" color={colors.text} />
-                <span className="text-xs text-left leading-tight" style={{ color: colors.text }}>
-                  {card.title}
-                </span>
-              </motion.button>
+                card={card}
+                arcanaColor={arcanaColor}
+                transforms={transforms}
+                onSelect={onCardSelect}
+              />
             )
           })}
         </motion.div>
