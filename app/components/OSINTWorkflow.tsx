@@ -25,7 +25,7 @@ const colors = {
 type InvestigationType = 'competitive_intel' | 'due_diligence'
 type OutputFormat = 'graph' | 'report' | 'json'
 type ScanDepth = 'quick' | 'standard' | 'deep'
-type TargetType = 'person' | 'company' | 'domain'
+type TargetType = 'person' | 'company' | 'domain' | 'phone'
 
 // OSINT Module definitions
 interface OSINTModule {
@@ -51,6 +51,17 @@ const osintModules: OSINTModule[] = [
     sources: ['Hunter.io', 'EmailRep', 'HaveIBeenPwned'],
     color: colors.blue,
     estimatedTime: '15s',
+    forTypes: ['due_diligence'],
+  },
+  {
+    id: 'phone_intel',
+    name: 'Phone Intelligence',
+    icon: '📱',
+    description: 'Carrier lookup, caller ID, spam reports, linked accounts',
+    category: 'identity',
+    sources: ['NumVerify', 'Twilio Lookup', 'CallerID'],
+    color: colors.cyan,
+    estimatedTime: '20s',
     forTypes: ['due_diligence'],
   },
   {
@@ -399,6 +410,7 @@ export default function OSINTWorkflow() {
             { id: 'person', icon: '👤', label: 'Person' },
             { id: 'company', icon: '🏢', label: 'Company' },
             { id: 'domain', icon: '🌐', label: 'Domain' },
+            { id: 'phone', icon: '📞', label: 'Phone' },
           ].map(type => (
             <button
               key={type.id}
@@ -423,6 +435,7 @@ export default function OSINTWorkflow() {
             placeholder={
               targetType === 'person' ? 'Enter name or email...' :
               targetType === 'company' ? 'Enter company name...' :
+              targetType === 'phone' ? 'Enter phone number (e.g., +1 555-123-4567)...' :
               'Enter domain (e.g., example.com)...'
             }
             className="flex-1 px-4 py-3 rounded-lg text-sm focus:outline-none"
