@@ -7,6 +7,7 @@ import SpectraNoiseBackground from './SpectraNoiseBackground'
 import GlitchingTechEye from './GlitchingTechEye'
 import ArcanaSplit from './ArcanaSplit'
 import BorderBeam from './BorderBeam'
+import MeltingText from './MeltingText'
 import {
   Eye as EyeIcon,
   Compass as CompassIcon,
@@ -402,6 +403,9 @@ export default function CrucibleLanding({
   const exInferisOpacity = useTransform(smoothProgress, [0.15, 0.19], [0, 1])
   const exInferisX = useTransform(smoothProgress, [0.15, 0.19], [20, 0])
 
+  // Melting effect progress - starts melting as the phrase exits (scroll up)
+  const exInferisMeltProgress = useTransform(smoothProgress, [0.22, 0.30], [0, 1])
+
   // Section 3 (Arcana Split Workflows): 50% - 100%
   // Unified symbols appear: 50% - 60%
   // Split animation: 60% - 75%
@@ -413,6 +417,7 @@ export default function CrucibleLanding({
   const [currentMorphProgress, setCurrentMorphProgress] = useState(0)
   const [currentChatBarY, setCurrentChatBarY] = useState(300)
   const [agentsLanded, setAgentsLanded] = useState<Record<string, boolean>>({})
+  const [currentMeltProgress, setCurrentMeltProgress] = useState(0)
   const prevMorphProgress = useRef(0)
 
   useEffect(() => {
@@ -423,6 +428,11 @@ export default function CrucibleLanding({
     const unsubscribe = chatBarY.on('change', setCurrentChatBarY)
     return () => unsubscribe()
   }, [chatBarY])
+
+  useEffect(() => {
+    const unsubscribe = exInferisMeltProgress.on('change', setCurrentMeltProgress)
+    return () => unsubscribe()
+  }, [exInferisMeltProgress])
 
   // Detect when agents land in boxes (morph reaches threshold)
   useEffect(() => {
@@ -695,40 +705,36 @@ export default function CrucibleLanding({
               </span>
               <motion.span
                 style={{
-                  color: colors.accent,
                   display: 'inline-block',
                   opacity: exInferisOpacity,
                   x: exInferisX,
                 }}
-                animate={{
-                  textShadow: [
-                    `0 0 20px ${colors.accent}66, 0 0 40px ${colors.accent}33`,
-                    `0 0 30px ${colors.accent}99, 0 0 60px ${colors.accent}55, 0 0 80px ${colors.accent}22`,
-                    `0 0 20px ${colors.accent}66, 0 0 40px ${colors.accent}33`,
-                  ],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                }}
               >
-                ex inferis
+                <MeltingText
+                  text="ex inferis"
+                  isVisible={true}
+                  isMelting={currentMeltProgress > 0}
+                  meltProgress={currentMeltProgress}
+                  fontSize={48}
+                  color={colors.accent}
+                  meltColor={colors.accent}
+                />
               </motion.span>
             </h2>
           </motion.div>
 
           {/* Chat Bar Section - slides up from below */}
           <motion.div
-            className="absolute w-full max-w-3xl px-4 left-1/2 -translate-x-1/2"
+            className="absolute inset-x-0 flex flex-col items-center px-6"
             style={{
               top: '50%',
+              transform: 'translateY(-50%)',
               y: chatBarY,
               opacity: chatBarOpacity,
             }}
           >
             {/* Agent selector chips - with BorderBeam glow when agents land */}
-            <div className="mb-4 flex justify-center gap-3 pb-2 px-4">
+            <div className="mb-4 flex justify-center gap-2 pb-2 flex-wrap w-full max-w-2xl mx-auto">
               {agents.map(agent => {
                 const isActive = localSelectedAgents.includes(agent.id)
                 const hasLanded = agentsLanded[agent.id] || false
@@ -737,7 +743,7 @@ export default function CrucibleLanding({
                   <button
                     key={agent.id}
                     onClick={() => handleAgentSelect(agent.id)}
-                    className="relative flex flex-col items-center px-5 py-3 rounded-lg transition-all shrink-0 overflow-hidden"
+                    className="relative flex flex-col items-center px-3 md:px-5 py-2 md:py-3 rounded-lg transition-all overflow-hidden"
                     style={{
                       background: isActive ? `${agent.color}22` : colors.surface,
                       border: `1px solid ${isActive ? agent.color : colors.border}`,
@@ -747,11 +753,11 @@ export default function CrucibleLanding({
                   >
                     {/* BorderBeam effect when agent lands */}
                     <BorderBeam color={agent.color} isActive={hasLanded} duration={1.2} size={60} />
-                    <div className="flex items-center gap-2">
-                      <IconComponent size={18} weight="duotone" color={isActive ? agent.color : colors.textMuted} />
-                      <span className="font-medium text-sm">{agent.name}</span>
+                    <div className="flex items-center gap-1.5 md:gap-2">
+                      <IconComponent size={16} weight="duotone" color={isActive ? agent.color : colors.textMuted} />
+                      <span className="font-medium text-xs md:text-sm">{agent.name}</span>
                     </div>
-                    <span className="text-[10px] opacity-70 mt-1">{agent.role}</span>
+                    <span className="text-[9px] md:text-[10px] opacity-70 mt-0.5 md:mt-1">{agent.role}</span>
                   </button>
                 )
               })}
@@ -759,7 +765,7 @@ export default function CrucibleLanding({
 
             {/* Search bar - bigger text for legibility */}
             <div
-              className="relative rounded-2xl overflow-hidden"
+              className="relative rounded-2xl overflow-hidden w-full max-w-2xl"
               style={{
                 background: colors.surface,
                 border: `1px solid ${colors.border}`,
@@ -772,12 +778,12 @@ export default function CrucibleLanding({
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="What would you like to create today?"
-                  className="flex-1 px-6 py-5 bg-transparent text-lg focus:outline-none"
+                  className="flex-1 px-4 md:px-6 py-4 md:py-5 bg-transparent text-base md:text-lg focus:outline-none"
                   style={{ color: colors.text, fontFamily: "system-ui, -apple-system, sans-serif" }}
                 />
                 <button
                   type="submit"
-                  className="px-8 py-4 m-2 rounded-xl font-semibold text-base transition-all hover:brightness-110"
+                  className="px-4 md:px-8 py-3 md:py-4 m-2 rounded-xl font-semibold text-sm md:text-base transition-all hover:brightness-110"
                   style={{
                     background: colors.accent,
                     color: colors.text,
@@ -790,7 +796,7 @@ export default function CrucibleLanding({
             </div>
 
             {/* Quick suggestions - slightly bigger for legibility */}
-            <div className="mt-4 flex justify-center gap-2 flex-wrap">
+            <div className="mt-4 flex justify-center gap-2 flex-wrap max-w-2xl w-full">
               {['Generate product images', 'Research competitors', 'Create video ad', 'Build email campaign'].map(
                 suggestion => (
                   <button
@@ -812,7 +818,7 @@ export default function CrucibleLanding({
 
             {/* Multi-colored glow at bottom - scroll hint */}
             <motion.div
-              className="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[600px] h-24 pointer-events-none"
+              className="absolute -bottom-32 left-0 right-0 mx-auto w-[90%] max-w-[600px] h-24 pointer-events-none"
               style={{
                 opacity: useTransform(smoothProgress, [0.35, 0.42, 0.48], [0, 0.8, 0]),
               }}

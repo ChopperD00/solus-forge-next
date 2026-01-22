@@ -40,6 +40,7 @@ import {
   ChartBar as ChartBarIcon,
   Vault as VaultIcon,
   Detective as DetectiveIcon,
+  CaretDoubleLeft as CaretDoubleLeftIcon,
 } from '@phosphor-icons/react'
 
 type IntentId = 'email_campaign' | 'video_production' | 'image_generation' | 'audio' | '3d_assets' | 'research' | 'automation' | 'prompt_vault' | 'influencer_suite' | 'social_paid_ads' | 'email_automation' | 'social_ads_automation' | 'lupin_iii' | null
@@ -205,39 +206,22 @@ export default function Home() {
               }}
             >
               <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={handleBackToLanding}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl transition-colors hover:bg-white/5"
-                    style={{ color: colors.textMuted }}
-                  >
-                    ← Back
-                  </button>
-                  <div className="flex items-center gap-3">
-                    <SolusLogo size={36} animated={false} />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h1
-                          className="text-lg tracking-wide font-bold brand-text"
-                          style={{ color: colors.text }}
-                        >
-                          SOLUS FORGE
-                        </h1>
-                        <span
-                          className="text-[8px] px-1.5 py-0.5 rounded"
-                          style={{ background: `${colors.accent}22`, color: colors.accent }}
-                        >
-                          PRE-α
-                        </span>
-                      </div>
-                      <span className="text-xs" style={{ color: colors.textMuted }}>
-                        {workflows.find(w => w.id === selectedIntent)?.title}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                {/* Back button with arcana-colored icon */}
+                {(() => {
+                  const activeWorkflow = workflows.find(w => w.id === selectedIntent)
+                  const arcanaColor = activeWorkflow?.color || colors.accent
+                  return (
+                    <button
+                      onClick={handleBackToLanding}
+                      className="flex items-center gap-1 px-3 py-2 rounded-xl transition-all hover:bg-white/5"
+                      style={{ color: arcanaColor }}
+                    >
+                      <CaretDoubleLeftIcon size={20} weight="bold" color={arcanaColor} />
+                    </button>
+                  )
+                })()}
 
-                {/* Active workflow badge */}
+                {/* Active workflow badge - right side only */}
                 <div className="flex items-center gap-3">
                   {(() => {
                     const activeWorkflow = workflows.find(w => w.id === selectedIntent)

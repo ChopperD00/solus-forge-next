@@ -150,6 +150,7 @@ export default function GradientCircle({ children, scrollProgress = 0 }: Gradien
         height: 800,
         transform: `scale(${scale})`,
         transition: 'transform 0.1s ease-out',
+        overflow: 'visible',
       }}
     >
       <canvas
@@ -164,6 +165,7 @@ export default function GradientCircle({ children, scrollProgress = 0 }: Gradien
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
+          overflow: 'visible',
         }}
       >
         {children}
