@@ -50,25 +50,26 @@ interface NodeWorkflowCanvasProps {
   gridSize?: number
 }
 
-// Color palette
+// Neural Logic Graph inspired color palette
 const colors = {
-  bg: '#141010',
-  surface: '#1E1818',
-  surfaceLight: '#2A2222',
-  border: '#3A3030',
-  borderHover: '#504545',
+  bg: '#0A0A0A',
+  surface: '#151515',
+  surfaceLight: '#1E1E1E',
+  border: '#2A2A2A',
+  borderHover: '#3A3A3A',
   text: '#FFFFFF',
-  textMuted: '#B0A8A8',
-  textDim: '#706868',
+  textMuted: '#888888',
+  textDim: '#555555',
   accent: '#FF6B00',
-  accentGlow: 'rgba(255, 107, 0, 0.3)',
-  connection: '#4A9EFF',
-  connectionGlow: 'rgba(74, 158, 255, 0.4)',
+  accentGlow: 'rgba(255, 107, 0, 0.25)',
+  connection: '#666666',
+  connectionGlow: 'rgba(100, 100, 100, 0.3)',
+  nodeGlow: 'rgba(255, 255, 255, 0.03)',
 }
 
-// Port colors by data type
+// Port colors by data type - more subtle and elegant
 const portColors: Record<string, string> = {
-  any: '#888888',
+  any: '#555555',
   video: '#FF6B6B',
   audio: '#6BCB77',
   image: '#9B59B6',
@@ -229,26 +230,27 @@ export default function NodeWorkflowCanvas({
 
     return (
       <g key={conn.id}>
-        {/* Glow effect */}
+        {/* Subtle glow effect */}
         <path
           d={path}
           fill="none"
           stroke={colors.connectionGlow}
-          strokeWidth={8}
-          style={{ filter: 'blur(4px)' }}
+          strokeWidth={6}
+          style={{ filter: 'blur(6px)' }}
         />
-        {/* Main line */}
+        {/* Main line - thinner, more elegant */}
         <path
           d={path}
           fill="none"
           stroke={colors.connection}
-          strokeWidth={2}
+          strokeWidth={1.5}
+          strokeLinecap="round"
           className={conn.animated ? 'animate-pulse' : ''}
         />
-        {/* Animated dot */}
+        {/* Small dot at connection points */}
         {conn.animated && (
-          <circle r={4} fill={colors.connection}>
-            <animateMotion dur="2s" repeatCount="indefinite" path={path} />
+          <circle r={3} fill="#888888">
+            <animateMotion dur="2.5s" repeatCount="indefinite" path={path} />
           </circle>
         )}
       </g>
@@ -301,7 +303,7 @@ export default function NodeWorkflowCanvas({
       onMouseLeave={handleMouseUp}
       onWheel={handleWheel}
     >
-      {/* Grid background */}
+      {/* Grid background - Neural Logic Graph style (subtle dots) */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{
@@ -311,13 +313,7 @@ export default function NodeWorkflowCanvas({
       >
         <defs>
           <pattern id="grid" width={gridSize} height={gridSize} patternUnits="userSpaceOnUse">
-            <path
-              d={`M ${gridSize} 0 L 0 0 0 ${gridSize}`}
-              fill="none"
-              stroke={colors.border}
-              strokeWidth={0.5}
-              opacity={0.3}
-            />
+            <circle cx={gridSize / 2} cy={gridSize / 2} r={0.5} fill={colors.border} opacity={0.4} />
           </pattern>
         </defs>
         <rect width="10000" height="10000" x="-5000" y="-5000" fill="url(#grid)" />
@@ -342,7 +338,7 @@ export default function NodeWorkflowCanvas({
           </g>
         </svg>
 
-        {/* Nodes */}
+        {/* Nodes - Neural Logic Graph Style */}
         {nodes.map(node => (
           <motion.div
             key={node.id}
@@ -350,41 +346,53 @@ export default function NodeWorkflowCanvas({
             style={{
               left: node.x,
               top: node.y,
-              width: node.width || 200,
+              width: node.width || 180,
             }}
-            initial={{ scale: 0, opacity: 0 }}
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
             onMouseDown={(e) => handleNodeMouseDown(e, node.id)}
             onDoubleClick={() => onNodeDoubleClick?.(node)}
           >
-            {/* Node container */}
+            {/* Node container - Neural Logic Graph style */}
             <div
-              className="rounded-2xl border transition-all duration-200"
+              className="rounded-xl border transition-all duration-200 relative"
               style={{
-                background: colors.surface,
-                borderColor: selectedNodeId === node.id ? accentColor : colors.border,
+                background: `linear-gradient(135deg, ${colors.surface} 0%, ${colors.bg} 100%)`,
+                borderColor: selectedNodeId === node.id ? (node.color || accentColor) : colors.border,
                 boxShadow: selectedNodeId === node.id
-                  ? `0 0 20px ${colors.accentGlow}, 0 4px 20px rgba(0,0,0,0.4)`
-                  : '0 4px 20px rgba(0,0,0,0.3)',
+                  ? `0 0 24px ${node.color || accentColor}33, 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 ${colors.nodeGlow}`
+                  : `0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 ${colors.nodeGlow}`,
               }}
             >
-              {/* Node header */}
-              <div className="flex items-center gap-3 p-4">
+              {/* Subtle inner glow on selected */}
+              {selectedNodeId === node.id && (
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
+                  className="absolute inset-0 rounded-xl pointer-events-none"
                   style={{
-                    background: `${node.color || accentColor}22`,
-                    border: `1px solid ${node.color || accentColor}44`,
+                    background: `radial-gradient(ellipse at top, ${node.color || accentColor}08 0%, transparent 70%)`,
+                  }}
+                />
+              )}
+
+              {/* Node header - cleaner layout */}
+              <div className="flex items-center gap-3 px-4 py-3 relative z-10">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0"
+                  style={{
+                    background: `${node.color || accentColor}15`,
+                    border: `1px solid ${node.color || accentColor}30`,
+                    boxShadow: `0 0 12px ${node.color || accentColor}10`,
                   }}
                 >
                   {node.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm truncate" style={{ color: colors.text }}>
+                  <div className="font-medium text-sm truncate leading-tight" style={{ color: colors.text }}>
                     {node.title}
                   </div>
                   {node.subtitle && (
-                    <div className="text-xs truncate" style={{ color: colors.textMuted }}>
+                    <div className="text-[10px] truncate mt-0.5 leading-tight" style={{ color: colors.textDim }}>
                       {node.subtitle}
                     </div>
                   )}
@@ -392,27 +400,31 @@ export default function NodeWorkflowCanvas({
               </div>
 
               {/* Input ports */}
+              {/* Input ports - Neural Logic Graph style dots */}
               {node.inputs.map((port, idx) => {
-                const portY = ((node.height || 80) / (node.inputs.length + 1)) * (idx + 1)
+                const portY = ((node.height || 56) / (node.inputs.length + 1)) * (idx + 1)
+                const portColor = portColors[port.dataType] || portColors.any
+                const isConnecting = connectingFrom?.portId === port.id
                 return (
                   <div
                     key={port.id}
                     className="absolute flex items-center gap-2 cursor-pointer group"
-                    style={{ left: -8, top: portY - 8 }}
+                    style={{ left: -5, top: portY - 5 }}
                     onClick={(e) => handlePortClick(e, node.id, port.id, 'input')}
                   >
+                    {/* Outer glow ring on hover/connect */}
                     <div
-                      className="w-4 h-4 rounded-full border-2 transition-all group-hover:scale-125"
+                      className="w-[10px] h-[10px] rounded-full transition-all duration-200 group-hover:scale-150"
                       style={{
-                        background: colors.surface,
-                        borderColor: portColors[port.dataType] || portColors.any,
-                        boxShadow: connectingFrom?.portId === port.id
-                          ? `0 0 10px ${portColors[port.dataType]}`
+                        background: isConnecting ? portColor : colors.bg,
+                        border: `2px solid ${isConnecting ? portColor : colors.border}`,
+                        boxShadow: isConnecting
+                          ? `0 0 12px ${portColor}, 0 0 4px ${portColor}`
                           : 'none',
                       }}
                     />
                     <span
-                      className="text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                      className="text-[10px] opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap -translate-x-1 group-hover:translate-x-0"
                       style={{ color: colors.textMuted }}
                     >
                       {port.label}
@@ -421,28 +433,31 @@ export default function NodeWorkflowCanvas({
                 )
               })}
 
-              {/* Output ports */}
+              {/* Output ports - Neural Logic Graph style dots */}
               {node.outputs.map((port, idx) => {
-                const portY = ((node.height || 80) / (node.outputs.length + 1)) * (idx + 1)
+                const portY = ((node.height || 56) / (node.outputs.length + 1)) * (idx + 1)
+                const portColor = portColors[port.dataType] || portColors.any
+                const isConnecting = connectingFrom?.portId === port.id
                 return (
                   <div
                     key={port.id}
                     className="absolute flex items-center gap-2 cursor-pointer group"
-                    style={{ right: -8, top: portY - 8, flexDirection: 'row-reverse' }}
+                    style={{ right: -5, top: portY - 5, flexDirection: 'row-reverse' }}
                     onClick={(e) => handlePortClick(e, node.id, port.id, 'output')}
                   >
+                    {/* Filled dot for outputs */}
                     <div
-                      className="w-4 h-4 rounded-full border-2 transition-all group-hover:scale-125"
+                      className="w-[10px] h-[10px] rounded-full transition-all duration-200 group-hover:scale-150"
                       style={{
-                        background: portColors[port.dataType] || portColors.any,
-                        borderColor: portColors[port.dataType] || portColors.any,
-                        boxShadow: connectingFrom?.portId === port.id
-                          ? `0 0 10px ${portColors[port.dataType]}`
-                          : 'none',
+                        background: portColor,
+                        border: `2px solid ${portColor}`,
+                        boxShadow: isConnecting
+                          ? `0 0 12px ${portColor}, 0 0 4px ${portColor}`
+                          : `0 0 6px ${portColor}40`,
                       }}
                     />
                     <span
-                      className="text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                      className="text-[10px] opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap translate-x-1 group-hover:translate-x-0"
                       style={{ color: colors.textMuted }}
                     >
                       {port.label}

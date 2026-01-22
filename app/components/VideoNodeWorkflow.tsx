@@ -603,6 +603,12 @@ export default function VideoNodeWorkflow() {
         </button>
         <div className="w-px h-6" style={{ background: colors.border }} />
         <button
+          className="px-3 py-1.5 rounded-lg text-sm transition-all hover:opacity-80"
+          style={{ background: '#8B5CF6', color: colors.text }}
+        >
+          🏛️ Save to Vault
+        </button>
+        <button
           className="px-4 py-1.5 rounded-lg text-sm font-medium"
           style={{ background: colors.accent, color: colors.text }}
         >

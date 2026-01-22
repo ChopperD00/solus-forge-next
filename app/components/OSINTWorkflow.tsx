@@ -218,6 +218,9 @@ export default function OSINTWorkflow() {
   const [scanResults, setScanResults] = useState<Record<string, ScanResult>>({})
   const [complianceAcknowledged, setComplianceAcknowledged] = useState(false)
   const [showComplianceModal, setShowComplianceModal] = useState(false)
+  const [showReportViewer, setShowReportViewer] = useState(false)
+  const [savedToVault, setSavedToVault] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
   // Filter modules based on investigation type
   const availableModules = osintModules.filter(m => m.forTypes.includes(investigationType))
@@ -589,10 +592,31 @@ export default function OSINTWorkflow() {
                     Risk: {calculateOverallRisk().toUpperCase()}
                   </div>
                   <button
-                    className="px-3 py-1.5 rounded-lg text-sm"
+                    onClick={() => setShowReportViewer(true)}
+                    className="px-3 py-1.5 rounded-lg text-sm transition-all hover:opacity-80"
+                    style={{ background: colors.blue, color: colors.text }}
+                  >
+                    📄 View Report
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSavedToVault(true)
+                      setTimeout(() => setSavedToVault(false), 2000)
+                    }}
+                    className="px-3 py-1.5 rounded-lg text-sm transition-all hover:opacity-80"
+                    style={{
+                      background: savedToVault ? colors.green : colors.purple,
+                      color: colors.text
+                    }}
+                  >
+                    {savedToVault ? '✓ Saved!' : '🏛️ Save to Vault'}
+                  </button>
+                  <button
+                    onClick={() => setShowReportViewer(true)}
+                    className="px-3 py-1.5 rounded-lg text-sm transition-all hover:opacity-80"
                     style={{ background: colors.accent, color: colors.text }}
                   >
-                    📥 Export
+                    📥 Export Doc
                   </button>
                 </div>
               )}
@@ -762,6 +786,211 @@ export default function OSINTWorkflow() {
                 >
                   I Acknowledge & Proceed
                 </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Report Viewer Modal */}
+      <AnimatePresence>
+        {showReportViewer && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.9)' }}
+            onClick={() => setShowReportViewer(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="max-w-4xl w-full max-h-[90vh] overflow-hidden rounded-2xl flex flex-col"
+              style={{ background: colors.surface, border: `1px solid ${colors.border}` }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Report Header */}
+              <div className="p-6 border-b flex items-center justify-between" style={{ borderColor: colors.border }}>
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">📋</span>
+                  <div>
+                    <h3 className="text-xl font-bold" style={{ color: colors.text }}>Intelligence Report</h3>
+                    <p className="text-sm" style={{ color: colors.textMuted }}>
+                      {targetType === 'person' ? '👤' : targetType === 'company' ? '🏢' : targetType === 'phone' ? '📞' : '🌐'} {targetValue}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setIsExporting(true)
+                      setTimeout(() => {
+                        setIsExporting(false)
+                        // Simulate doc generation
+                        alert('Report exported to Document! (In production, this would generate a DOCX file)')
+                      }, 1500)
+                    }}
+                    disabled={isExporting}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-80 disabled:opacity-50"
+                    style={{ background: colors.accent, color: colors.text }}
+                  >
+                    {isExporting ? '⏳ Generating...' : '📄 Export as Doc'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSavedToVault(true)
+                      setTimeout(() => setSavedToVault(false), 2000)
+                    }}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-80"
+                    style={{ background: savedToVault ? colors.green : colors.purple, color: colors.text }}
+                  >
+                    {savedToVault ? '✓ Saved!' : '🏛️ Save to Vault'}
+                  </button>
+                  <button
+                    onClick={() => setShowReportViewer(false)}
+                    className="p-2 rounded-lg hover:bg-white/10 transition-all"
+                  >
+                    <span style={{ color: colors.textMuted }}>✕</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Report Content */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {/* Executive Summary */}
+                <section className="p-4 rounded-xl" style={{ background: colors.bg }}>
+                  <h4 className="text-lg font-semibold mb-3 flex items-center gap-2" style={{ color: colors.accent }}>
+                    <span>📋</span> Executive Summary
+                  </h4>
+                  <p className="text-sm leading-relaxed" style={{ color: colors.textMuted }}>
+                    This report presents the findings of an intelligence investigation conducted on <strong style={{ color: colors.text }}>{targetValue}</strong>
+                    {' '}({targetType}). The investigation utilized {selectedModules.length} intelligence modules across{' '}
+                    {Array.from(new Set(selectedModules.map(id => osintModules.find(m => m.id === id)?.category))).length} categories.
+                    The overall risk assessment is rated as <strong style={{ color: riskColors[calculateOverallRisk()] }}>{calculateOverallRisk().toUpperCase()}</strong>.
+                  </p>
+                </section>
+
+                {/* Risk Overview */}
+                <section className="p-4 rounded-xl" style={{ background: colors.bg }}>
+                  <h4 className="text-lg font-semibold mb-3 flex items-center gap-2" style={{ color: colors.red }}>
+                    <span>⚠️</span> Risk Assessment
+                  </h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    {(['low', 'medium', 'high'] as const).map(level => {
+                      const count = Object.values(scanResults)
+                        .flatMap(r => r.riskFactors || [])
+                        .filter(f => f.level === level).length
+                      return (
+                        <div
+                          key={level}
+                          className="p-3 rounded-lg text-center"
+                          style={{ background: `${riskColors[level]}15`, border: `1px solid ${riskColors[level]}33` }}
+                        >
+                          <div className="text-2xl font-bold" style={{ color: riskColors[level] }}>{count}</div>
+                          <div className="text-xs uppercase" style={{ color: colors.textMuted }}>{level} Risk</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </section>
+
+                {/* Module Findings */}
+                <section className="p-4 rounded-xl" style={{ background: colors.bg }}>
+                  <h4 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: colors.blue }}>
+                    <span>🔍</span> Detailed Findings by Module
+                  </h4>
+                  <div className="space-y-4">
+                    {Object.entries(scanResults)
+                      .filter(([_, result]) => result.status === 'complete')
+                      .map(([moduleId, result]) => {
+                        const module = osintModules.find(m => m.id === moduleId)
+                        return (
+                          <div
+                            key={moduleId}
+                            className="p-4 rounded-lg"
+                            style={{ background: colors.surface, border: `1px solid ${colors.border}` }}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xl">{module?.icon}</span>
+                                <span className="font-medium" style={{ color: colors.text }}>{module?.name}</span>
+                              </div>
+                              <span className="text-xs px-2 py-1 rounded" style={{ background: `${module?.color}22`, color: module?.color }}>
+                                {module?.category}
+                              </span>
+                            </div>
+                            <p className="text-sm mb-2" style={{ color: colors.textDim }}>{module?.description}</p>
+                            <div className="text-xs mb-3" style={{ color: colors.textMuted }}>
+                              Sources: {module?.sources.join(', ')}
+                            </div>
+                            {result.riskFactors && result.riskFactors.length > 0 ? (
+                              <div className="space-y-2">
+                                {result.riskFactors.map((risk, i) => (
+                                  <div
+                                    key={i}
+                                    className="flex items-start gap-2 p-2 rounded"
+                                    style={{ background: `${riskColors[risk.level]}10` }}
+                                  >
+                                    <span
+                                      className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
+                                      style={{ background: riskColors[risk.level] }}
+                                    />
+                                    <div>
+                                      <span className="text-xs font-medium uppercase" style={{ color: riskColors[risk.level] }}>
+                                        {risk.level} risk
+                                      </span>
+                                      <p className="text-sm" style={{ color: colors.textMuted }}>{risk.description}</p>
+                                      <span className="text-xs" style={{ color: colors.textDim }}>Source: {risk.source}</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-sm italic" style={{ color: colors.green }}>
+                                ✓ No significant findings
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                  </div>
+                </section>
+
+                {/* Methodology */}
+                <section className="p-4 rounded-xl" style={{ background: colors.bg }}>
+                  <h4 className="text-lg font-semibold mb-3 flex items-center gap-2" style={{ color: colors.purple }}>
+                    <span>🔬</span> Methodology
+                  </h4>
+                  <p className="text-sm mb-3" style={{ color: colors.textMuted }}>
+                    This investigation was conducted using the Lupin III Intelligence Suite, which aggregates data from multiple
+                    open-source intelligence (OSINT) providers. The scan depth was set to <strong style={{ color: colors.text }}>{scanDepth}</strong>,
+                    which engaged {selectedModules.length} modules.
+                  </p>
+                  <div className="text-xs" style={{ color: colors.textDim }}>
+                    <strong>Modules Used:</strong> {selectedModules.map(id => osintModules.find(m => m.id === id)?.name).join(', ')}
+                  </div>
+                </section>
+
+                {/* Compliance Footer */}
+                <section className="p-4 rounded-xl border-2 border-dashed" style={{ borderColor: colors.yellow }}>
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">⚠️</span>
+                    <div>
+                      <h4 className="font-semibold mb-1" style={{ color: colors.yellow }}>Compliance Disclaimer</h4>
+                      <p className="text-xs" style={{ color: colors.textMuted }}>
+                        <strong>NOT FOR FCRA PURPOSES.</strong> This report is intended for legitimate business intelligence
+                        purposes only, including competitive analysis, partner vetting, and fraud prevention. This report
+                        should NOT be used for employment screening, tenant screening, credit decisions, or insurance
+                        underwriting. Data sourced exclusively from publicly available records.
+                      </p>
+                      <p className="text-xs mt-2" style={{ color: colors.textDim }}>
+                        Generated: {new Date().toLocaleString()} • Report ID: LUPIN-{Date.now().toString(36).toUpperCase()}
+                      </p>
+                    </div>
+                  </div>
+                </section>
               </div>
             </motion.div>
           </motion.div>
