@@ -611,19 +611,21 @@ export default function CrucibleLanding({
 
         {/* SECTION 1: Hero with Gradient Circle + Glitching Tech Eye */}
         <motion.div
-          className="absolute inset-0 flex items-center justify-center"
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
           style={{ opacity: heroOpacity, scale: heroScale }}
         >
-          <GradientCircle scrollProgress={0}>
-            <GlitchingTechEye
-              size={220}
-              hueBase={25}
-              rotationSpeed={0.6}
-              glitchiness={0.4}
-              grainStrength={0.25}
-              eyeFollow={0.8}
-            />
-          </GradientCircle>
+          <div className="pointer-events-auto">
+            <GradientCircle scrollProgress={0}>
+              <GlitchingTechEye
+                size={220}
+                hueBase={25}
+                rotationSpeed={0.6}
+                glitchiness={0.4}
+                grainStrength={0.25}
+                eyeFollow={0.8}
+              />
+            </GradientCircle>
+          </div>
         </motion.div>
 
         {/* Aurora Borealis bottom glow */}
