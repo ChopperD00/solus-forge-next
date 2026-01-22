@@ -1,14 +1,120 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useRef, useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import * as React from 'react'
+
+// Circular text component for the outer perimeter
+function OuterCircularText({
+  text,
+  radius,
+  isVisible,
+  fontSize = 12,
+}: {
+  text: string
+  radius: number
+  isVisible: boolean
+  fontSize?: number
+}) {
+  const uniqueId = React.useId()
+  const pathId = `outerCirclePath-${uniqueId}`
+
+  const circumference = 2 * Math.PI * radius
+  const repeatCount = Math.ceil(circumference / (text.length * fontSize * 0.55))
+  const repeatedText = Array(repeatCount).fill(text).join(' · ')
+
+  // SVG needs to be large enough to contain the text path
+  const svgSize = 800
+  const cx = svgSize / 2
+  const cy = svgSize / 2
+
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          className="absolute pointer-events-none"
+          style={{
+            width: svgSize,
+            height: svgSize,
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+          initial={{ opacity: 0, rotate: -10 }}
+          animate={{ opacity: 1, rotate: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <svg
+            width={svgSize}
+            height={svgSize}
+            viewBox={`0 0 ${svgSize} ${svgSize}`}
+            style={{ overflow: 'visible' }}
+          >
+            <defs>
+              <path
+                id={pathId}
+                d={`M ${cx}, ${cy} m -${radius}, 0 a ${radius},${radius} 0 1,1 ${radius * 2},0 a ${radius},${radius} 0 1,1 -${radius * 2},0`}
+                fill="none"
+              />
+              <filter id={`blur-outer-${uniqueId}`} x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
+              </filter>
+            </defs>
+
+            <g>
+              <animateTransform
+                attributeName="transform"
+                type="rotate"
+                from={`0 ${cx} ${cy}`}
+                to={`360 ${cx} ${cy}`}
+                dur="45s"
+                repeatCount="indefinite"
+              />
+
+              {/* Glow layer */}
+              <text
+                fill="rgba(255, 140, 80, 0.35)"
+                fontSize={fontSize}
+                fontFamily="'Inter', system-ui, sans-serif"
+                fontWeight="400"
+                letterSpacing="0.25em"
+                filter={`url(#blur-outer-${uniqueId})`}
+              >
+                <textPath href={`#${pathId}`} startOffset="0%">
+                  {repeatedText}
+                </textPath>
+              </text>
+
+              {/* Main text */}
+              <text
+                fill="rgba(255, 180, 120, 0.7)"
+                fontSize={fontSize}
+                fontFamily="'Inter', system-ui, sans-serif"
+                fontWeight="300"
+                letterSpacing="0.25em"
+              >
+                <textPath href={`#${pathId}`} startOffset="0%">
+                  {repeatedText}
+                </textPath>
+              </text>
+            </g>
+          </svg>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
 
 interface GradientCircleProps {
   children?: React.ReactNode
   scrollProgress?: number
+  isHovered?: boolean
 }
 
-export default function GradientCircle({ children, scrollProgress = 0 }: GradientCircleProps) {
+export default function GradientCircle({ children, scrollProgress = 0, isHovered = false }: GradientCircleProps) {
+  const [localHovered, setLocalHovered] = useState(false)
+  const showText = isHovered || localHovered
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number>(0)
@@ -141,6 +247,9 @@ export default function GradientCircle({ children, scrollProgress = 0 }: Gradien
   // Scale based on scroll progress
   const scale = 1 + scrollProgress * 2
 
+  // Sphere visual radius is size * 0.42 = 336px
+  const textRadius = 336
+
   return (
     <motion.div
       ref={containerRef}
@@ -152,12 +261,23 @@ export default function GradientCircle({ children, scrollProgress = 0 }: Gradien
         transition: 'transform 0.1s ease-out',
         overflow: 'visible',
       }}
+      onMouseEnter={() => setLocalHovered(true)}
+      onMouseLeave={() => setLocalHovered(false)}
     >
       <canvas
         ref={canvasRef}
         className="absolute inset-0"
         style={{ width: 800, height: 800 }}
       />
+
+      {/* Circular text around outer perimeter */}
+      <OuterCircularText
+        text="SOLUS FORGE"
+        radius={textRadius}
+        isVisible={showText}
+        fontSize={14}
+      />
+
       {/* Content inside the circle - perfectly centered */}
       <div
         className="absolute z-10 flex flex-col items-center justify-center"

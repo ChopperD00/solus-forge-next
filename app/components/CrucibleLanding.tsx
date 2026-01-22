@@ -304,6 +304,7 @@ interface CrucibleLandingProps {
   onPromptSubmit?: (prompt: string) => void
   onWorkflowSelect?: (workflowId: string) => void
   selectedAgents?: string[]
+  initialScrollToWorkflows?: boolean
 }
 
 export default function CrucibleLanding({
@@ -311,8 +312,22 @@ export default function CrucibleLanding({
   onPromptSubmit,
   onWorkflowSelect,
   selectedAgents = ['solus', 'trion'],
+  initialScrollToWorkflows = false,
 }: CrucibleLandingProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const hasScrolledToWorkflows = useRef(false)
+
+  // Scroll to workflows section on mount if requested
+  useEffect(() => {
+    if (initialScrollToWorkflows && containerRef.current && !hasScrolledToWorkflows.current) {
+      hasScrolledToWorkflows.current = true
+      // Scroll to ~55% which is where workflows appear
+      const scrollTarget = containerRef.current.scrollHeight * 0.55
+      setTimeout(() => {
+        containerRef.current?.scrollTo({ top: scrollTarget, behavior: 'instant' })
+      }, 100)
+    }
+  }, [initialScrollToWorkflows])
   const [time, setTime] = useState(0)
   const [prompt, setPrompt] = useState('')
   const windowSize = useWindowSize()
@@ -705,36 +720,29 @@ export default function CrucibleLanding({
               </span>
               <motion.span
                 style={{
+                  color: colors.accent,
                   display: 'inline-block',
                   opacity: exInferisOpacity,
                   x: exInferisX,
+                  textShadow: `0 0 30px ${colors.accent}66, 0 0 60px ${colors.accent}33`,
                 }}
               >
-                <MeltingText
-                  text="ex inferis"
-                  isVisible={true}
-                  isMelting={currentMeltProgress > 0}
-                  meltProgress={currentMeltProgress}
-                  fontSize={48}
-                  color={colors.accent}
-                  meltColor={colors.accent}
-                />
+                ex inferis
               </motion.span>
             </h2>
           </motion.div>
 
           {/* Chat Bar Section - slides up from below */}
           <motion.div
-            className="absolute inset-x-0 flex flex-col items-center px-6"
+            className="absolute inset-0 flex items-center justify-center px-6"
             style={{
-              top: '50%',
-              transform: 'translateY(-50%)',
               y: chatBarY,
               opacity: chatBarOpacity,
             }}
           >
+            <div className="flex flex-col items-center w-full">
             {/* Agent selector chips - with BorderBeam glow when agents land */}
-            <div className="mb-4 flex justify-center gap-2 pb-2 flex-wrap w-full max-w-2xl mx-auto">
+            <div className="mb-4 flex justify-center gap-2 pb-2 flex-wrap w-full max-w-2xl">
               {agents.map(agent => {
                 const isActive = localSelectedAgents.includes(agent.id)
                 const hasLanded = agentsLanded[agent.id] || false
@@ -814,6 +822,7 @@ export default function CrucibleLanding({
                   </button>
                 )
               )}
+            </div>
             </div>
 
             {/* Multi-colored glow at bottom - scroll hint */}
@@ -909,7 +918,7 @@ export default function CrucibleLanding({
 
           {/* Arcana Split Columns - unified symbols that fracture into playing cards */}
           <div className="relative w-full max-w-6xl mx-auto z-10 px-4">
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-center items-start gap-4">
               {/* The Visionary - Orange */}
               <ArcanaSplit
                 arcanaName="The Visionary"

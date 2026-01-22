@@ -51,30 +51,30 @@ export default function HyperspeedTransition({
       return
     }
 
-    // Start the sequence
+    // Start the sequence - shortened for faster entry
     setPhase('sucking')
-    speedRef.current = 2
+    speedRef.current = 20
 
-    // Phase timing
-    const suckingTimer = setTimeout(() => {
+    // Phase timing - much faster
+    const hyperspeedTimer = setTimeout(() => {
       setPhase('hyperspeed')
-      speedRef.current = 50
-    }, 1500)
+      speedRef.current = 80
+    }, 400)
 
     const flashTimer = setTimeout(() => {
       setPhase('flash')
-    }, 3500)
+    }, 900)
 
     const arrivalTimer = setTimeout(() => {
       setPhase('arrival')
-    }, 3800)
+    }, 1100)
 
     const completeTimer = setTimeout(() => {
       onComplete()
-    }, 5000)
+    }, 1600)
 
     return () => {
-      clearTimeout(suckingTimer)
+      clearTimeout(hyperspeedTimer)
       clearTimeout(flashTimer)
       clearTimeout(arrivalTimer)
       clearTimeout(completeTimer)

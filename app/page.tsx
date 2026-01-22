@@ -100,6 +100,7 @@ export default function Home() {
   const [selectedIntent, setSelectedIntent] = useState<IntentId>(null)
   const [showLanding, setShowLanding] = useState(true)
   const [selectedAgents, setSelectedAgents] = useState<string[]>(['solus', 'trion'])
+  const [scrollToWorkflows, setScrollToWorkflows] = useState(false)
   const { isTransitioning, transitionOrigin, triggerTransition, handleComplete } = useRadialWipe()
 
   // Password gate with hyperspeed transition
@@ -141,6 +142,7 @@ export default function Home() {
   const handleBackToLanding = () => {
     triggerTransition({ x: 10, y: 5 }, () => {
       setSelectedIntent(null)
+      setScrollToWorkflows(true)  // Return to workflow selection, not eye
       setShowLanding(true)
     })
   }
@@ -186,6 +188,7 @@ export default function Home() {
               onAgentSelect={handleAgentSelect}
               onPromptSubmit={handlePromptSubmit}
               onWorkflowSelect={(workflowId) => handleSelectIntent(workflowId)}
+              initialScrollToWorkflows={scrollToWorkflows}
             />
           </motion.div>
         ) : (
