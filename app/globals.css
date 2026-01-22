@@ -1,0 +1,168 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Legacy dark theme (v2) */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #141414;
+  --bg-card: #1e1e1e;
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+  --accent-purple: #9333EA;
+  --accent-blue: #3B82F6;
+  --accent-green: #22C55E;
+  --accent-orange: #F97316;
+  --accent-pink: #EC4899;
+  --border-color: #2a2a2a;
+
+  /* Ocean Films inspired theme (v3) */
+  --ocean-bg: #0D1A03;
+  --ocean-bg-light: #1a2805;
+  --ocean-accent: #223307;
+  --ocean-border: #3a5510;
+  --ocean-text: #E7FFD9;
+  --ocean-text-muted: #9AB88A;
+  --ocean-text-dim: #5a7a4a;
+  --ocean-glow: #7CFC00;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Ocean theme class */
+body.theme-ocean {
+  background: linear-gradient(135deg, var(--ocean-bg) 0%, var(--ocean-accent) 50%, var(--ocean-bg) 100%);
+  color: var(--ocean-text);
+}
+
+/* Typography - Halfre display font + Inter for body */
+/* Fonts are loaded via next/font in layout.tsx for optimal performance */
+
+h1, h2, h3, .font-display, .font-halfre {
+  font-family: var(--font-halfre), var(--font-inter), system-ui, sans-serif;
+  font-weight: normal;
+  letter-spacing: 0.02em;
+}
+
+/* Body text uses Inter */
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Explicit Halfre class for branding elements */
+.brand-text {
+  font-family: var(--font-halfre), var(--font-inter), system-ui, sans-serif;
+  letter-spacing: 0.05em;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+/* Glow effects */
+.glow-purple {
+  box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+}
+
+.glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #fff 0%, #888 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Ocean theme specific styles */
+.theme-ocean .card-hover:hover {
+  box-shadow: 0 8px 30px rgba(58, 85, 16, 0.4);
+}
+
+/* Ocean glow effect */
+.ocean-glow {
+  box-shadow: 0 0 20px rgba(124, 252, 0, 0.2), 0 0 40px rgba(58, 85, 16, 0.3);
+}
+
+/* Organic shape animation */
+@keyframes organic-pulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  }
+  25% {
+    transform: scale(1.02) rotate(1deg);
+    border-radius: 50% 50% 30% 70% / 50% 70% 30% 50%;
+  }
+  50% {
+    transform: scale(1) rotate(0deg);
+    border-radius: 70% 30% 50% 50% / 30% 50% 50% 70%;
+  }
+  75% {
+    transform: scale(1.01) rotate(-1deg);
+    border-radius: 30% 70% 70% 30% / 70% 30% 30% 70%;
+  }
+}
+
+.organic-shape {
+  animation: organic-pulse 8s ease-in-out infinite;
+}
+
+/* Smooth transitions for sidebar */
+.sidebar-transition {
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* GSAP-friendly transforms */
+.transform-gpu {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Custom selection color for ocean theme */
+.theme-ocean ::selection {
+  background: rgba(124, 252, 0, 0.3);
+  color: #E7FFD9;
+}
+
+/* Noise texture overlay */
+.noise-overlay::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
