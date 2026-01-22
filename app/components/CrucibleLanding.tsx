@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion'
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
 import GradientCircle from './GradientCircle'
 import SpectraNoiseBackground from './SpectraNoiseBackground'
 import SolusForgeIcon from './SolusForgeIcon'
@@ -34,77 +34,53 @@ const colors = {
   accentGlow: 'rgba(255, 107, 0, 0.3)',
 }
 
-// Agent configurations with increased orbital radius
+// Agent configurations
 const agents = [
   {
     id: 'solus',
     name: 'Solus',
-    fullName: 'Claude Opus',
     icon: '🔮',
-    specialty: 'Strategic Oversight',
     role: 'Strategic Oversight',
-    orbitRadius: 340,
-    orbitSpeed: 0.25,
     orbitOffset: 0,
     color: '#8B5CF6',
   },
   {
     id: 'quintus',
     name: 'Quintus',
-    fullName: 'Claude Haiku',
     icon: '📐',
-    specialty: 'Planner',
     role: 'Planner/Optimization',
-    orbitRadius: 340,
-    orbitSpeed: 0.25,
     orbitOffset: Math.PI / 3,
     color: '#06B6D4',
   },
   {
     id: 'trion',
     name: 'Trion',
-    fullName: 'Anthropic',
     icon: '🔍',
-    specialty: 'Research & Discovery',
     role: 'Research & Discovery',
-    orbitRadius: 340,
-    orbitSpeed: 0.25,
     orbitOffset: (Math.PI * 2) / 3,
     color: '#10B981',
   },
   {
     id: 'lathe',
     name: 'Lathe',
-    fullName: 'Claude Sonnet',
     icon: '⚖️',
-    specialty: 'Quality Control',
     role: 'Quality Control/Reviewer',
-    orbitRadius: 340,
-    orbitSpeed: 0.25,
     orbitOffset: Math.PI,
     color: '#F59E0B',
   },
   {
     id: 'alchemist',
     name: 'Alchemist',
-    fullName: 'Gemini',
     icon: '✨',
-    specialty: 'Creative Generation',
     role: 'Creative Generation',
-    orbitRadius: 340,
-    orbitSpeed: 0.25,
     orbitOffset: (Math.PI * 4) / 3,
     color: '#EC4899',
   },
   {
     id: 'cortex',
     name: 'Cortex',
-    fullName: 'NotebookLM',
     icon: '🧠',
-    specialty: 'Memory & Context',
     role: 'Archival',
-    orbitRadius: 340,
-    orbitSpeed: 0.25,
     orbitOffset: (Math.PI * 5) / 3,
     color: '#EF4444',
   },
@@ -122,38 +98,56 @@ const workflows = [
   { id: 'research', icon: '🔬', title: 'Research', subtitle: 'Parallel AI research', color: '#06B6D4' },
 ]
 
-interface FloatingAgentProps {
+// Morphing Agent Component - orbits then morphs to final position
+interface MorphingAgentProps {
   agent: typeof agents[0]
-  scrollProgress: number
-  time: number
   index: number
+  morphProgress: number // 0 = orbiting, 1 = in final position
+  time: number
   isSelected: boolean
   onSelect: () => void
-  windowSize: { width: number; height: number }
+  totalAgents: number
 }
 
-function FloatingAgent({
+function MorphingAgent({
   agent,
-  scrollProgress,
-  time,
   index,
+  morphProgress,
+  time,
   isSelected,
   onSelect,
-  windowSize,
-}: FloatingAgentProps) {
-  const angle = agent.orbitOffset + time * agent.orbitSpeed
-  const orbitX = Math.cos(angle) * agent.orbitRadius
-  const orbitY = Math.sin(angle) * agent.orbitRadius * 0.4
+  totalAgents,
+}: MorphingAgentProps) {
+  const orbitRadius = 200
+  const orbitSpeed = 0.3
 
-  const scale = 1 - scrollProgress * 0.3
-  const labelOpacity = Math.max(0, 1 - scrollProgress * 3)
+  // Orbital position
+  const angle = agent.orbitOffset + time * orbitSpeed
+  const orbitX = Math.cos(angle) * orbitRadius
+  const orbitY = Math.sin(angle) * orbitRadius * 0.4
+
+  // Final position (spread across top, evenly spaced)
+  const spacing = 100
+  const totalWidth = (totalAgents - 1) * spacing
+  const finalX = (index * spacing) - (totalWidth / 2)
+  const finalY = -180 // Above the chat bar
+
+  // Interpolate between orbit and final positions
+  const currentX = orbitX + (finalX - orbitX) * morphProgress
+  const currentY = orbitY + (finalY - orbitY) * morphProgress
+
+  // Scale down slightly when morphed
+  const scale = 1 - morphProgress * 0.15
+
+  // Show label when morphed
+  const labelOpacity = morphProgress
 
   return (
     <motion.div
       className="absolute cursor-pointer"
       style={{
-        x: orbitX,
-        y: orbitY,
+        x: currentX,
+        y: currentY,
         scale,
         zIndex: isSelected ? 20 : 10,
       }}
@@ -161,21 +155,21 @@ function FloatingAgent({
       whileHover={{ scale: scale * 1.1 }}
     >
       <motion.div
-        className="relative flex items-center justify-center"
-        style={{
-          width: 56,
-          height: 56,
-        }}
+        className="relative flex flex-col items-center"
+        style={{ width: 56, height: 56 }}
       >
+        {/* Glow */}
         <div
-          className="absolute inset-0 rounded-full animate-pulse"
+          className="absolute inset-0 rounded-full"
           style={{
             background: `radial-gradient(circle, ${agent.color}33 0%, transparent 70%)`,
             transform: 'scale(1.5)',
+            opacity: isSelected ? 1 : 0.5,
           }}
         />
+        {/* Icon container */}
         <div
-          className="relative w-full h-full rounded-full flex items-center justify-center"
+          className="relative w-full h-full rounded-full flex items-center justify-center transition-all"
           style={{
             background: colors.surface,
             border: `2px solid ${isSelected ? agent.color : colors.border}`,
@@ -184,11 +178,12 @@ function FloatingAgent({
         >
           <span className="text-xl">{agent.icon}</span>
         </div>
+        {/* Label - appears when morphed */}
         <motion.div
-          className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-center"
+          className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-center"
           style={{ opacity: labelOpacity }}
         >
-          <div className="text-xs font-medium" style={{ color: colors.text }}>
+          <div className="text-[10px] font-medium" style={{ color: colors.text }}>
             {agent.name}
           </div>
         </motion.div>
@@ -235,16 +230,18 @@ export default function CrucibleLanding({
     return () => unsubscribe()
   }, [smoothProgress])
 
-  // Orbital animation
+  // Orbital animation - slows down as morph progresses
   useEffect(() => {
     let animationFrame: number
     const animate = () => {
-      setTime(prev => prev + 0.016)
+      const morphProgress = Math.min(1, Math.max(0, (progress - 0.25) / 0.2))
+      const speedMultiplier = 1 - morphProgress * 0.9 // Slow to 10% speed when morphed
+      setTime(prev => prev + 0.016 * speedMultiplier)
       animationFrame = requestAnimationFrame(animate)
     }
     animationFrame = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(animationFrame)
-  }, [])
+  }, [progress])
 
   const handleAgentSelect = (agentId: string) => {
     setLocalSelectedAgents(prev =>
@@ -262,19 +259,31 @@ export default function CrucibleLanding({
     }
   }
 
-  // Animation phases based on scroll - clearer separation between sections
-  // Section 1 (Hero): 0% - 25% scroll
-  const heroOpacity = useTransform(smoothProgress, [0, 0.2, 0.25], [1, 1, 0])
-  const heroScale = useTransform(smoothProgress, [0, 0.25], [1, 1.2])
+  // Animation phases based on scroll
+  // Section 1 (Hero): 0% - 20%
+  const heroOpacity = useTransform(smoothProgress, [0, 0.15, 0.2], [1, 1, 0])
+  const heroScale = useTransform(smoothProgress, [0, 0.2], [1, 1.2])
   const auroraOpacity = useTransform(smoothProgress, [0, 0.15], [1, 0])
 
-  // Section 2 (Crucible): 25% - 60% scroll
-  const crucibleOpacity = useTransform(smoothProgress, [0.2, 0.3, 0.55, 0.6], [0, 1, 1, 0])
-  const searchBarY = useTransform(smoothProgress, [0.25, 0.35], [50, 0])
+  // Section 2 (Orbit + Morph): 20% - 55%
+  // Sub-phase 2a: Orbiting around Latin phrase (20% - 35%)
+  // Sub-phase 2b: Morphing to chat bar (35% - 45%)
+  // Sub-phase 2c: Chat bar fully visible (45% - 55%)
+  const section2Opacity = useTransform(smoothProgress, [0.15, 0.25, 0.5, 0.55], [0, 1, 1, 0])
+  const orbitPhraseOpacity = useTransform(smoothProgress, [0.2, 0.25, 0.35, 0.4], [0, 1, 1, 0])
+  const morphProgress = useTransform(smoothProgress, [0.35, 0.45], [0, 1])
+  const chatBarOpacity = useTransform(smoothProgress, [0.38, 0.45], [0, 1])
 
-  // Section 3 (Workflows): 60% - 100% scroll
-  const workflowsOpacity = useTransform(smoothProgress, [0.55, 0.65], [0, 1])
-  const workflowsY = useTransform(smoothProgress, [0.55, 0.65], [50, 0])
+  // Section 3 (Workflows): 55% - 100%
+  const workflowsOpacity = useTransform(smoothProgress, [0.5, 0.6], [0, 1])
+  const workflowsY = useTransform(smoothProgress, [0.5, 0.6], [50, 0])
+
+  // Get current morph progress value
+  const [currentMorphProgress, setCurrentMorphProgress] = useState(0)
+  useEffect(() => {
+    const unsubscribe = morphProgress.on('change', setCurrentMorphProgress)
+    return () => unsubscribe()
+  }, [morphProgress])
 
   return (
     <div
@@ -299,7 +308,6 @@ export default function CrucibleLanding({
         >
           <GradientCircle scrollProgress={0}>
             <div className="text-center flex flex-col items-center">
-              {/* Geometric Logo Icon */}
               <SolusForgeIcon
                 size={180}
                 color={colors.text}
@@ -319,12 +327,11 @@ export default function CrucibleLanding({
           </GradientCircle>
         </motion.div>
 
-        {/* Aurora Borealis bottom glow - subtle scroll indicator */}
+        {/* Aurora Borealis bottom glow */}
         <motion.div
           className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none"
           style={{ opacity: auroraOpacity }}
         >
-          {/* Multiple layered gradients for aurora effect */}
           <div
             className="absolute inset-0"
             style={{
@@ -335,17 +342,10 @@ export default function CrucibleLanding({
               `,
             }}
           />
-          {/* Animated shimmer layer */}
           <motion.div
             className="absolute inset-0"
-            animate={{
-              opacity: [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             style={{
               background: `
                 radial-gradient(ellipse 50% 30% at 35% 100%, rgba(255, 107, 0, 0.2) 0%, transparent 40%),
@@ -353,81 +353,81 @@ export default function CrucibleLanding({
               `,
             }}
           />
-          {/* Soft top fade */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: 'linear-gradient(to bottom, transparent 0%, transparent 60%, rgba(10, 10, 10, 0.5) 100%)',
-            }}
-          />
         </motion.div>
 
-        {/* SECTION 2: Enter the Crucible with Orbiting Agents */}
+        {/* SECTION 2: Orbiting Agents + Morph to Chat Bar */}
         <motion.div
           className="absolute inset-0 flex flex-col items-center justify-center"
-          style={{ opacity: crucibleOpacity }}
+          style={{ opacity: section2Opacity }}
         >
-          {/* Title */}
-          <motion.div className="text-center mb-8 z-20">
+          {/* Latin Phrase - Orbiting phase */}
+          <motion.div
+            className="absolute text-center"
+            style={{ opacity: orbitPhraseOpacity }}
+          >
             <h2
-              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-3"
+              className="text-2xl md:text-3xl lg:text-4xl font-light italic tracking-wide"
               style={{
-                color: colors.text,
-                textShadow: `0 0 40px ${colors.accent}44`,
+                color: colors.textMuted,
+                textShadow: `0 0 30px ${colors.accent}33`,
               }}
             >
-              Enter the{' '}
-              <span
-                style={{
-                  background: `linear-gradient(135deg, ${colors.accent} 0%, #F59E0B 100%)`,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                Crucible
-              </span>
+              Libera te tutemet ex inferis
             </h2>
-            <p className="text-base md:text-lg" style={{ color: colors.textMuted }}>
-              Where AI models converge to forge your vision
+            <p className="text-sm mt-2" style={{ color: colors.textDim }}>
+              "Free yourself from hell"
             </p>
           </motion.div>
 
-          {/* Orbiting Agents */}
+          {/* Morphing Agents */}
           <div className="relative" style={{ width: 0, height: 0 }}>
             {agents.map((agent, index) => (
-              <FloatingAgent
+              <MorphingAgent
                 key={agent.id}
                 agent={agent}
-                scrollProgress={Math.max(0, (progress - 0.3) * 3)}
-                time={time}
                 index={index}
+                morphProgress={currentMorphProgress}
+                time={time}
                 isSelected={localSelectedAgents.includes(agent.id)}
                 onSelect={() => handleAgentSelect(agent.id)}
-                windowSize={windowSize}
+                totalAgents={agents.length}
               />
             ))}
           </div>
 
-          {/* Search Bar Section - Centered */}
+          {/* Chat Bar Section - appears after morph */}
           <motion.div
             className="absolute w-full max-w-3xl px-4"
             style={{
-              top: '55%',
-              y: searchBarY,
+              top: '50%',
+              opacity: chatBarOpacity,
             }}
           >
-            {/* Agent selector chips with roles */}
-            <div className="mb-4 flex justify-center gap-2 flex-wrap">
-              <span className="text-sm mr-2" style={{ color: colors.textMuted }}>
-                {localSelectedAgents.length} agents:
-              </span>
+            {/* Latin Phrase for chat phase */}
+            <div className="text-center mb-6">
+              <h2
+                className="text-xl md:text-2xl lg:text-3xl font-light italic tracking-wide"
+                style={{
+                  color: colors.textMuted,
+                  textShadow: `0 0 20px ${colors.accent}22`,
+                }}
+              >
+                Aut viam inveniam aut faciam
+              </h2>
+              <p className="text-xs mt-1" style={{ color: colors.textDim }}>
+                "I shall find a way or make one"
+              </p>
+            </div>
+
+            {/* Agent selector chips - single line */}
+            <div className="mb-4 flex justify-center gap-3 overflow-x-auto pb-2">
               {agents.map(agent => {
                 const isActive = localSelectedAgents.includes(agent.id)
                 return (
                   <button
                     key={agent.id}
                     onClick={() => handleAgentSelect(agent.id)}
-                    className="flex flex-col items-center px-3 py-1.5 rounded-lg text-xs transition-all"
+                    className="flex flex-col items-center px-4 py-2 rounded-lg text-xs transition-all shrink-0"
                     style={{
                       background: isActive ? `${agent.color}22` : colors.surface,
                       border: `1px solid ${isActive ? agent.color : colors.border}`,
