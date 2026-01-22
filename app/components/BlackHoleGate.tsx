@@ -320,13 +320,14 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
             transition={{ duration: 0.5 }}
             className="absolute inset-0 flex flex-col items-center justify-center z-10"
           >
-            {/* Password input - centered */}
+            {/* Password input - centered in the black hole core */}
             <motion.form
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
               onSubmit={handleSubmit}
-              className="flex flex-col items-center gap-6"
+              className="flex flex-col items-center gap-4"
+              style={{ marginTop: '-40px' }}
             >
               <div className="relative">
                 <input
