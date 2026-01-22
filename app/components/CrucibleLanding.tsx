@@ -199,10 +199,15 @@ function MorphingAgent({
   totalAgents,
 }: MorphingAgentProps) {
   const orbitRadius = 200
-  const orbitSpeed = 0.3
+  const orbitSpeed = 0.5 // Faster orbit speed
+
+  // Limit to 2 complete orbits (2 * 2π radians), then stop
+  const maxOrbits = 2
+  const maxAngle = maxOrbits * Math.PI * 2
+  const currentAngle = Math.min(time * orbitSpeed, maxAngle)
 
   // Orbital position (around center)
-  const angle = agent.orbitOffset + time * orbitSpeed
+  const angle = agent.orbitOffset + currentAngle
   const orbitX = Math.cos(angle) * orbitRadius
   const orbitY = Math.sin(angle) * orbitRadius * 0.4
 
@@ -414,12 +419,11 @@ export default function CrucibleLanding({
   // Morph progress - agents fly into boxes as UI slides up
   const morphProgress = useTransform(smoothProgress, [0.24, 0.34], [0, 1])
 
-  // "ex inferis" reveal on scroll - appears after initial phrase is visible
-  const exInferisOpacity = useTransform(smoothProgress, [0.15, 0.19], [0, 1])
-  const exInferisX = useTransform(smoothProgress, [0.15, 0.19], [20, 0])
-
-  // Melting effect progress - starts melting as the phrase exits (scroll up)
-  const exInferisMeltProgress = useTransform(smoothProgress, [0.22, 0.30], [0, 1])
+  // "ex inferis" reveal and fade on scroll - appears then fades with glow
+  const exInferisOpacity = useTransform(smoothProgress, [0.15, 0.18, 0.22, 0.26], [0, 1, 1, 0])
+  const exInferisX = useTransform(smoothProgress, [0.15, 0.18], [20, 0])
+  // Glow intensifies as it fades out
+  const exInferisGlow = useTransform(smoothProgress, [0.18, 0.24], [0, 1])
 
   // Section 3 (Arcana Split Workflows): 50% - 100%
   // Unified symbols appear: 50% - 60%
@@ -432,7 +436,7 @@ export default function CrucibleLanding({
   const [currentMorphProgress, setCurrentMorphProgress] = useState(0)
   const [currentChatBarY, setCurrentChatBarY] = useState(300)
   const [agentsLanded, setAgentsLanded] = useState<Record<string, boolean>>({})
-  const [currentMeltProgress, setCurrentMeltProgress] = useState(0)
+  const [currentGlowProgress, setCurrentGlowProgress] = useState(0)
   const prevMorphProgress = useRef(0)
 
   useEffect(() => {
@@ -445,9 +449,9 @@ export default function CrucibleLanding({
   }, [chatBarY])
 
   useEffect(() => {
-    const unsubscribe = exInferisMeltProgress.on('change', setCurrentMeltProgress)
+    const unsubscribe = exInferisGlow.on('change', setCurrentGlowProgress)
     return () => unsubscribe()
-  }, [exInferisMeltProgress])
+  }, [exInferisGlow])
 
   // Detect when agents land in boxes (morph reaches threshold)
   useEffect(() => {
@@ -724,7 +728,8 @@ export default function CrucibleLanding({
                   display: 'inline-block',
                   opacity: exInferisOpacity,
                   x: exInferisX,
-                  textShadow: `0 0 30px ${colors.accent}66, 0 0 60px ${colors.accent}33`,
+                  textShadow: `0 0 ${30 + currentGlowProgress * 50}px ${colors.accent}${Math.round(102 + currentGlowProgress * 100).toString(16).padStart(2, '0')}, 0 0 ${60 + currentGlowProgress * 80}px ${colors.accent}${Math.round(51 + currentGlowProgress * 150).toString(16).padStart(2, '0')}, 0 0 ${currentGlowProgress * 120}px ${colors.accent}`,
+                  filter: currentGlowProgress > 0.3 ? `blur(${currentGlowProgress * 2}px)` : 'none',
                 }}
               >
                 ex inferis
