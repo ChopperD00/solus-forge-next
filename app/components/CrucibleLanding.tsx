@@ -311,7 +311,7 @@ export default function CrucibleLanding({
               color: colors.accent,
             }}
           >
-            Pre-Alpha v3.3
+            Pre-Alpha v3.4
           </div>
         </div>
 
