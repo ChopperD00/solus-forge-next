@@ -414,18 +414,20 @@ export default function CrucibleLanding({
           style={{ opacity: heroOpacity, scale: heroScale }}
         >
           <GradientCircle scrollProgress={0}>
-            <div className="text-center flex flex-col items-center">
+            <div className="text-center flex flex-col items-center justify-center">
               <SolusForgeIcon
-                size={180}
+                size={160}
                 color={colors.text}
                 glowColor={colors.accentGlow}
                 animated={true}
               />
               <h1
-                className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-wider mt-6 brand-text"
+                className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-wider mt-8"
                 style={{
                   color: colors.text,
                   textShadow: `0 0 60px ${colors.accent}66`,
+                  fontFamily: "var(--font-futuriata), 'Futuriata', system-ui, sans-serif",
+                  letterSpacing: '0.15em',
                 }}
               >
                 SOLUS FORGE

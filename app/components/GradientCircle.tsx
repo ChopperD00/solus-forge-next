@@ -46,26 +46,25 @@ export default function GradientCircle({ children, scrollProgress = 0 }: Gradien
     const centerY = size / 2
     const radius = size * 0.42
 
-    // Generate a new solar flare
+    // Generate a new solar flare - travels OUTWARD from the circle
     const createFlare = (time: number): SolarFlare => {
-      // Bias toward bottom half of circle (between PI/4 and 3PI/4 from bottom)
-      // Bottom is at PI/2, so we want angles around there
+      // Flares can spawn anywhere around the circle but bias toward bottom
       const bottomBias = Math.PI / 2 // Bottom of circle
-      const spread = Math.PI * 0.6 // How wide the spawn area is
+      const spread = Math.PI * 1.2 // Wider spawn area
       const angle = bottomBias + (Math.random() - 0.5) * spread
 
       return {
         id: Math.random(),
         angle,
         startTime: time,
-        duration: 2 + Math.random() * 2, // 2-4 seconds
-        intensity: 0.6 + Math.random() * 0.4,
-        size: 0.8 + Math.random() * 0.6,
-        direction: 0.3 + Math.random() * 0.7, // Mostly downward
+        duration: 2.5 + Math.random() * 2, // 2.5-4.5 seconds
+        intensity: 0.5 + Math.random() * 0.4,
+        size: 0.7 + Math.random() * 0.5,
+        direction: 0.5 + Math.random() * 0.5, // Outward direction bias
       }
     }
 
-    // Draw a solar flare
+    // Draw a solar flare - travels OUTWARD from the circle (away from eye)
     const drawFlare = (flare: SolarFlare, currentTime: number) => {
       const elapsed = currentTime - flare.startTime
       const progress = elapsed / flare.duration
@@ -73,7 +72,7 @@ export default function GradientCircle({ children, scrollProgress = 0 }: Gradien
       if (progress > 1) return // Flare has ended
 
       // Easing: quick rise, slow fall
-      const riseTime = 0.2
+      const riseTime = 0.15
       let alpha: number
       if (progress < riseTime) {
         alpha = (progress / riseTime) * flare.intensity
@@ -81,88 +80,89 @@ export default function GradientCircle({ children, scrollProgress = 0 }: Gradien
         alpha = flare.intensity * (1 - (progress - riseTime) / (1 - riseTime))
       }
 
-      // Flare extends outward and downward
+      // Flare starts at the circle edge and extends OUTWARD (away from center)
       const baseX = centerX + Math.cos(flare.angle) * radius
       const baseY = centerY + Math.sin(flare.angle) * radius
 
-      // Flare grows outward over time
-      const flareLength = 40 + progress * 80 * flare.size
-      const flareWidth = 15 + Math.sin(progress * Math.PI) * 25 * flare.size
+      // Flare grows outward over time - AWAY from center
+      const flareLength = 30 + progress * 100 * flare.size
+      const flareWidth = 12 + Math.sin(progress * Math.PI) * 20 * flare.size
 
-      // Direction: outward from center with downward bias
+      // Direction: OUTWARD from center (away from the eye)
       const outwardX = Math.cos(flare.angle)
       const outwardY = Math.sin(flare.angle)
 
-      // Add downward drift
-      const driftY = progress * 30 * flare.direction
-
-      // Create gradient for the flare
+      // Create gradient for the flare - brightest at base (near circle), fading outward
       const endX = baseX + outwardX * flareLength
-      const endY = baseY + outwardY * flareLength + driftY
+      const endY = baseY + outwardY * flareLength
 
       const flareGradient = ctx.createLinearGradient(baseX, baseY, endX, endY)
-      flareGradient.addColorStop(0, `rgba(255, 200, 100, ${alpha * 0.8})`)
-      flareGradient.addColorStop(0.3, `rgba(255, 140, 50, ${alpha * 0.6})`)
-      flareGradient.addColorStop(0.7, `rgba(255, 80, 20, ${alpha * 0.3})`)
+      flareGradient.addColorStop(0, `rgba(255, 200, 100, ${alpha * 0.9})`)
+      flareGradient.addColorStop(0.2, `rgba(255, 160, 60, ${alpha * 0.7})`)
+      flareGradient.addColorStop(0.5, `rgba(255, 100, 30, ${alpha * 0.4})`)
+      flareGradient.addColorStop(0.8, `rgba(255, 60, 10, ${alpha * 0.15})`)
       flareGradient.addColorStop(1, 'transparent')
 
-      // Draw the main flare body
+      // Draw the main flare body - pointing OUTWARD
       ctx.save()
       ctx.translate(baseX, baseY)
-      ctx.rotate(flare.angle + Math.PI / 2)
+      // Rotate so the flare points away from center
+      ctx.rotate(flare.angle - Math.PI / 2)
 
       // Organic flare shape using bezier curves
       ctx.beginPath()
       ctx.moveTo(0, 0)
 
-      // Left side of flare
+      // Left side of flare (going outward)
       ctx.bezierCurveTo(
-        -flareWidth * 0.3, flareLength * 0.3,
-        -flareWidth * 0.5, flareLength * 0.6,
-        -flareWidth * 0.2 + Math.sin(currentTime * 3 + flare.id) * 5, flareLength
+        -flareWidth * 0.4, -flareLength * 0.25,
+        -flareWidth * 0.6, -flareLength * 0.5,
+        -flareWidth * 0.15 + Math.sin(currentTime * 4 + flare.id) * 4, -flareLength
       )
 
-      // Tip
+      // Tip (furthest from center)
       ctx.bezierCurveTo(
-        0, flareLength * 1.1,
-        0, flareLength * 1.1,
-        flareWidth * 0.2 + Math.sin(currentTime * 3 + flare.id + 1) * 5, flareLength
+        0, -flareLength * 1.15,
+        0, -flareLength * 1.15,
+        flareWidth * 0.15 + Math.sin(currentTime * 4 + flare.id + 1) * 4, -flareLength
       )
 
       // Right side of flare
       ctx.bezierCurveTo(
-        flareWidth * 0.5, flareLength * 0.6,
-        flareWidth * 0.3, flareLength * 0.3,
+        flareWidth * 0.6, -flareLength * 0.5,
+        flareWidth * 0.4, -flareLength * 0.25,
         0, 0
       )
 
       ctx.fillStyle = flareGradient
       ctx.fill()
 
-      // Add glow around the flare
-      const glowGradient = ctx.createRadialGradient(0, flareLength * 0.5, 0, 0, flareLength * 0.5, flareLength)
-      glowGradient.addColorStop(0, `rgba(255, 150, 50, ${alpha * 0.3})`)
+      // Add glow around the flare base
+      const glowGradient = ctx.createRadialGradient(0, -flareLength * 0.3, 0, 0, -flareLength * 0.3, flareLength * 0.6)
+      glowGradient.addColorStop(0, `rgba(255, 180, 80, ${alpha * 0.25})`)
       glowGradient.addColorStop(1, 'transparent')
 
       ctx.fillStyle = glowGradient
       ctx.beginPath()
-      ctx.arc(0, flareLength * 0.5, flareLength * 0.8, 0, Math.PI * 2)
+      ctx.arc(0, -flareLength * 0.3, flareLength * 0.6, 0, Math.PI * 2)
       ctx.fill()
 
       ctx.restore()
 
-      // Draw ripple particles falling downward
-      const numParticles = 5
+      // Draw particles traveling OUTWARD from the circle
+      const numParticles = 6
       for (let i = 0; i < numParticles; i++) {
-        const particleProgress = (progress + i * 0.1) % 1
-        if (particleProgress < 0.2) continue // Delay particle start
+        const particleProgress = (progress + i * 0.12) % 1
+        if (particleProgress < 0.1) continue // Delay particle start
 
-        const px = baseX + outwardX * flareLength * particleProgress * 0.8 + (Math.random() - 0.5) * 20
-        const py = baseY + outwardY * flareLength * particleProgress + driftY * particleProgress * 1.5 + i * 15
-        const particleAlpha = alpha * (1 - particleProgress) * 0.5
-        const particleSize = 2 + (1 - particleProgress) * 3
+        // Particles travel outward along the flare direction
+        const particleDist = flareLength * particleProgress * 1.2 + i * 12
+        const px = baseX + outwardX * particleDist + (Math.random() - 0.5) * 15
+        const py = baseY + outwardY * particleDist + (Math.random() - 0.5) * 15
+        const particleAlpha = alpha * (1 - particleProgress) * 0.6
+        const particleSize = 1.5 + (1 - particleProgress) * 2.5
 
-        ctx.fillStyle = `rgba(255, ${150 + i * 20}, 50, ${particleAlpha})`
+        ctx.fillStyle = `rgba(255, ${180 + i * 15}, 80, ${particleAlpha})`
         ctx.beginPath()
         ctx.arc(px, py, particleSize, 0, Math.PI * 2)
         ctx.fill()
@@ -312,8 +312,15 @@ export default function GradientCircle({ children, scrollProgress = 0 }: Gradien
         className="absolute inset-0"
         style={{ width: 800, height: 800 }}
       />
-      {/* Content inside the circle */}
-      <div className="relative z-10 flex flex-col items-center justify-center">
+      {/* Content inside the circle - perfectly centered */}
+      <div
+        className="absolute z-10 flex flex-col items-center justify-center"
+        style={{
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
         {children}
       </div>
     </motion.div>
