@@ -367,64 +367,7 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
         )}
       </AnimatePresence>
 
-      {/* Fast warp transition */}
-      <AnimatePresence>
-        {isUnlocking && (
-          <>
-            {/* Quick "save" flash */}
-            {warpPhase === 'warp' && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="absolute inset-0 flex items-center justify-center z-20"
-              >
-                <motion.p
-                  initial={{ scale: 1.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.6, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="text-5xl md:text-7xl font-bold tracking-widest lowercase"
-                  style={{
-                    color: colors.text,
-                    fontFamily: "system-ui, -apple-system, sans-serif",
-                    textShadow: '0 0 80px rgba(255, 255, 255, 0.5)',
-                  }}
-                >
-                  save
-                </motion.p>
-              </motion.div>
-            )}
-
-            {/* Fast "yourself" with orange */}
-            {warpPhase === 'colorize' && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="absolute inset-0 flex items-center justify-center z-20"
-              >
-                <motion.p
-                  initial={{ scale: 1.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.3, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="text-5xl md:text-7xl font-bold tracking-widest lowercase"
-                  style={{
-                    color: colors.accent,
-                    fontFamily: "system-ui, -apple-system, sans-serif",
-                    textShadow: `0 0 100px ${colors.accent}, 0 0 150px ${colors.accent}`,
-                  }}
-                >
-                  yourself
-                </motion.p>
-              </motion.div>
-            )}
-          </>
-        )}
-      </AnimatePresence>
+      {/* Warp speed transition - no text, just visual effect */}
     </div>
   )
 }

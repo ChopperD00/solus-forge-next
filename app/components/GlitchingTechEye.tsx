@@ -247,44 +247,40 @@ export default function GlitchingTechEye({
         }
       }
 
-      // Grain overlay - more intense
+      // Grain overlay - only within circular area
       gctx.clearRect(0, 0, gw, gh)
-      const img = gctx.createImageData(gw, gh)
-      const data = img.data
-      const base = 128
-      const amp = Math.floor(255 * (0.1 + grainStrength * 0.4))
 
-      for (let p = 0; p < data.length; p += 4) {
-        const n = (Math.random() - 0.5) * amp
-        const v = Math.max(0, Math.min(255, base + n))
-        data[p] = v
-        data[p + 1] = v * 0.7 // Orange tint
-        data[p + 2] = v * 0.3
-        data[p + 3] = Math.max(0, Math.min(255, Math.abs(n) * 3))
-      }
-      gctx.putImageData(img, 0, 0)
+      // Create circular grain only within the eye area
+      const gcx = gw / 2
+      const gcy = gh / 2
+      const grainRadius = Math.min(gw, gh) * 0.45
 
-      // Extra glitch particles
-      if (glitchiness > 0.5) {
-        gctx.globalCompositeOperation = "screen"
-        for (let i = 0; i < 80; i++) {
-          const px = Math.random() * gw
-          const py = Math.random() * gh
+      // Extra glitch particles - within circle only
+      if (glitchiness > 0.3) {
+        for (let i = 0; i < 60; i++) {
+          const angle = Math.random() * Math.PI * 2
+          const dist = Math.random() * grainRadius * 0.9
+          const px = gcx + Math.cos(angle) * dist
+          const py = gcy + Math.sin(angle) * dist
           const pr = Math.random() * 2 + 0.5
-          const op = Math.random() * 0.5 * glitchiness
+          const op = Math.random() * 0.4 * glitchiness
           gctx.fillStyle = `rgba(255, 180, 100, ${op})`
           gctx.beginPath()
           gctx.arc(px, py, pr, 0, Math.PI * 2)
           gctx.fill()
         }
-        gctx.globalCompositeOperation = "source-over"
       }
 
-      // Draw grain overlay
-      ctx.globalAlpha = 0.3 + grainStrength * 0.5
+      // Draw grain overlay with circular clip
+      ctx.save()
+      ctx.beginPath()
+      ctx.arc(cx, cy, radius * 1.8, 0, Math.PI * 2)
+      ctx.clip()
+      ctx.globalAlpha = 0.2 + grainStrength * 0.3
       ctx.imageSmoothingEnabled = true
       ctx.drawImage(grainCanvas, 0, 0, wCss, hCss)
       ctx.globalAlpha = 1
+      ctx.restore()
 
       ctx.restore()
 

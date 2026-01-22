@@ -213,48 +213,35 @@ export default function ArcanaSplit({
     [0, 1]
   )
 
-  // Card position transforms - tighter vertical spacing
+  // Card position transforms - simple fade in with slight stagger
   const getCardTransform = (cardIndex: number, totalCards: number) => {
-    const centerOffset = (totalCards - 1) / 2
-    // Tighter vertical spacing - 12px gap between cards
-    const finalY = (cardIndex - centerOffset) * (CARD_HEIGHT + 12)
-    const jitterX = (cardIndex % 2 === 0 ? -1 : 1) * 10
+    // No Y movement - cards are already stacked by flexbox
+    const y = useTransform(scrollProgress, [0, 1], [0, 0])
 
-    const y = useTransform(
-      scrollProgress,
-      [adjustedEnd - 0.05, adjustedEnd + 0.02],
-      [0, finalY]
-    )
+    // No X movement
+    const x = useTransform(scrollProgress, [0, 1], [0, 0])
 
-    const x = useTransform(
-      scrollProgress,
-      [adjustedEnd - 0.05, adjustedEnd - 0.02, adjustedEnd + 0.02],
-      [0, jitterX, 0]
-    )
-
+    // Simple scale in
     const scale = useTransform(
       scrollProgress,
-      [adjustedEnd - 0.05, adjustedEnd],
-      [0.6, 1]
+      [adjustedEnd - 0.05 + cardIndex * 0.01, adjustedEnd + cardIndex * 0.01],
+      [0.8, 1]
     )
 
-    const rotate = useTransform(
-      scrollProgress,
-      [adjustedEnd - 0.05, adjustedEnd - 0.02, adjustedEnd + 0.02],
-      [cardIndex * 6 - totalCards * 3, cardIndex * 2, 0]
-    )
+    // No rotation
+    const rotate = useTransform(scrollProgress, [0, 1], [0, 0])
 
     return { x, y, scale, rotate }
   }
 
   return (
     <div
-      className="relative flex flex-col items-center flex-1"
-      style={{ minWidth: CARD_WIDTH + 16, maxWidth: CARD_WIDTH + 32, minHeight: 600 }}
+      className="relative flex flex-col items-center"
+      style={{ width: CARD_WIDTH + 20 }}
     >
       {/* Arcana Name - positioned above everything */}
       <motion.span
-        className="text-xs uppercase tracking-widest mb-6 whitespace-nowrap font-medium"
+        className="text-[10px] uppercase tracking-widest mb-4 whitespace-nowrap font-semibold"
         style={{
           color: arcanaColor,
           opacity: useTransform(scrollProgress, [adjustedStart, adjustedStart + 0.03], [0, 0.9]),
@@ -265,7 +252,7 @@ export default function ArcanaSplit({
       </motion.span>
 
       {/* Container for symbol and cards */}
-      <div className="relative flex-1 flex items-start justify-center pt-2" style={{ minHeight: 500 }}>
+      <div className="relative flex flex-col items-center justify-start">
         {/* Unified Arcana Symbol */}
         <motion.div
           className="absolute flex flex-col items-center justify-center"
@@ -377,10 +364,10 @@ export default function ArcanaSplit({
           </motion.div>
         </motion.div>
 
-        {/* Playing Cards - emerge from split */}
+        {/* Playing Cards - simple vertical stack */}
         <motion.div
-          className="absolute flex flex-col items-center"
-          style={{ opacity: cardsOpacity, top: '5%' }}
+          className="flex flex-col items-center gap-3"
+          style={{ opacity: cardsOpacity }}
         >
           {cards.map((card, cardIndex) => {
             const transforms = getCardTransform(cardIndex, cards.length)
