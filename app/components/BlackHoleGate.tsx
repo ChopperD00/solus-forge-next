@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HandEye } from '@phosphor-icons/react'
+import { ArrowRight } from '@phosphor-icons/react'
 
 const colors = {
   bg: '#000000',
@@ -325,27 +325,27 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="absolute top-[15%] left-0 right-0 text-center"
+              className="absolute top-[15%] left-0 right-0 text-center z-20"
             >
               <h1
                 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-widest"
                 style={{
                   color: colors.text,
                   fontFamily: "system-ui, -apple-system, sans-serif",
-                  textShadow: '0 0 40px rgba(100, 100, 100, 0.3)',
+                  textShadow: '0 0 60px rgba(255, 255, 255, 0.2), 0 0 120px rgba(100, 100, 100, 0.3)',
                 }}
               >
                 SOLUS FORGE
               </h1>
             </motion.div>
 
-            {/* Password input - absolute center (input only) */}
+            {/* Password input - absolute center with inline enter button */}
             <motion.form
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
               onSubmit={handleSubmit}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
             >
               <div className="relative">
                 <input
@@ -354,7 +354,7 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder="Enter passphrase"
                   autoFocus
-                  className="w-72 md:w-80 px-6 py-4 rounded-full text-center text-base tracking-wider focus:outline-none transition-all"
+                  className="w-72 md:w-80 pl-6 pr-14 py-4 rounded-full text-center text-base tracking-wider focus:outline-none transition-all"
                   style={{
                     background: 'rgba(255, 255, 255, 0.03)',
                     border: `1px solid ${error ? '#EF4444' : 'rgba(150, 150, 150, 0.3)'}`,
@@ -365,6 +365,17 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                       : '0 0 30px rgba(100, 100, 100, 0.15)',
                   }}
                 />
+                {/* Enter button on right edge */}
+                <button
+                  type="submit"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                  style={{
+                    background: 'rgba(150, 150, 150, 0.2)',
+                    border: '1px solid rgba(150, 150, 150, 0.3)',
+                  }}
+                >
+                  <ArrowRight size={18} weight="bold" color={colors.text} />
+                </button>
                 {error && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -377,27 +388,6 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                 )}
               </div>
             </motion.form>
-
-            {/* Submit button - positioned below center */}
-            <motion.button
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              type="submit"
-              form="password-form"
-              onClick={handleSubmit}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="absolute top-[58%] left-1/2 -translate-x-1/2 px-8 py-3 rounded-full font-medium tracking-wider transition-all flex items-center gap-3"
-              style={{
-                background: 'linear-gradient(135deg, #666666 0%, #888888 100%)',
-                color: colors.text,
-                fontFamily: "system-ui, -apple-system, sans-serif",
-                boxShadow: '0 0 30px rgba(100, 100, 100, 0.2)',
-              }}
-            >
-              <HandEye size={24} weight="duotone" />
-            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
@@ -410,18 +400,19 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
             {warpPhase === 'collapse' && (
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.25 }}
+                animate={{ opacity: 0.6 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
-                className="absolute inset-0 flex items-center justify-center z-10"
+                className="absolute inset-0 flex items-center justify-center z-20"
               >
                 <motion.p
                   initial={{ scale: 0.9 }}
                   animate={{ scale: 1 }}
                   className="text-4xl md:text-6xl font-bold tracking-widest lowercase"
                   style={{
-                    color: colors.textMuted,
+                    color: colors.text,
                     fontFamily: "system-ui, -apple-system, sans-serif",
+                    textShadow: '0 0 40px rgba(255, 255, 255, 0.3)',
                   }}
                 >
                   engaged...
@@ -433,10 +424,10 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
             {warpPhase === 'warp' && (
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.3 }}
+                animate={{ opacity: 0.8 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="absolute inset-0 flex items-center justify-center z-10"
+                className="absolute inset-0 flex items-center justify-center z-20"
               >
                 <motion.p
                   initial={{ scale: 1.2, opacity: 0 }}
@@ -446,6 +437,7 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                   style={{
                     color: colors.text,
                     fontFamily: "system-ui, -apple-system, sans-serif",
+                    textShadow: '0 0 60px rgba(255, 255, 255, 0.4)',
                   }}
                 >
                   save
@@ -457,10 +449,10 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
             {warpPhase === 'colorize' && (
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.4 }}
+                animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.4 }}
-                className="absolute inset-0 flex items-center justify-center z-10"
+                className="absolute inset-0 flex items-center justify-center z-20"
               >
                 <motion.p
                   initial={{ scale: 1.3, opacity: 0 }}
@@ -470,7 +462,7 @@ export default function BlackHoleGate({ onUnlock, password }: BlackHoleGateProps
                   style={{
                     color: colors.accent,
                     fontFamily: "system-ui, -apple-system, sans-serif",
-                    textShadow: `0 0 60px ${colors.accent}`,
+                    textShadow: `0 0 80px ${colors.accent}, 0 0 120px ${colors.accent}`,
                   }}
                 >
                   yourself
