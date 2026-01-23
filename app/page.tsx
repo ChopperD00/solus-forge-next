@@ -18,6 +18,8 @@ import SocialPaidAdsWorkflow from './components/SocialPaidAdsWorkflow'
 import EmailAutomationWorkflow from './components/EmailAutomationWorkflow'
 import SocialAdsAutomationWorkflow from './components/SocialAdsAutomationWorkflow'
 import OSINTWorkflow from './components/OSINTWorkflow'
+import StylestEmailWorkflow from './components/StylestEmailWorkflow'
+import NurseJamieEmailWorkflow from './components/NurseJamieEmailWorkflow'
 import AnalyticsWorkflow from './components/AnalyticsWorkflow'
 import AssetVaultWorkflow from './components/AssetVaultWorkflow'
 import CrucibleLanding from './components/CrucibleLanding'
@@ -45,7 +47,7 @@ import {
   CaretDoubleLeft as CaretDoubleLeftIcon,
 } from '@phosphor-icons/react'
 
-type IntentId = 'email_campaign' | 'video_production' | 'image_generation' | 'audio' | '3d_assets' | 'research' | 'automation' | 'prompt_vault' | 'influencer_suite' | 'social_paid_ads' | 'email_automation' | 'social_ads_automation' | 'lupin_iii' | 'analytics' | 'asset_vault' | null
+type IntentId = 'email_campaign' | 'video_production' | 'image_generation' | 'audio' | '3d_assets' | 'research' | 'automation' | 'prompt_vault' | 'influencer_suite' | 'social_paid_ads' | 'email_automation' | 'social_ads_automation' | 'lupin_iii' | 'analytics' | 'asset_vault' | 'stylest_email' | 'nurse_jamie_email' | null
 
 // SOLUS color palette - Darker, more cinematic
 const colors = {
@@ -97,6 +99,8 @@ const workflows = [
   { id: 'lupin_iii', icon: DetectiveIcon, title: 'Lupin III', subtitle: 'OSINT & Intelligence Suite', color: '#8B5CF6' },
   { id: 'analytics', icon: ChartBarIcon, title: 'Analytics', subtitle: 'Performance insights', color: '#3B82F6' },
   { id: 'asset_vault', icon: VaultIcon, title: 'Asset Vault', subtitle: 'Organize & version control', color: '#8B5CF6' },
+  { id: 'stylest_email', icon: EnvelopeIcon, title: 'Stylest Email', subtitle: 'Swimwear campaign studio', color: '#F97316' },
+  { id: 'nurse_jamie_email', icon: EnvelopeIcon, title: 'Nurse Jamie Email', subtitle: 'Beauty device campaigns', color: '#D4AF37' },
 ]
 
 export default function Home() {
@@ -299,6 +303,8 @@ export default function Home() {
               {selectedIntent === 'lupin_iii' && <OSINTWorkflow />}
               {selectedIntent === 'analytics' && <AnalyticsWorkflow />}
               {selectedIntent === 'asset_vault' && <AssetVaultWorkflow />}
+              {selectedIntent === 'stylest_email' && <StylestEmailWorkflow />}
+              {selectedIntent === 'nurse_jamie_email' && <NurseJamieEmailWorkflow />}
             </main>
           </motion.div>
         )}

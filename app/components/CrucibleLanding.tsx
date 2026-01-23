@@ -159,6 +159,8 @@ const tarotCards = [
   { id: 'email_campaign', icon: EnvelopeIcon, title: 'Email Campaign', subtitle: 'Figma templates, copy, AI images', capabilities: ['Template Design', 'Copy Generation', 'A/B Testing', 'Send Automation'], arcana: 'The Merchant' },
   { id: 'social_paid_ads', icon: DeviceMobileIcon, title: 'Social Paid Ads', subtitle: 'Multi-format ad creation', capabilities: ['Ad Creative', 'Audience Targeting', 'Budget Optimization', 'Performance Tracking'], arcana: 'The Merchant' },
   { id: 'influencer_suite', icon: UserIcon, title: 'Influencer Suite', subtitle: 'LoRA training & clothing swap', capabilities: ['LoRA Training', 'Face Swap', 'Clothing Transfer', 'Brand Consistency'], arcana: 'The Merchant' },
+  { id: 'stylest_email', icon: EnvelopeIcon, title: 'Stylest Email', subtitle: 'Swimwear campaign studio', capabilities: ['Product Swap', 'Colorway System', 'Zone Editing', 'Founder Sections'], arcana: 'The Merchant' },
+  { id: 'nurse_jamie_email', icon: EnvelopeIcon, title: 'Nurse Jamie Email', subtitle: 'Beauty device campaigns', capabilities: ['Product Catalog', 'Content Blocks', 'HTML Export', 'Platform Targeting'], arcana: 'The Merchant' },
   { id: 'automation', icon: LightningIcon, title: 'Automation', subtitle: 'Workflow triggers & sequences', capabilities: ['Trigger Events', 'Conditional Logic', 'API Integrations', 'Scheduled Tasks'], arcana: 'The Merchant' },
   // Intelligence
   { id: 'research', icon: FlaskIcon, title: 'Research', subtitle: 'Parallel AI research', capabilities: ['Multi-Source Search', 'Summarization', 'Fact Checking', 'Citation Tracking'], arcana: 'The Oracle' },
@@ -963,7 +965,7 @@ export default function CrucibleLanding({
                 arcanaSymbol={
                   <ScalesIcon size={48} weight="duotone" color="#10B981" />
                 }
-                cards={tarotCards.slice(4, 8)}
+                cards={tarotCards.slice(4, 10)}
                 scrollProgress={smoothProgress}
                 splitStart={0.60}
                 splitEnd={0.78}
@@ -978,7 +980,7 @@ export default function CrucibleLanding({
                 arcanaSymbol={
                   <BrainIcon size={48} weight="duotone" color="#8B5CF6" />
                 }
-                cards={tarotCards.slice(8, 11)}
+                cards={tarotCards.slice(10, 13)}
                 scrollProgress={smoothProgress}
                 splitStart={0.60}
                 splitEnd={0.78}
@@ -993,7 +995,7 @@ export default function CrucibleLanding({
                 arcanaSymbol={
                   <SparkleIcon size={48} weight="duotone" color="#EC4899" />
                 }
-                cards={tarotCards.slice(11, 14)}
+                cards={tarotCards.slice(13, 16)}
                 scrollProgress={smoothProgress}
                 splitStart={0.60}
                 splitEnd={0.78}
