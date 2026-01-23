@@ -299,6 +299,87 @@ function NodeConfigPanel({ node, onClose, onUpdate }: NodeConfigPanelProps) {
           </div>
         )}
 
+        {/* Reference Image node */}
+        {node.type === 'image_ref' && (
+          <div className="mb-4">
+            <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Reference Image</label>
+            <div
+              className="w-full h-40 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all hover:border-opacity-100"
+              style={{ background: colors.bg, border: `2px dashed ${colors.border}` }}
+            >
+              <span className="text-3xl mb-2">🖼️</span>
+              <span className="text-sm" style={{ color: colors.textMuted }}>Drop image or click to upload</span>
+              <span className="text-xs mt-1" style={{ color: colors.textDim }}>PNG, JPG, WebP up to 10MB</span>
+            </div>
+            <div className="mt-3">
+              <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Or paste URL</label>
+              <input
+                type="text"
+                className="w-full p-3 rounded-xl text-sm"
+                style={{ background: colors.bg, color: colors.text, border: `1px solid ${colors.border}` }}
+                placeholder="https://example.com/image.png"
+              />
+            </div>
+            <div className="mt-3">
+              <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Image Influence</label>
+              <input type="range" min="0" max="1" step="0.1" defaultValue="0.7" className="w-full" />
+              <div className="flex justify-between text-xs mt-1" style={{ color: colors.textDim }}>
+                <span>Subtle</span>
+                <span>Strong</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Export/Batch Output node */}
+        {node.type === 'batch_output' && (
+          <div className="mb-4">
+            <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Export Format</label>
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              {['PNG', 'JPEG', 'WebP'].map(format => (
+                <button
+                  key={format}
+                  className="p-3 rounded-xl text-center text-sm transition-all"
+                  style={{ background: colors.bg, border: `1px solid ${colors.border}`, color: colors.text }}
+                >
+                  {format}
+                </button>
+              ))}
+            </div>
+            <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Quality</label>
+            <input type="range" min="1" max="100" defaultValue="95" className="w-full" />
+            <div className="flex justify-between text-xs mt-1 mb-4" style={{ color: colors.textDim }}>
+              <span>Compressed</span>
+              <span>Maximum</span>
+            </div>
+            <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Output Size</label>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {['Original', '2x Upscale', '1080p', '4K'].map(size => (
+                <button
+                  key={size}
+                  className="p-2 rounded-lg text-xs transition-all"
+                  style={{ background: colors.bg, border: `1px solid ${colors.border}`, color: colors.textMuted }}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+            <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Destination</label>
+            <div className="space-y-2">
+              {['Download', 'Asset Vault', 'Google Drive', 'Dropbox'].map(dest => (
+                <button
+                  key={dest}
+                  className="w-full p-3 rounded-xl text-left text-sm flex items-center gap-3 transition-all"
+                  style={{ background: colors.bg, border: `1px solid ${colors.border}`, color: colors.text }}
+                >
+                  <span>{dest === 'Download' ? '💾' : dest === 'Asset Vault' ? '🗄️' : dest === 'Google Drive' ? '📁' : '📦'}</span>
+                  {dest}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Model selection */}
         {node.type === 'image_model' && (
           <>

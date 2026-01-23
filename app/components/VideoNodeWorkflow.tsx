@@ -252,6 +252,99 @@ function NodeConfigPanel({ node, onClose, onUpdate }: NodeConfigPanelProps) {
           </div>
         )}
 
+        {/* Image Input node */}
+        {node.type === 'image_input' && (
+          <div className="mb-4">
+            <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Input Image</label>
+            <div
+              className="w-full h-40 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all hover:border-opacity-100"
+              style={{ background: colors.bg, border: `2px dashed ${colors.border}` }}
+            >
+              <span className="text-3xl mb-2">🖼️</span>
+              <span className="text-sm" style={{ color: colors.textMuted }}>Drop image or click to upload</span>
+              <span className="text-xs mt-1" style={{ color: colors.textDim }}>First frame / reference image</span>
+            </div>
+            <div className="mt-3">
+              <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Or paste URL</label>
+              <input
+                type="text"
+                className="w-full p-3 rounded-xl text-sm"
+                style={{ background: colors.bg, color: colors.text, border: `1px solid ${colors.border}` }}
+                placeholder="https://example.com/image.png"
+              />
+            </div>
+            <div className="mt-3">
+              <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Use as</label>
+              <div className="grid grid-cols-2 gap-2">
+                {['First Frame', 'Style Reference', 'Motion Source', 'Face Reference'].map(opt => (
+                  <button
+                    key={opt}
+                    className="p-2 rounded-lg text-xs transition-all"
+                    style={{ background: colors.bg, border: `1px solid ${colors.border}`, color: colors.textMuted }}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Export/Output node */}
+        {node.type === 'output' && (
+          <div className="mb-4">
+            <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Export Format</label>
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              {['MP4', 'WebM', 'GIF'].map(format => (
+                <button
+                  key={format}
+                  className="p-3 rounded-xl text-center text-sm transition-all"
+                  style={{ background: colors.bg, border: `1px solid ${colors.border}`, color: colors.text }}
+                >
+                  {format}
+                </button>
+              ))}
+            </div>
+            <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Resolution</label>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {['720p', '1080p', '4K', 'Original'].map(res => (
+                <button
+                  key={res}
+                  className="p-2 rounded-lg text-xs transition-all"
+                  style={{ background: colors.bg, border: `1px solid ${colors.border}`, color: colors.textMuted }}
+                >
+                  {res}
+                </button>
+              ))}
+            </div>
+            <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Frame Rate</label>
+            <div className="grid grid-cols-4 gap-2 mb-4">
+              {['24', '30', '60', '120'].map(fps => (
+                <button
+                  key={fps}
+                  className="p-2 rounded-lg text-xs transition-all"
+                  style={{ background: colors.bg, border: `1px solid ${colors.border}`, color: colors.textMuted }}
+                >
+                  {fps}fps
+                </button>
+              ))}
+            </div>
+            <label className="text-xs mb-2 block" style={{ color: colors.textMuted }}>Destination</label>
+            <div className="space-y-2">
+              {['Download', 'Asset Vault', 'YouTube', 'Vimeo'].map(dest => (
+                <button
+                  key={dest}
+                  className="w-full p-3 rounded-xl text-left text-sm flex items-center gap-3 transition-all"
+                  style={{ background: colors.bg, border: `1px solid ${colors.border}`, color: colors.text }}
+                >
+                  <span>{dest === 'Download' ? '💾' : dest === 'Asset Vault' ? '🗄️' : dest === 'YouTube' ? '📺' : '🎬'}</span>
+                  {dest}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Model selection for video model nodes */}
         {node.type === 'video_model' && (
           <>
