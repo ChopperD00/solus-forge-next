@@ -20,6 +20,7 @@ import SocialAdsAutomationWorkflow from './components/SocialAdsAutomationWorkflo
 import OSINTWorkflow from './components/OSINTWorkflow'
 import StylestEmailWorkflow from './components/StylestEmailWorkflow'
 import NurseJamieEmailWorkflow from './components/NurseJamieEmailWorkflow'
+import NurseJamieEmailStudio from './components/NurseJamieEmailStudio'
 import AnalyticsWorkflow from './components/AnalyticsWorkflow'
 import AssetVaultWorkflow from './components/AssetVaultWorkflow'
 import CrucibleLanding from './components/CrucibleLanding'
@@ -304,7 +305,7 @@ export default function Home() {
               {selectedIntent === 'analytics' && <AnalyticsWorkflow />}
               {selectedIntent === 'asset_vault' && <AssetVaultWorkflow />}
               {selectedIntent === 'stylest_email' && <StylestEmailWorkflow />}
-              {selectedIntent === 'nurse_jamie_email' && <NurseJamieEmailWorkflow />}
+              {selectedIntent === 'nurse_jamie_email' && <NurseJamieEmailStudio />}
             </main>
           </motion.div>
         )}
