@@ -423,41 +423,42 @@ export default function CrucibleLanding({
     }
   }
 
-  // Animation phases based on scroll (700vh total - faster progression)
-  // Section 1 (Hero): 0% - 15%
-  const heroOpacity = useTransform(smoothProgress, [0, 0.10, 0.15], [1, 1, 0])
-  const heroScale = useTransform(smoothProgress, [0, 0.15], [1, 1.2])
-  const auroraOpacity = useTransform(smoothProgress, [0, 0.10], [1, 0])
+  // Animation phases based on scroll (900vh total - smoother progression)
+  // Section 1 (Hero): 0% - 12%
+  const heroOpacity = useTransform(smoothProgress, [0, 0.08, 0.12], [1, 1, 0])
+  const heroScale = useTransform(smoothProgress, [0, 0.12], [1, 1.2])
+  const auroraOpacity = useTransform(smoothProgress, [0, 0.08], [1, 0])
 
-  // Section 2 (Orbit + Morph): 15% - 55%
-  // Sub-phase 2a: Orbiting around Latin phrase (15% - 25%)
-  // Sub-phase 2b: UI slides up, agents fly into boxes (25% - 40%)
-  // Sub-phase 2c: Chat bar fully visible (40% - 55%)
-  const section2Opacity = useTransform(smoothProgress, [0.10, 0.18, 0.50, 0.58], [0, 1, 1, 0])
-  const orbitPhraseOpacity = useTransform(smoothProgress, [0.15, 0.20, 0.28, 0.34], [0, 1, 1, 0])
+  // Section 2 (Orbit + Morph): 12% - 45%
+  // Sub-phase 2a: Orbiting around Latin phrase (12% - 20%)
+  // Sub-phase 2b: UI slides up, agents fly into boxes (20% - 32%)
+  // Sub-phase 2c: Chat bar fully visible (32% - 45%)
+  const section2Opacity = useTransform(smoothProgress, [0.08, 0.14, 0.42, 0.48], [0, 1, 1, 0])
+  const orbitPhraseOpacity = useTransform(smoothProgress, [0.12, 0.16, 0.24, 0.30], [0, 1, 1, 0])
 
   // Orbit phrase moves UP as chat bar comes in
-  const orbitPhraseY = useTransform(smoothProgress, [0.26, 0.38], [0, -150])
+  const orbitPhraseY = useTransform(smoothProgress, [0.22, 0.32], [0, -150])
 
   // Chat bar slides up from below
-  const chatBarY = useTransform(smoothProgress, [0.28, 0.40], [300, 0]) // Starts 300px below, moves to center
-  const chatBarOpacity = useTransform(smoothProgress, [0.28, 0.36], [0, 1])
+  const chatBarY = useTransform(smoothProgress, [0.24, 0.34], [300, 0]) // Starts 300px below, moves to center
+  const chatBarOpacity = useTransform(smoothProgress, [0.24, 0.30], [0, 1])
 
   // Morph progress - agents fly into boxes as UI slides up (complete earlier)
-  const morphProgress = useTransform(smoothProgress, [0.22, 0.30], [0, 1])
+  const morphProgress = useTransform(smoothProgress, [0.18, 0.26], [0, 1])
 
   // "ex inferis" reveal and fade on scroll - appears then fades with glow
-  const exInferisOpacity = useTransform(smoothProgress, [0.18, 0.22, 0.28, 0.34], [0, 1, 1, 0])
-  const exInferisX = useTransform(smoothProgress, [0.18, 0.22], [20, 0])
+  const exInferisOpacity = useTransform(smoothProgress, [0.14, 0.18, 0.24, 0.30], [0, 1, 1, 0])
+  const exInferisX = useTransform(smoothProgress, [0.14, 0.18], [20, 0])
   // Glow intensifies as it fades out
-  const exInferisGlow = useTransform(smoothProgress, [0.22, 0.32], [0, 1])
+  const exInferisGlow = useTransform(smoothProgress, [0.18, 0.28], [0, 1])
 
-  // Section 3 (Arcana Split Workflows): 55% - 100%
-  // Unified symbols appear: 55% - 65%
-  // Split animation: 65% - 80%
-  // Cards fully revealed: 80% - 100%
-  const workflowsOpacity = useTransform(smoothProgress, [0.52, 0.62], [0, 1])
-  const workflowsY = useTransform(smoothProgress, [0.52, 0.62], [50, 0])
+  // Section 3 (Arcana Split Workflows): 45% - 88%
+  // Smooth crossfade with prompt section
+  // Unified symbols appear: 45% - 52%
+  // Split animation: 52% - 65%
+  // Cards fully revealed: 65% - 88%
+  const workflowsOpacity = useTransform(smoothProgress, [0.44, 0.52], [0, 1])
+  const workflowsY = useTransform(smoothProgress, [0.44, 0.52], [50, 0])
 
   // Get current morph progress and chatBarY values
   const [currentMorphProgress, setCurrentMorphProgress] = useState(0)
@@ -502,7 +503,7 @@ export default function CrucibleLanding({
     <div
       ref={containerRef}
       className="relative"
-      style={{ height: '700vh', background: colors.bg }}
+      style={{ height: '900vh', background: colors.bg }}
     >
       {/* SpectraNoise Background */}
       <SpectraNoiseBackground
@@ -862,7 +863,7 @@ export default function CrucibleLanding({
             <motion.div
               className="mt-8 flex flex-col items-center gap-1"
               style={{
-                opacity: useTransform(smoothProgress, [0.36, 0.42, 0.52, 0.58], [0, 1, 1, 0]),
+                opacity: useTransform(smoothProgress, [0.30, 0.35, 0.42, 0.46], [0, 1, 1, 0]),
               }}
             >
               <motion.span
@@ -889,7 +890,7 @@ export default function CrucibleLanding({
             <motion.div
               className="absolute -bottom-32 left-0 right-0 mx-auto w-[90%] max-w-[600px] h-24 pointer-events-none"
               style={{
-                opacity: useTransform(smoothProgress, [0.42, 0.48, 0.54], [0, 0.8, 0]),
+                opacity: useTransform(smoothProgress, [0.36, 0.40, 0.44], [0, 0.8, 0]),
               }}
             >
               {/* Animated gradient glow */}
@@ -955,8 +956,8 @@ export default function CrucibleLanding({
           <motion.div
             className="text-center relative z-10 mb-12 md:mb-16"
             style={{
-              y: useTransform(smoothProgress, [0.55, 0.65, 0.78], [30, 0, -40]),
-              opacity: useTransform(smoothProgress, [0.55, 0.62, 0.75, 0.85], [0, 1, 1, 0.7]),
+              y: useTransform(smoothProgress, [0.46, 0.54, 0.65], [30, 0, -40]),
+              opacity: useTransform(smoothProgress, [0.46, 0.52, 0.62, 0.72], [0, 1, 1, 0.7]),
             }}
           >
             <h3
@@ -988,8 +989,8 @@ export default function CrucibleLanding({
                 }
                 cards={tarotCards.slice(0, 4)}
                 scrollProgress={smoothProgress}
-                splitStart={0.60}
-                splitEnd={0.78}
+                splitStart={0.50}
+                splitEnd={0.65}
                 columnIndex={0}
                 onCardSelect={onWorkflowSelect}
               />
@@ -1003,8 +1004,8 @@ export default function CrucibleLanding({
                 }
                 cards={merchantCards}
                 scrollProgress={smoothProgress}
-                splitStart={0.60}
-                splitEnd={0.78}
+                splitStart={0.50}
+                splitEnd={0.65}
                 columnIndex={1}
                 onCardSelect={onWorkflowSelect}
               />
@@ -1018,8 +1019,8 @@ export default function CrucibleLanding({
                 }
                 cards={tarotCards.slice(10, 13)}
                 scrollProgress={smoothProgress}
-                splitStart={0.60}
-                splitEnd={0.78}
+                splitStart={0.50}
+                splitEnd={0.65}
                 columnIndex={2}
                 onCardSelect={onWorkflowSelect}
               />
@@ -1033,8 +1034,8 @@ export default function CrucibleLanding({
                 }
                 cards={tarotCards.slice(13, 16)}
                 scrollProgress={smoothProgress}
-                splitStart={0.60}
-                splitEnd={0.78}
+                splitStart={0.50}
+                splitEnd={0.65}
                 columnIndex={3}
                 onCardSelect={onWorkflowSelect}
               />
@@ -1045,8 +1046,8 @@ export default function CrucibleLanding({
           <motion.div
             className="relative z-10 mt-12 md:mt-16 w-full px-4 md:px-8"
             style={{
-              opacity: useTransform(smoothProgress, [0.72, 0.80, 0.90, 0.95], [0, 1, 1, 0.8]),
-              y: useTransform(smoothProgress, [0.72, 0.82], [40, 0]),
+              opacity: useTransform(smoothProgress, [0.60, 0.68, 0.80, 0.88], [0, 1, 1, 0.9]),
+              y: useTransform(smoothProgress, [0.60, 0.68], [40, 0]),
             }}
           >
             {/* Section Header */}
@@ -1178,7 +1179,7 @@ export default function CrucibleLanding({
       <motion.div
         className="fixed bottom-0 left-0 right-0 pointer-events-none z-50"
         style={{
-          opacity: useTransform(smoothProgress, [0.36, 0.44, 0.54, 0.62], [0, 1, 1, 0]),
+          opacity: useTransform(smoothProgress, [0.30, 0.36, 0.44, 0.50], [0, 1, 1, 0]),
           height: 120,
         }}
       >
