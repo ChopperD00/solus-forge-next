@@ -261,7 +261,7 @@ export default function ArcanaSplit({
   return (
     <div
       className="relative flex flex-col items-center"
-      style={{ width: cardWidth + 20, minHeight: isMobile ? 700 : 900 }}
+      style={{ width: cardWidth + 20 }}
     >
       {/* Arcana Name - positioned above everything */}
       <motion.span

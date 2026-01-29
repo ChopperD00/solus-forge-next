@@ -513,7 +513,7 @@ export default function CrucibleLanding({
       />
 
       {/* Sticky viewport container */}
-      <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
+      <div className="sticky top-0 h-screen flex items-center justify-center">
 
         {/* Fixed Header */}
         <div className="absolute top-0 left-0 right-0 z-50 px-2 md:px-4 py-2 md:py-3 flex items-center justify-between">
@@ -941,7 +941,7 @@ export default function CrucibleLanding({
 
         {/* SECTION 3: Arcana Split Animation - Symbols fracture into workflow cards */}
         <motion.div
-          className="absolute inset-0 flex flex-col items-center justify-center"
+          className="absolute inset-0 flex flex-col items-center justify-start pt-16 overflow-y-auto"
           style={{ opacity: workflowsOpacity }}
         >
           {/* Subtle background overlay */}
@@ -952,12 +952,12 @@ export default function CrucibleLanding({
             }}
           />
 
-          {/* Section Title - fades in then moves up as cards appear */}
+          {/* Section Title - fades in and stays */}
           <motion.div
             className="text-center relative z-10 mb-12 md:mb-16"
             style={{
-              y: useTransform(smoothProgress, [0.46, 0.54, 0.65], [30, 0, -40]),
-              opacity: useTransform(smoothProgress, [0.46, 0.52, 0.62, 0.72], [0, 1, 1, 0.7]),
+              y: useTransform(smoothProgress, [0.46, 0.54, 0.70], [30, 0, -30]),
+              opacity: useTransform(smoothProgress, [0.46, 0.52], [0, 1]),
             }}
           >
             <h3
@@ -1046,8 +1046,8 @@ export default function CrucibleLanding({
           <motion.div
             className="relative z-10 mt-12 md:mt-16 w-full px-4 md:px-8"
             style={{
-              opacity: useTransform(smoothProgress, [0.60, 0.68, 0.80, 0.88], [0, 1, 1, 0.9]),
-              y: useTransform(smoothProgress, [0.60, 0.68], [40, 0]),
+              opacity: useTransform(smoothProgress, [0.55, 0.62], [0, 1]),
+              y: useTransform(smoothProgress, [0.55, 0.62], [40, 0]),
             }}
           >
             {/* Section Header */}
