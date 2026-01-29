@@ -1213,7 +1213,7 @@ export default function CrucibleLanding({
                     className="relative cursor-pointer group"
                     whileHover={{ scale: 1.02, y: -4 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => onWorkflowSelect(card.id)}
+                    onClick={() => onWorkflowSelect?.(card.id)}
                     style={{
                       width: 280,
                       background: colors.surface,
