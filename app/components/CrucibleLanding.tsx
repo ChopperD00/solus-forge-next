@@ -858,171 +858,30 @@ export default function CrucibleLanding({
               )}
             </div>
 
-            {/* Aurora Borealis Scroll Indicator - Full width atmospheric glow */}
+            {/* Scroll hint - simple text indicator */}
             <motion.div
-              className="mt-16 relative w-screen left-1/2 -translate-x-1/2"
+              className="mt-8 flex flex-col items-center gap-1"
               style={{
                 opacity: useTransform(smoothProgress, [0.36, 0.42, 0.52, 0.58], [0, 1, 1, 0]),
-                height: 100,
               }}
             >
-              {/* Aurora wave layers - full bleed */}
-              <div className="absolute inset-0 pointer-events-none">
-                {/* Layer 1 - Purple/violet wave */}
-                <motion.div
-                  className="absolute h-20 blur-3xl"
-                  animate={{
-                    x: ['-10%', '10%', '-10%'],
-                    scaleX: [1, 1.3, 1],
-                  }}
-                  transition={{
-                    duration: 8,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                  style={{
-                    left: '-10%',
-                    right: '-10%',
-                    background: `linear-gradient(90deg,
-                      transparent 0%,
-                      rgba(139, 92, 246, 0.35) 15%,
-                      rgba(168, 85, 247, 0.5) 35%,
-                      rgba(139, 92, 246, 0.4) 55%,
-                      rgba(168, 85, 247, 0.3) 75%,
-                      transparent 100%
-                    )`,
-                    top: '10%',
-                  }}
-                />
-
-                {/* Layer 2 - Green/cyan wave */}
-                <motion.div
-                  className="absolute h-16 blur-3xl"
-                  animate={{
-                    x: ['5%', '-15%', '5%'],
-                    scaleX: [1.2, 0.9, 1.2],
-                  }}
-                  transition={{
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: 0.5,
-                  }}
-                  style={{
-                    left: '-10%',
-                    right: '-10%',
-                    background: `linear-gradient(90deg,
-                      transparent 0%,
-                      rgba(16, 185, 129, 0.25) 20%,
-                      rgba(6, 182, 212, 0.4) 45%,
-                      rgba(16, 185, 129, 0.35) 70%,
-                      transparent 100%
-                    )`,
-                    top: '30%',
-                  }}
-                />
-
-                {/* Layer 3 - Orange/amber accent wave */}
-                <motion.div
-                  className="absolute h-14 blur-2xl"
-                  animate={{
-                    x: ['-8%', '12%', '-8%'],
-                    opacity: [0.4, 0.7, 0.4],
-                  }}
-                  transition={{
-                    duration: 5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: 1,
-                  }}
-                  style={{
-                    left: '-10%',
-                    right: '-10%',
-                    background: `linear-gradient(90deg,
-                      transparent 0%,
-                      rgba(255, 107, 0, 0.2) 25%,
-                      rgba(251, 191, 36, 0.35) 50%,
-                      rgba(255, 107, 0, 0.25) 75%,
-                      transparent 100%
-                    )`,
-                    top: '45%',
-                  }}
-                />
-
-                {/* Layer 4 - Pink/magenta wave */}
-                <motion.div
-                  className="absolute h-12 blur-3xl"
-                  animate={{
-                    x: ['12%', '-8%', '12%'],
-                    scaleX: [0.85, 1.2, 0.85],
-                  }}
-                  transition={{
-                    duration: 7,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: 0.3,
-                  }}
-                  style={{
-                    left: '-10%',
-                    right: '-10%',
-                    background: `linear-gradient(90deg,
-                      transparent 0%,
-                      rgba(236, 72, 153, 0.2) 15%,
-                      rgba(219, 39, 119, 0.35) 40%,
-                      rgba(236, 72, 153, 0.3) 65%,
-                      rgba(219, 39, 119, 0.2) 85%,
-                      transparent 100%
-                    )`,
-                    top: '35%',
-                  }}
-                />
-
-                {/* Traveling shimmer effect */}
-                <motion.div
-                  className="absolute inset-0"
-                  animate={{
-                    backgroundPosition: ['200% 50%', '-100% 50%'],
-                  }}
-                  transition={{
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
-                  style={{
-                    background: `linear-gradient(90deg,
-                      transparent 0%,
-                      transparent 40%,
-                      rgba(255, 255, 255, 0.08) 48%,
-                      rgba(255, 255, 255, 0.12) 50%,
-                      rgba(255, 255, 255, 0.08) 52%,
-                      transparent 60%,
-                      transparent 100%
-                    )`,
-                    backgroundSize: '200% 100%',
-                  }}
-                />
-              </div>
-
-              {/* Scroll hint text + arrow - centered */}
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-10">
-                <motion.span
-                  className="text-xs tracking-widest uppercase font-medium"
-                  style={{ color: colors.textMuted, textShadow: `0 0 20px ${colors.bg}` }}
-                  animate={{ opacity: [0.5, 0.9, 0.5] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  Workflows Below
-                </motion.span>
-                <motion.div
-                  animate={{ y: [0, 8, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ color: colors.textMuted }}
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M7 10l5 5 5-5" />
-                  </svg>
-                </motion.div>
-              </div>
+              <motion.span
+                className="text-xs tracking-widest uppercase font-medium"
+                style={{ color: colors.textDim }}
+                animate={{ opacity: [0.4, 0.8, 0.4] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              >
+                Workflows Below
+              </motion.span>
+              <motion.div
+                animate={{ y: [0, 6, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                style={{ color: colors.textDim }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M7 10l5 5 5-5" />
+                </svg>
+              </motion.div>
             </motion.div>
             </div>
 
@@ -1314,6 +1173,160 @@ export default function CrucibleLanding({
           </motion.footer>
         </motion.div>
       </div>
+
+      {/* Aurora Borealis - Fixed to bottom of viewport */}
+      <motion.div
+        className="fixed bottom-0 left-0 right-0 pointer-events-none z-50"
+        style={{
+          opacity: useTransform(smoothProgress, [0.36, 0.44, 0.54, 0.62], [0, 1, 1, 0]),
+          height: 120,
+        }}
+      >
+        {/* Fade gradient from transparent to aurora */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(to bottom, transparent 0%, ${colors.bg}40 100%)`,
+          }}
+        />
+
+        {/* Aurora wave layers */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Layer 1 - Purple/violet wave */}
+          <motion.div
+            className="absolute h-24 blur-3xl"
+            animate={{
+              x: ['-10%', '10%', '-10%'],
+              scaleX: [1, 1.3, 1],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            style={{
+              left: '-10%',
+              right: '-10%',
+              bottom: '-20%',
+              background: `linear-gradient(90deg,
+                transparent 0%,
+                rgba(139, 92, 246, 0.4) 15%,
+                rgba(168, 85, 247, 0.55) 35%,
+                rgba(139, 92, 246, 0.45) 55%,
+                rgba(168, 85, 247, 0.35) 75%,
+                transparent 100%
+              )`,
+            }}
+          />
+
+          {/* Layer 2 - Green/cyan wave */}
+          <motion.div
+            className="absolute h-20 blur-3xl"
+            animate={{
+              x: ['5%', '-15%', '5%'],
+              scaleX: [1.2, 0.9, 1.2],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.5,
+            }}
+            style={{
+              left: '-10%',
+              right: '-10%',
+              bottom: '-10%',
+              background: `linear-gradient(90deg,
+                transparent 0%,
+                rgba(16, 185, 129, 0.3) 20%,
+                rgba(6, 182, 212, 0.45) 45%,
+                rgba(16, 185, 129, 0.4) 70%,
+                transparent 100%
+              )`,
+            }}
+          />
+
+          {/* Layer 3 - Orange/amber accent wave */}
+          <motion.div
+            className="absolute h-16 blur-2xl"
+            animate={{
+              x: ['-8%', '12%', '-8%'],
+              opacity: [0.5, 0.8, 0.5],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+            style={{
+              left: '-10%',
+              right: '-10%',
+              bottom: '0%',
+              background: `linear-gradient(90deg,
+                transparent 0%,
+                rgba(255, 107, 0, 0.25) 25%,
+                rgba(251, 191, 36, 0.4) 50%,
+                rgba(255, 107, 0, 0.3) 75%,
+                transparent 100%
+              )`,
+            }}
+          />
+
+          {/* Layer 4 - Pink/magenta wave */}
+          <motion.div
+            className="absolute h-14 blur-3xl"
+            animate={{
+              x: ['12%', '-8%', '12%'],
+              scaleX: [0.85, 1.2, 0.85],
+            }}
+            transition={{
+              duration: 7,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.3,
+            }}
+            style={{
+              left: '-10%',
+              right: '-10%',
+              bottom: '5%',
+              background: `linear-gradient(90deg,
+                transparent 0%,
+                rgba(236, 72, 153, 0.25) 15%,
+                rgba(219, 39, 119, 0.4) 40%,
+                rgba(236, 72, 153, 0.35) 65%,
+                rgba(219, 39, 119, 0.25) 85%,
+                transparent 100%
+              )`,
+            }}
+          />
+
+          {/* Traveling shimmer effect */}
+          <motion.div
+            className="absolute inset-0"
+            animate={{
+              backgroundPosition: ['200% 50%', '-100% 50%'],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            style={{
+              background: `linear-gradient(90deg,
+                transparent 0%,
+                transparent 40%,
+                rgba(255, 255, 255, 0.1) 48%,
+                rgba(255, 255, 255, 0.15) 50%,
+                rgba(255, 255, 255, 0.1) 52%,
+                transparent 60%,
+                transparent 100%
+              )`,
+              backgroundSize: '200% 100%',
+            }}
+          />
+        </div>
+      </motion.div>
     </div>
   )
 }
