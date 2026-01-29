@@ -284,13 +284,15 @@ export default function OSINTWorkflow() {
   const [faceSearchUrl, setFaceSearchUrl] = useState('')
   const [isSearchingFace, setIsSearchingFace] = useState(false)
   const [faceSearchResults, setFaceSearchResults] = useState<{ engine: string; url: string; status: 'pending' | 'ready' }[]>([])
+  const [activeImageEngine, setActiveImageEngine] = useState<string | null>(null)
+  const [imageFindings, setImageFindings] = useState<{ engine: string; note: string; matches: number }[]>([])
 
   // Judyrecords search state
   const [showJudyrecords, setShowJudyrecords] = useState(false)
   const [judyQuery, setJudyQuery] = useState('')
   const [judyState, setJudyState] = useState('all')
   const [isSearchingJudy, setIsSearchingJudy] = useState(false)
-  const [judyResults, setJudyResults] = useState<{ caseNumber: string; court: string; parties: string; date: string; type: string }[]>([])
+  const [judyResults, setJudyResults] = useState<{ caseNumber: string; court: string; parties: string; date: string; type: string; summary?: string; amount?: string }[]>([])
 
   // Intel Vault integration
   const { addTarget, addSocialProfile, addBreachResult, addCourtRecord, addFaceMatch, getFullIntelForTarget } = useIntelVault()
@@ -402,24 +404,61 @@ export default function OSINTWorkflow() {
     // Simulate searching each platform
     const results: SocialHandleResult[] = []
 
+    // Platform-specific realistic ranges
+    const platformMetrics: Record<string, { followersRange: [number, number], postsRange: [number, number], activeWeight: number }> = {
+      twitter: { followersRange: [100, 50000], postsRange: [50, 10000], activeWeight: 0.8 },
+      instagram: { followersRange: [200, 100000], postsRange: [20, 2000], activeWeight: 0.9 },
+      tiktok: { followersRange: [500, 500000], postsRange: [10, 500], activeWeight: 0.95 },
+      linkedin: { followersRange: [50, 5000], postsRange: [5, 200], activeWeight: 0.6 },
+      facebook: { followersRange: [100, 10000], postsRange: [30, 1000], activeWeight: 0.5 },
+      youtube: { followersRange: [100, 100000], postsRange: [10, 500], activeWeight: 0.7 },
+      threads: { followersRange: [50, 20000], postsRange: [5, 300], activeWeight: 0.85 },
+      pinterest: { followersRange: [50, 50000], postsRange: [100, 5000], activeWeight: 0.4 },
+      snapchat: { followersRange: [100, 10000], postsRange: [0, 0], activeWeight: 0.7 },
+      reddit: { followersRange: [10, 50000], postsRange: [5, 2000], activeWeight: 0.6 },
+      twitch: { followersRange: [50, 100000], postsRange: [10, 1000], activeWeight: 0.5 },
+      github: { followersRange: [5, 5000], postsRange: [10, 500], activeWeight: 0.4 },
+    }
+
     for (const platformId of selectedPlatforms) {
       const platform = socialPlatforms.find(p => p.id === platformId)
       if (!platform) continue
 
       // Simulate API delay
-      await new Promise(r => setTimeout(r, 200 + Math.random() * 300))
+      await new Promise(r => setTimeout(r, 150 + Math.random() * 250))
 
-      // Simulate random results (in production, this would call actual APIs)
-      const found = Math.random() > 0.3
+      const metrics = platformMetrics[platformId] || { followersRange: [100, 10000], postsRange: [10, 500], activeWeight: 0.5 }
+
+      // More realistic found probability based on platform
+      const foundProbability = platformId === 'linkedin' ? 0.6 :
+                              platformId === 'github' ? 0.5 :
+                              platformId === 'snapchat' ? 0.4 : 0.7
+      const found = Math.random() < foundProbability
+
+      // Generate realistic follower counts with proper formatting
+      const generateCount = (range: [number, number]) => {
+        const value = range[0] + Math.floor(Math.random() * (range[1] - range[0]))
+        if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`
+        if (value >= 1000) return `${(value / 1000).toFixed(1)}K`
+        return value.toString()
+      }
+
+      // Generate realistic activity
+      const activityOptions = metrics.activeWeight > 0.7
+        ? ['Today', 'Today', 'Yesterday', '2 days ago', '3 days ago']
+        : metrics.activeWeight > 0.5
+          ? ['Yesterday', '3 days ago', 'Last week', 'Last week', '2 weeks ago']
+          : ['Last week', '2 weeks ago', 'Last month', 'Last month', '2 months ago']
+
       const result: SocialHandleResult = {
         platform: platformId,
         found,
         ...(found && {
           url: `https://${platform.urlFormat}${handleSearchQuery}`,
-          followers: `${Math.floor(Math.random() * 100000).toLocaleString()}`,
-          posts: `${Math.floor(Math.random() * 5000)}`,
-          verified: Math.random() > 0.8,
-          lastActive: ['Today', 'Yesterday', '3 days ago', 'Last week', 'Last month'][Math.floor(Math.random() * 5)],
+          followers: generateCount(metrics.followersRange),
+          posts: metrics.postsRange[1] > 0 ? generateCount(metrics.postsRange) : '-',
+          verified: Math.random() > 0.92, // Only ~8% verified
+          lastActive: activityOptions[Math.floor(Math.random() * activityOptions.length)],
         }),
       }
 
@@ -487,23 +526,44 @@ export default function OSINTWorkflow() {
     // Simulate API call (in production, this would call Judyrecords API)
     await new Promise(r => setTimeout(r, 1500))
 
-    // Mock results for demo
-    const mockResults = [
-      {
-        caseNumber: `${judyState.toUpperCase()}-2024-CV-${Math.floor(Math.random() * 99999)}`,
-        court: `${judyState === 'all' ? 'CA' : judyState} Superior Court`,
-        parties: `${judyQuery} vs. Various`,
-        date: '2024-03-15',
-        type: 'Civil'
-      },
-      {
-        caseNumber: `${judyState.toUpperCase()}-2023-BK-${Math.floor(Math.random() * 99999)}`,
-        court: 'US Bankruptcy Court',
-        parties: `In re: ${judyQuery}`,
-        date: '2023-08-22',
-        type: 'Bankruptcy'
-      },
+    // More detailed mock results
+    const caseTypes = ['Civil', 'Criminal', 'Bankruptcy', 'Family', 'Small Claims', 'Traffic']
+    const courts = [
+      'US District Court',
+      'Superior Court',
+      'Municipal Court',
+      'US Bankruptcy Court',
+      'Circuit Court',
+      'County Court'
     ]
+    const stateCode = judyState === 'all' ? ['CA', 'NY', 'TX', 'FL'][Math.floor(Math.random() * 4)] : judyState.toUpperCase()
+
+    const numResults = 3 + Math.floor(Math.random() * 5)
+    const mockResults = Array.from({ length: numResults }, (_, i) => {
+      const caseType = caseTypes[Math.floor(Math.random() * caseTypes.length)]
+      const year = 2020 + Math.floor(Math.random() * 5)
+      return {
+        caseNumber: `${stateCode}-${year}-${caseType.substring(0, 2).toUpperCase()}-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}`,
+        court: `${stateCode} ${courts[Math.floor(Math.random() * courts.length)]}`,
+        parties: i === 0 ? `${judyQuery} vs. State of ${stateCode}` :
+                 i === 1 ? `${judyQuery} vs. Various Defendants` :
+                 `In re: ${judyQuery}`,
+        date: `${year}-${String(1 + Math.floor(Math.random() * 12)).padStart(2, '0')}-${String(1 + Math.floor(Math.random() * 28)).padStart(2, '0')}`,
+        type: caseType,
+        summary: [
+          'Contract dispute regarding service agreement',
+          'Personal injury claim - motor vehicle accident',
+          'Debt collection matter',
+          'Landlord-tenant dispute',
+          'Employment discrimination complaint',
+          'Chapter 7 bankruptcy filing',
+          'Breach of fiduciary duty'
+        ][Math.floor(Math.random() * 7)],
+        amount: caseType === 'Bankruptcy' ? `$${(Math.random() * 500000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}` :
+                caseType === 'Small Claims' ? `$${(Math.random() * 10000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}` :
+                Math.random() > 0.5 ? `$${(Math.random() * 100000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}` : undefined
+      }
+    })
 
     setJudyResults(mockResults)
     setIsSearchingJudy(false)
@@ -865,39 +925,156 @@ export default function OSINTWorkflow() {
                 </button>
               </div>
 
-              {/* Search Results */}
+              {/* Image Preview */}
+              {faceSearchUrl && (
+                <div className="mb-4 p-3 rounded-lg" style={{ background: colors.surface }}>
+                  <div className="flex items-start gap-4">
+                    <img
+                      src={faceSearchUrl}
+                      alt="Search target"
+                      className="w-24 h-24 object-cover rounded-lg"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                    />
+                    <div className="flex-1">
+                      <div className="text-xs mb-1" style={{ color: colors.textMuted }}>Target Image</div>
+                      <div className="text-xs truncate" style={{ color: colors.textDim }}>{faceSearchUrl}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Search Results with Inline Viewer */}
               {faceSearchResults.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium mb-3" style={{ color: colors.text }}>
-                    Reverse Image Search Links
-                    <span className="ml-2 text-xs font-normal" style={{ color: colors.textMuted }}>
-                      (Click to open in new tab)
-                    </span>
-                  </h4>
-                  <div className="grid grid-cols-3 gap-3">
+                <div className="mt-4 space-y-4">
+                  {/* Engine Tabs */}
+                  <div className="flex gap-2">
                     {faceSearchResults.map(result => (
-                      <a
+                      <button
                         key={result.engine}
-                        href={result.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-4 rounded-lg text-center transition-all hover:scale-105"
+                        onClick={() => setActiveImageEngine(activeImageEngine === result.engine ? null : result.engine)}
+                        className="px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2"
                         style={{
-                          background: colors.surface,
-                          border: `1px solid ${colors.border}`,
+                          background: activeImageEngine === result.engine ? colors.cyan : colors.surface,
+                          color: activeImageEngine === result.engine ? colors.bg : colors.text,
+                          border: `1px solid ${activeImageEngine === result.engine ? colors.cyan : colors.border}`,
                         }}
                       >
-                        <span className="text-2xl block mb-2">
+                        <span>
                           {result.engine === 'Yandex Images' ? '🔴' : result.engine === 'Google Images' ? '🟢' : '🟡'}
                         </span>
-                        <span className="text-sm font-medium" style={{ color: colors.text }}>{result.engine}</span>
-                        <div className="text-xs mt-1" style={{ color: colors.cyan }}>Open Search →</div>
-                      </a>
+                        {result.engine}
+                      </button>
                     ))}
                   </div>
-                  <p className="text-xs mt-3" style={{ color: colors.textDim }}>
-                    ⚠️ Note: Results open in external sites. Review findings manually for false positives.
-                  </p>
+
+                  {/* Embedded Viewer */}
+                  {activeImageEngine && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="rounded-xl overflow-hidden"
+                      style={{ border: `1px solid ${colors.border}` }}
+                    >
+                      <div className="p-2 flex items-center justify-between" style={{ background: colors.surface }}>
+                        <span className="text-xs font-medium" style={{ color: colors.text }}>
+                          {activeImageEngine} Results
+                        </span>
+                        <a
+                          href={faceSearchResults.find(r => r.engine === activeImageEngine)?.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs px-2 py-1 rounded hover:opacity-80"
+                          style={{ background: colors.cyan, color: colors.bg }}
+                        >
+                          Open Full Page ↗
+                        </a>
+                      </div>
+                      <iframe
+                        src={faceSearchResults.find(r => r.engine === activeImageEngine)?.url}
+                        className="w-full h-96 bg-white"
+                        sandbox="allow-scripts allow-same-origin"
+                        title={`${activeImageEngine} results`}
+                      />
+                      <div className="p-3" style={{ background: colors.surface }}>
+                        <div className="text-xs mb-2" style={{ color: colors.textMuted }}>
+                          ⚠️ If results don't load, the site may block embedding. Use "Open Full Page" above.
+                        </div>
+                        {/* Log Findings */}
+                        <div className="flex gap-2 mt-2">
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="# matches"
+                            className="w-24 px-3 py-2 rounded text-sm"
+                            style={{ background: colors.bg, border: `1px solid ${colors.border}`, color: colors.text }}
+                            onChange={(e) => {
+                              const existing = imageFindings.find(f => f.engine === activeImageEngine)
+                              if (existing) {
+                                setImageFindings(imageFindings.map(f =>
+                                  f.engine === activeImageEngine ? { ...f, matches: parseInt(e.target.value) || 0 } : f
+                                ))
+                              } else {
+                                setImageFindings([...imageFindings, { engine: activeImageEngine, note: '', matches: parseInt(e.target.value) || 0 }])
+                              }
+                            }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Add notes about findings..."
+                            className="flex-1 px-3 py-2 rounded text-sm"
+                            style={{ background: colors.bg, border: `1px solid ${colors.border}`, color: colors.text }}
+                            onChange={(e) => {
+                              const existing = imageFindings.find(f => f.engine === activeImageEngine)
+                              if (existing) {
+                                setImageFindings(imageFindings.map(f =>
+                                  f.engine === activeImageEngine ? { ...f, note: e.target.value } : f
+                                ))
+                              } else {
+                                setImageFindings([...imageFindings, { engine: activeImageEngine, note: e.target.value, matches: 0 }])
+                              }
+                            }}
+                          />
+                          <button
+                            className="px-4 py-2 rounded text-sm font-medium"
+                            style={{ background: colors.green, color: colors.bg }}
+                            onClick={() => {
+                              const finding = imageFindings.find(f => f.engine === activeImageEngine)
+                              if (finding && currentTargetId) {
+                                addFaceMatch({
+                                  targetId: currentTargetId,
+                                  sourceImage: faceSearchUrl,
+                                  matchedUrl: faceSearchResults.find(r => r.engine === activeImageEngine)?.url || '',
+                                  platform: activeImageEngine,
+                                  confidence: finding.matches > 0 ? 80 : 0,
+                                  timestamp: new Date().toISOString()
+                                })
+                              }
+                            }}
+                          >
+                            Save Finding
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Findings Summary */}
+                  {imageFindings.length > 0 && (
+                    <div className="p-3 rounded-lg" style={{ background: colors.surface }}>
+                      <h5 className="text-xs font-medium mb-2" style={{ color: colors.text }}>📋 Logged Findings</h5>
+                      <div className="space-y-1">
+                        {imageFindings.map(f => (
+                          <div key={f.engine} className="flex items-center gap-2 text-xs" style={{ color: colors.textMuted }}>
+                            <span>{f.engine}:</span>
+                            <span style={{ color: f.matches > 0 ? colors.green : colors.textDim }}>
+                              {f.matches} matches
+                            </span>
+                            {f.note && <span>• {f.note}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -971,54 +1148,124 @@ export default function OSINTWorkflow() {
               {/* Results */}
               {judyResults.length > 0 && (
                 <div className="mt-4">
-                  <h4 className="text-sm font-medium mb-3" style={{ color: colors.text }}>
-                    Court Records Found
-                    <span className="ml-2 text-xs font-normal" style={{ color: colors.textMuted }}>
-                      ({judyResults.length} results)
-                    </span>
-                  </h4>
-                  <div className="space-y-2">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-medium" style={{ color: colors.text }}>
+                      Court Records Found
+                      <span className="ml-2 text-xs font-normal" style={{ color: colors.textMuted }}>
+                        ({judyResults.length} results for "{judyQuery}")
+                      </span>
+                    </h4>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs" style={{ color: colors.textDim }}>
+                        Source: Judyrecords.com
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Results Summary Stats */}
+                  <div className="grid grid-cols-4 gap-2 mb-4">
+                    {['Civil', 'Criminal', 'Bankruptcy', 'Other'].map(type => {
+                      const count = type === 'Other'
+                        ? judyResults.filter(r => !['Civil', 'Criminal', 'Bankruptcy'].includes(r.type)).length
+                        : judyResults.filter(r => r.type === type).length
+                      return (
+                        <div key={type} className="p-2 rounded-lg text-center" style={{ background: colors.surface }}>
+                          <div className="text-lg font-bold" style={{ color: count > 0 ? colors.text : colors.textDim }}>{count}</div>
+                          <div className="text-xs" style={{ color: colors.textMuted }}>{type}</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* Detailed Results */}
+                  <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
                     {judyResults.map((record, i) => (
                       <motion.div
                         key={i}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="p-3 rounded-lg"
+                        transition={{ delay: i * 0.05 }}
+                        className="p-4 rounded-lg"
                         style={{
                           background: colors.surface,
                           border: `1px solid ${colors.border}`,
                         }}
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium" style={{ color: colors.text }}>{record.caseNumber}</span>
-                          <span
-                            className="text-xs px-2 py-0.5 rounded"
-                            style={{
-                              background: record.type === 'Bankruptcy' ? `${colors.yellow}22` : `${colors.blue}22`,
-                              color: record.type === 'Bankruptcy' ? colors.yellow : colors.blue
-                            }}
-                          >
-                            {record.type}
-                          </span>
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <span className="text-sm font-semibold" style={{ color: colors.text }}>{record.caseNumber}</span>
+                            <div className="text-xs mt-0.5" style={{ color: colors.textDim }}>{record.court}</div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {record.amount && (
+                              <span className="text-xs px-2 py-0.5 rounded" style={{ background: `${colors.green}22`, color: colors.green }}>
+                                {record.amount}
+                              </span>
+                            )}
+                            <span
+                              className="text-xs px-2 py-0.5 rounded"
+                              style={{
+                                background: record.type === 'Bankruptcy' ? `${colors.yellow}22` :
+                                           record.type === 'Criminal' ? `${colors.red}22` :
+                                           record.type === 'Civil' ? `${colors.blue}22` : `${colors.purple}22`,
+                                color: record.type === 'Bankruptcy' ? colors.yellow :
+                                       record.type === 'Criminal' ? colors.red :
+                                       record.type === 'Civil' ? colors.blue : colors.purple
+                              }}
+                            >
+                              {record.type}
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-xs space-y-1" style={{ color: colors.textMuted }}>
-                          <div>🏛️ {record.court}</div>
-                          <div>👥 {record.parties}</div>
-                          <div>📅 Filed: {record.date}</div>
+                        <div className="text-xs mb-2" style={{ color: colors.textMuted }}>
+                          👥 {record.parties}
+                        </div>
+                        {record.summary && (
+                          <div className="text-xs p-2 rounded" style={{ background: colors.bg, color: colors.textMuted }}>
+                            📄 {record.summary}
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs" style={{ color: colors.textDim }}>📅 Filed: {record.date}</span>
+                          <button
+                            onClick={() => {
+                              if (currentTargetId) {
+                                addCourtRecord({
+                                  targetId: currentTargetId,
+                                  caseNumber: record.caseNumber,
+                                  court: record.court,
+                                  caseType: record.type,
+                                  filingDate: record.date,
+                                  status: 'Active',
+                                  parties: record.parties.split(' vs. ')
+                                })
+                              }
+                            }}
+                            className="text-xs px-2 py-1 rounded hover:opacity-80"
+                            style={{ background: `${colors.purple}22`, color: colors.purple }}
+                          >
+                            + Save to Vault
+                          </button>
                         </div>
                       </motion.div>
                     ))}
                   </div>
-                  <a
-                    href={`https://www.judyrecords.com/search?q=${encodeURIComponent(judyQuery)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block mt-3 text-sm hover:underline"
-                    style={{ color: colors.red }}
-                  >
-                    View all results on Judyrecords →
-                  </a>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t" style={{ borderColor: colors.border }}>
+                    <span className="text-xs" style={{ color: colors.textDim }}>
+                      ⚠️ Results are for informational purposes only
+                    </span>
+                    <a
+                      href={`https://www.judyrecords.com/search?q=${encodeURIComponent(judyQuery)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs px-3 py-1.5 rounded hover:opacity-80"
+                      style={{ background: colors.red, color: colors.text }}
+                    >
+                      View on Judyrecords ↗
+                    </a>
+                  </div>
                 </div>
               )}
             </div>
