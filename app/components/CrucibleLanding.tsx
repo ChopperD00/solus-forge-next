@@ -847,6 +847,161 @@ export default function CrucibleLanding({
                 )
               )}
             </div>
+
+            {/* Aurora Borealis Scroll Indicator */}
+            <motion.div
+              className="mt-12 w-full max-w-4xl mx-auto relative overflow-hidden"
+              style={{
+                opacity: useTransform(smoothProgress, [0.36, 0.42, 0.52, 0.58], [0, 1, 1, 0]),
+                height: 80,
+              }}
+            >
+              {/* Aurora wave layers */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                {/* Layer 1 - Purple/violet wave */}
+                <motion.div
+                  className="absolute w-full h-16 blur-2xl"
+                  animate={{
+                    x: [-50, 50, -50],
+                    scaleX: [1, 1.2, 1],
+                  }}
+                  transition={{
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  style={{
+                    background: `linear-gradient(90deg,
+                      transparent 0%,
+                      rgba(139, 92, 246, 0.4) 20%,
+                      rgba(168, 85, 247, 0.5) 40%,
+                      rgba(139, 92, 246, 0.4) 60%,
+                      transparent 100%
+                    )`,
+                    top: '20%',
+                  }}
+                />
+
+                {/* Layer 2 - Green/cyan wave */}
+                <motion.div
+                  className="absolute w-full h-14 blur-2xl"
+                  animate={{
+                    x: [30, -70, 30],
+                    scaleX: [1.1, 0.9, 1.1],
+                  }}
+                  transition={{
+                    duration: 6,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.5,
+                  }}
+                  style={{
+                    background: `linear-gradient(90deg,
+                      transparent 0%,
+                      rgba(16, 185, 129, 0.3) 25%,
+                      rgba(6, 182, 212, 0.4) 50%,
+                      rgba(16, 185, 129, 0.3) 75%,
+                      transparent 100%
+                    )`,
+                    top: '35%',
+                  }}
+                />
+
+                {/* Layer 3 - Orange/amber accent wave */}
+                <motion.div
+                  className="absolute w-full h-12 blur-xl"
+                  animate={{
+                    x: [-40, 60, -40],
+                    opacity: [0.3, 0.6, 0.3],
+                  }}
+                  transition={{
+                    duration: 5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 1,
+                  }}
+                  style={{
+                    background: `linear-gradient(90deg,
+                      transparent 0%,
+                      rgba(255, 107, 0, 0.25) 30%,
+                      rgba(251, 191, 36, 0.35) 50%,
+                      rgba(255, 107, 0, 0.25) 70%,
+                      transparent 100%
+                    )`,
+                    top: '50%',
+                  }}
+                />
+
+                {/* Layer 4 - Pink/magenta wave */}
+                <motion.div
+                  className="absolute w-full h-10 blur-2xl"
+                  animate={{
+                    x: [60, -30, 60],
+                    scaleX: [0.9, 1.15, 0.9],
+                  }}
+                  transition={{
+                    duration: 7,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.3,
+                  }}
+                  style={{
+                    background: `linear-gradient(90deg,
+                      transparent 0%,
+                      rgba(236, 72, 153, 0.25) 20%,
+                      rgba(219, 39, 119, 0.35) 50%,
+                      rgba(236, 72, 153, 0.25) 80%,
+                      transparent 100%
+                    )`,
+                    top: '45%',
+                  }}
+                />
+
+                {/* Shimmer overlay */}
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{
+                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                  style={{
+                    background: `linear-gradient(90deg,
+                      transparent 0%,
+                      rgba(255, 255, 255, 0.05) 45%,
+                      rgba(255, 255, 255, 0.1) 50%,
+                      rgba(255, 255, 255, 0.05) 55%,
+                      transparent 100%
+                    )`,
+                    backgroundSize: '200% 100%',
+                  }}
+                />
+              </div>
+
+              {/* Scroll hint text + arrow */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+                <motion.span
+                  className="text-xs tracking-widest uppercase"
+                  style={{ color: colors.textDim }}
+                  animate={{ opacity: [0.4, 0.8, 0.4] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  Workflows Below
+                </motion.span>
+                <motion.div
+                  animate={{ y: [0, 6, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  style={{ color: colors.textMuted }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M7 10l5 5 5-5" />
+                  </svg>
+                </motion.div>
+              </div>
+            </motion.div>
             </div>
 
             {/* Multi-colored glow at bottom - scroll hint */}
