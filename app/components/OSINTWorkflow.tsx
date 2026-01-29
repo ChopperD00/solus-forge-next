@@ -206,6 +206,32 @@ interface ScanResult {
   timestamp?: string
 }
 
+// Social media platforms for handle search
+const socialPlatforms = [
+  { id: 'twitter', name: 'X (Twitter)', icon: '𝕏', color: '#000000', urlFormat: 'twitter.com/' },
+  { id: 'instagram', name: 'Instagram', icon: '📸', color: '#E1306C', urlFormat: 'instagram.com/' },
+  { id: 'tiktok', name: 'TikTok', icon: '🎵', color: '#000000', urlFormat: 'tiktok.com/@' },
+  { id: 'linkedin', name: 'LinkedIn', icon: '💼', color: '#0A66C2', urlFormat: 'linkedin.com/in/' },
+  { id: 'facebook', name: 'Facebook', icon: '👤', color: '#1877F2', urlFormat: 'facebook.com/' },
+  { id: 'youtube', name: 'YouTube', icon: '▶️', color: '#FF0000', urlFormat: 'youtube.com/@' },
+  { id: 'threads', name: 'Threads', icon: '🧵', color: '#000000', urlFormat: 'threads.net/@' },
+  { id: 'pinterest', name: 'Pinterest', icon: '📌', color: '#E60023', urlFormat: 'pinterest.com/' },
+  { id: 'snapchat', name: 'Snapchat', icon: '👻', color: '#FFFC00', urlFormat: 'snapchat.com/add/' },
+  { id: 'reddit', name: 'Reddit', icon: '🤖', color: '#FF4500', urlFormat: 'reddit.com/user/' },
+  { id: 'twitch', name: 'Twitch', icon: '🎮', color: '#9146FF', urlFormat: 'twitch.tv/' },
+  { id: 'github', name: 'GitHub', icon: '💻', color: '#333333', urlFormat: 'github.com/' },
+]
+
+interface SocialHandleResult {
+  platform: string
+  found: boolean
+  url?: string
+  followers?: string
+  posts?: string
+  verified?: boolean
+  lastActive?: string
+}
+
 export default function OSINTWorkflow() {
   // State
   const [investigationType, setInvestigationType] = useState<InvestigationType>('competitive_intel')
@@ -221,6 +247,16 @@ export default function OSINTWorkflow() {
   const [showReportViewer, setShowReportViewer] = useState(false)
   const [savedToVault, setSavedToVault] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+
+  // Social media handle search state
+  const [showHandleSearch, setShowHandleSearch] = useState(false)
+  const [handleSearchQuery, setHandleSearchQuery] = useState('')
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(socialPlatforms.map(p => p.id))
+  const [isSearchingHandles, setIsSearchingHandles] = useState(false)
+  const [handleResults, setHandleResults] = useState<SocialHandleResult[]>([])
+
+  // Inline report viewer state
+  const [showInlineReport, setShowInlineReport] = useState(false)
 
   // Filter modules based on investigation type
   const availableModules = osintModules.filter(m => m.forTypes.includes(investigationType))
@@ -315,6 +351,53 @@ export default function OSINTWorkflow() {
     return 'low'
   }
 
+  // Social media handle search function
+  const searchSocialHandles = async () => {
+    if (!handleSearchQuery.trim()) return
+
+    setIsSearchingHandles(true)
+    setHandleResults([])
+
+    // Simulate searching each platform
+    const results: SocialHandleResult[] = []
+
+    for (const platformId of selectedPlatforms) {
+      const platform = socialPlatforms.find(p => p.id === platformId)
+      if (!platform) continue
+
+      // Simulate API delay
+      await new Promise(r => setTimeout(r, 200 + Math.random() * 300))
+
+      // Simulate random results (in production, this would call actual APIs)
+      const found = Math.random() > 0.3
+      const result: SocialHandleResult = {
+        platform: platformId,
+        found,
+        ...(found && {
+          url: `https://${platform.urlFormat}${handleSearchQuery}`,
+          followers: `${Math.floor(Math.random() * 100000).toLocaleString()}`,
+          posts: `${Math.floor(Math.random() * 5000)}`,
+          verified: Math.random() > 0.8,
+          lastActive: ['Today', 'Yesterday', '3 days ago', 'Last week', 'Last month'][Math.floor(Math.random() * 5)],
+        }),
+      }
+
+      results.push(result)
+      setHandleResults([...results])
+    }
+
+    setIsSearchingHandles(false)
+  }
+
+  // Toggle platform selection
+  const togglePlatform = (platformId: string) => {
+    setSelectedPlatforms(prev =>
+      prev.includes(platformId)
+        ? prev.filter(id => id !== platformId)
+        : [...prev, platformId]
+    )
+  }
+
   const riskColors = {
     low: colors.green,
     medium: colors.yellow,
@@ -404,6 +487,171 @@ export default function OSINTWorkflow() {
           </p>
         </button>
       </div>
+
+      {/* Social Media Handle Search Toggle */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => setShowHandleSearch(!showHandleSearch)}
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
+          style={{
+            background: showHandleSearch ? `${colors.purple}22` : colors.surface,
+            border: `1px solid ${showHandleSearch ? colors.purple : colors.border}`,
+            color: showHandleSearch ? colors.purple : colors.textMuted,
+          }}
+        >
+          <span>🔍</span> Social Media Handle Search
+          <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: `${colors.green}22`, color: colors.green }}>NEW</span>
+        </button>
+        {Object.keys(scanResults).length > 0 && !isScanning && (
+          <button
+            onClick={() => setShowInlineReport(!showInlineReport)}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
+            style={{
+              background: showInlineReport ? `${colors.blue}22` : colors.surface,
+              border: `1px solid ${showInlineReport ? colors.blue : colors.border}`,
+              color: showInlineReport ? colors.blue : colors.textMuted,
+            }}
+          >
+            <span>📋</span> {showInlineReport ? 'Hide Report Preview' : 'Preview Report'}
+          </button>
+        )}
+      </div>
+
+      {/* Social Media Handle Search Panel */}
+      <AnimatePresence>
+        {showHandleSearch && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="p-4 rounded-xl" style={{ background: `${colors.purple}11`, border: `1px solid ${colors.purple}33` }}>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl">🔎</span>
+                <div>
+                  <h3 className="font-semibold" style={{ color: colors.text }}>Social Media Handle Search</h3>
+                  <p className="text-xs" style={{ color: colors.textMuted }}>Search for a username across multiple platforms simultaneously</p>
+                </div>
+              </div>
+
+              {/* Search Input */}
+              <div className="flex gap-3 mb-4">
+                <div className="flex-1 relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg">@</span>
+                  <input
+                    type="text"
+                    value={handleSearchQuery}
+                    onChange={(e) => setHandleSearchQuery(e.target.value.replace(/^@/, ''))}
+                    placeholder="Enter username (without @)"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg text-sm focus:outline-none"
+                    style={{
+                      background: colors.surface,
+                      border: `1px solid ${colors.border}`,
+                      color: colors.text,
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && searchSocialHandles()}
+                  />
+                </div>
+                <button
+                  onClick={searchSocialHandles}
+                  disabled={isSearchingHandles || !handleSearchQuery.trim()}
+                  className="px-6 py-3 rounded-lg font-medium transition-all disabled:opacity-50"
+                  style={{ background: colors.purple, color: colors.text }}
+                >
+                  {isSearchingHandles ? '🔄 Searching...' : '🔍 Search All'}
+                </button>
+              </div>
+
+              {/* Platform Selection */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium" style={{ color: colors.textMuted }}>Select Platforms ({selectedPlatforms.length}/{socialPlatforms.length})</span>
+                  <button
+                    onClick={() => setSelectedPlatforms(selectedPlatforms.length === socialPlatforms.length ? [] : socialPlatforms.map(p => p.id))}
+                    className="text-xs px-2 py-1 rounded"
+                    style={{ color: colors.purple }}
+                  >
+                    {selectedPlatforms.length === socialPlatforms.length ? 'Deselect All' : 'Select All'}
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {socialPlatforms.map(platform => (
+                    <button
+                      key={platform.id}
+                      onClick={() => togglePlatform(platform.id)}
+                      className="px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5"
+                      style={{
+                        background: selectedPlatforms.includes(platform.id) ? `${platform.color}22` : colors.surface,
+                        border: `1px solid ${selectedPlatforms.includes(platform.id) ? platform.color : colors.border}`,
+                        color: selectedPlatforms.includes(platform.id) ? colors.text : colors.textMuted,
+                      }}
+                    >
+                      <span>{platform.icon}</span>
+                      <span>{platform.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Results */}
+              {handleResults.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium mb-3" style={{ color: colors.text }}>
+                    Results for @{handleSearchQuery}
+                    <span className="ml-2 text-xs font-normal" style={{ color: colors.textMuted }}>
+                      ({handleResults.filter(r => r.found).length} found / {handleResults.length} checked)
+                    </span>
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                    {handleResults.map(result => {
+                      const platform = socialPlatforms.find(p => p.id === result.platform)
+                      return (
+                        <motion.div
+                          key={result.platform}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="p-3 rounded-lg"
+                          style={{
+                            background: result.found ? `${colors.green}11` : colors.surface,
+                            border: `1px solid ${result.found ? colors.green : colors.border}33`,
+                          }}
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <span>{platform?.icon}</span>
+                            <span className="text-sm font-medium" style={{ color: colors.text }}>{platform?.name}</span>
+                            {result.verified && <span className="text-blue-400 text-xs">✓</span>}
+                          </div>
+                          {result.found ? (
+                            <div className="space-y-1">
+                              <div className="text-xs" style={{ color: colors.green }}>✓ Found</div>
+                              <div className="text-xs" style={{ color: colors.textMuted }}>
+                                {result.followers} followers • {result.posts} posts
+                              </div>
+                              <div className="text-xs" style={{ color: colors.textDim }}>Active: {result.lastActive}</div>
+                              <a
+                                href={result.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs hover:underline"
+                                style={{ color: colors.purple }}
+                              >
+                                View Profile →
+                              </a>
+                            </div>
+                          ) : (
+                            <div className="text-xs" style={{ color: colors.textDim }}>Not found</div>
+                          )}
+                        </motion.div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Target Input */}
       <div className="p-4 rounded-xl" style={{ background: colors.surface, border: `1px solid ${colors.border}` }}>
@@ -717,6 +965,163 @@ export default function OSINTWorkflow() {
                 }, null, 2)}
               </pre>
             )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Inline Report Preview */}
+      <AnimatePresence>
+        {showInlineReport && Object.keys(scanResults).length > 0 && !isScanning && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div
+              className="p-6 rounded-xl"
+              style={{ background: colors.surface, border: `2px solid ${colors.blue}44` }}
+            >
+              {/* Report Header */}
+              <div className="flex items-center justify-between mb-6 pb-4 border-b" style={{ borderColor: colors.border }}>
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">📋</span>
+                  <div>
+                    <h3 className="text-lg font-bold" style={{ color: colors.text }}>Intelligence Report Preview</h3>
+                    <p className="text-sm" style={{ color: colors.textMuted }}>
+                      {targetType === 'person' ? '👤' : targetType === 'company' ? '🏢' : targetType === 'phone' ? '📞' : '🌐'} {targetValue}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div
+                    className="px-3 py-1.5 rounded-full text-sm font-medium"
+                    style={{
+                      background: `${riskColors[calculateOverallRisk()]}22`,
+                      color: riskColors[calculateOverallRisk()],
+                      border: `1px solid ${riskColors[calculateOverallRisk()]}44`,
+                    }}
+                  >
+                    Risk: {calculateOverallRisk().toUpperCase()}
+                  </div>
+                  <button
+                    onClick={() => setShowReportViewer(true)}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-80"
+                    style={{ background: colors.accent, color: colors.text }}
+                  >
+                    📄 Full Report
+                  </button>
+                </div>
+              </div>
+
+              {/* Executive Summary */}
+              <div className="mb-6 p-4 rounded-xl" style={{ background: colors.bg }}>
+                <h4 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color: colors.accent }}>
+                  <span>📋</span> Executive Summary
+                </h4>
+                <p className="text-sm leading-relaxed" style={{ color: colors.textMuted }}>
+                  Investigation of <strong style={{ color: colors.text }}>{targetValue}</strong> ({targetType}) completed using{' '}
+                  {selectedModules.length} intelligence modules. Overall risk: <strong style={{ color: riskColors[calculateOverallRisk()] }}>
+                  {calculateOverallRisk().toUpperCase()}</strong>.
+                  {Object.values(scanResults).flatMap(r => r.riskFactors || []).length > 0
+                    ? ` Found ${Object.values(scanResults).flatMap(r => r.riskFactors || []).length} risk factor(s) requiring attention.`
+                    : ' No significant risk factors identified.'}
+                </p>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="p-3 rounded-lg text-center" style={{ background: colors.bg }}>
+                  <div className="text-2xl font-bold" style={{ color: colors.text }}>{selectedModules.length}</div>
+                  <div className="text-xs" style={{ color: colors.textMuted }}>Modules Used</div>
+                </div>
+                <div className="p-3 rounded-lg text-center" style={{ background: `${colors.green}11` }}>
+                  <div className="text-2xl font-bold" style={{ color: colors.green }}>
+                    {Object.values(scanResults).filter(r => r.status === 'complete').length}
+                  </div>
+                  <div className="text-xs" style={{ color: colors.textMuted }}>Completed</div>
+                </div>
+                <div className="p-3 rounded-lg text-center" style={{ background: `${colors.yellow}11` }}>
+                  <div className="text-2xl font-bold" style={{ color: colors.yellow }}>
+                    {Object.values(scanResults).flatMap(r => r.riskFactors || []).filter(f => f.level === 'medium').length}
+                  </div>
+                  <div className="text-xs" style={{ color: colors.textMuted }}>Medium Risks</div>
+                </div>
+                <div className="p-3 rounded-lg text-center" style={{ background: `${colors.red}11` }}>
+                  <div className="text-2xl font-bold" style={{ color: colors.red }}>
+                    {Object.values(scanResults).flatMap(r => r.riskFactors || []).filter(f => f.level === 'high').length}
+                  </div>
+                  <div className="text-xs" style={{ color: colors.textMuted }}>High Risks</div>
+                </div>
+              </div>
+
+              {/* Key Findings */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: colors.text }}>
+                  <span>🔍</span> Key Findings
+                </h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                  {Object.entries(scanResults)
+                    .filter(([_, result]) => result.status === 'complete' && result.riskFactors && result.riskFactors.length > 0)
+                    .map(([moduleId, result]) => {
+                      const module = osintModules.find(m => m.id === moduleId)
+                      return result.riskFactors?.map((risk, i) => (
+                        <div
+                          key={`${moduleId}-${i}`}
+                          className="flex items-start gap-3 p-3 rounded-lg"
+                          style={{ background: `${riskColors[risk.level]}11`, border: `1px solid ${riskColors[risk.level]}22` }}
+                        >
+                          <span
+                            className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
+                            style={{ background: riskColors[risk.level] }}
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-medium" style={{ color: colors.text }}>{module?.name}</span>
+                              <span className="text-xs uppercase px-1.5 py-0.5 rounded" style={{ background: `${riskColors[risk.level]}22`, color: riskColors[risk.level] }}>
+                                {risk.level}
+                              </span>
+                            </div>
+                            <p className="text-xs" style={{ color: colors.textMuted }}>{risk.description}</p>
+                          </div>
+                        </div>
+                      ))
+                    })}
+                  {Object.values(scanResults).flatMap(r => r.riskFactors || []).length === 0 && (
+                    <div className="text-center py-6" style={{ color: colors.green }}>
+                      <span className="text-2xl">✓</span>
+                      <p className="mt-2 text-sm">No significant risk factors identified</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: colors.border }}>
+                <p className="text-xs" style={{ color: colors.textDim }}>
+                  ⚠️ NOT FOR FCRA PURPOSES • Generated {new Date().toLocaleString()}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setSavedToVault(true)
+                      setTimeout(() => setSavedToVault(false), 2000)
+                    }}
+                    className="px-3 py-1.5 rounded-lg text-sm transition-all hover:opacity-80"
+                    style={{ background: savedToVault ? colors.green : colors.purple, color: colors.text }}
+                  >
+                    {savedToVault ? '✓ Saved!' : '🏛️ Save to Vault'}
+                  </button>
+                  <button
+                    onClick={() => setShowReportViewer(true)}
+                    className="px-3 py-1.5 rounded-lg text-sm transition-all hover:opacity-80"
+                    style={{ background: colors.blue, color: colors.text }}
+                  >
+                    📥 Export Doc
+                  </button>
+                </div>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
