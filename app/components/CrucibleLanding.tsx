@@ -848,22 +848,22 @@ export default function CrucibleLanding({
               )}
             </div>
 
-            {/* Aurora Borealis Scroll Indicator */}
+            {/* Aurora Borealis Scroll Indicator - Full width atmospheric glow */}
             <motion.div
-              className="mt-12 w-full max-w-4xl mx-auto relative overflow-hidden"
+              className="mt-16 relative w-screen left-1/2 -translate-x-1/2"
               style={{
                 opacity: useTransform(smoothProgress, [0.36, 0.42, 0.52, 0.58], [0, 1, 1, 0]),
-                height: 80,
+                height: 100,
               }}
             >
-              {/* Aurora wave layers */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
+              {/* Aurora wave layers - full bleed */}
+              <div className="absolute inset-0 pointer-events-none">
                 {/* Layer 1 - Purple/violet wave */}
                 <motion.div
-                  className="absolute w-full h-16 blur-2xl"
+                  className="absolute h-20 blur-3xl"
                   animate={{
-                    x: [-50, 50, -50],
-                    scaleX: [1, 1.2, 1],
+                    x: ['-10%', '10%', '-10%'],
+                    scaleX: [1, 1.3, 1],
                   }}
                   transition={{
                     duration: 8,
@@ -871,23 +871,26 @@ export default function CrucibleLanding({
                     ease: "easeInOut",
                   }}
                   style={{
+                    left: '-10%',
+                    right: '-10%',
                     background: `linear-gradient(90deg,
                       transparent 0%,
-                      rgba(139, 92, 246, 0.4) 20%,
-                      rgba(168, 85, 247, 0.5) 40%,
-                      rgba(139, 92, 246, 0.4) 60%,
+                      rgba(139, 92, 246, 0.35) 15%,
+                      rgba(168, 85, 247, 0.5) 35%,
+                      rgba(139, 92, 246, 0.4) 55%,
+                      rgba(168, 85, 247, 0.3) 75%,
                       transparent 100%
                     )`,
-                    top: '20%',
+                    top: '10%',
                   }}
                 />
 
                 {/* Layer 2 - Green/cyan wave */}
                 <motion.div
-                  className="absolute w-full h-14 blur-2xl"
+                  className="absolute h-16 blur-3xl"
                   animate={{
-                    x: [30, -70, 30],
-                    scaleX: [1.1, 0.9, 1.1],
+                    x: ['5%', '-15%', '5%'],
+                    scaleX: [1.2, 0.9, 1.2],
                   }}
                   transition={{
                     duration: 6,
@@ -896,23 +899,25 @@ export default function CrucibleLanding({
                     delay: 0.5,
                   }}
                   style={{
+                    left: '-10%',
+                    right: '-10%',
                     background: `linear-gradient(90deg,
                       transparent 0%,
-                      rgba(16, 185, 129, 0.3) 25%,
-                      rgba(6, 182, 212, 0.4) 50%,
-                      rgba(16, 185, 129, 0.3) 75%,
+                      rgba(16, 185, 129, 0.25) 20%,
+                      rgba(6, 182, 212, 0.4) 45%,
+                      rgba(16, 185, 129, 0.35) 70%,
                       transparent 100%
                     )`,
-                    top: '35%',
+                    top: '30%',
                   }}
                 />
 
                 {/* Layer 3 - Orange/amber accent wave */}
                 <motion.div
-                  className="absolute w-full h-12 blur-xl"
+                  className="absolute h-14 blur-2xl"
                   animate={{
-                    x: [-40, 60, -40],
-                    opacity: [0.3, 0.6, 0.3],
+                    x: ['-8%', '12%', '-8%'],
+                    opacity: [0.4, 0.7, 0.4],
                   }}
                   transition={{
                     duration: 5,
@@ -921,23 +926,25 @@ export default function CrucibleLanding({
                     delay: 1,
                   }}
                   style={{
+                    left: '-10%',
+                    right: '-10%',
                     background: `linear-gradient(90deg,
                       transparent 0%,
-                      rgba(255, 107, 0, 0.25) 30%,
+                      rgba(255, 107, 0, 0.2) 25%,
                       rgba(251, 191, 36, 0.35) 50%,
-                      rgba(255, 107, 0, 0.25) 70%,
+                      rgba(255, 107, 0, 0.25) 75%,
                       transparent 100%
                     )`,
-                    top: '50%',
+                    top: '45%',
                   }}
                 />
 
                 {/* Layer 4 - Pink/magenta wave */}
                 <motion.div
-                  className="absolute w-full h-10 blur-2xl"
+                  className="absolute h-12 blur-3xl"
                   animate={{
-                    x: [60, -30, 60],
-                    scaleX: [0.9, 1.15, 0.9],
+                    x: ['12%', '-8%', '12%'],
+                    scaleX: [0.85, 1.2, 0.85],
                   }}
                   transition={{
                     duration: 7,
@@ -946,34 +953,39 @@ export default function CrucibleLanding({
                     delay: 0.3,
                   }}
                   style={{
+                    left: '-10%',
+                    right: '-10%',
                     background: `linear-gradient(90deg,
                       transparent 0%,
-                      rgba(236, 72, 153, 0.25) 20%,
-                      rgba(219, 39, 119, 0.35) 50%,
-                      rgba(236, 72, 153, 0.25) 80%,
+                      rgba(236, 72, 153, 0.2) 15%,
+                      rgba(219, 39, 119, 0.35) 40%,
+                      rgba(236, 72, 153, 0.3) 65%,
+                      rgba(219, 39, 119, 0.2) 85%,
                       transparent 100%
                     )`,
-                    top: '45%',
+                    top: '35%',
                   }}
                 />
 
-                {/* Shimmer overlay */}
+                {/* Traveling shimmer effect */}
                 <motion.div
                   className="absolute inset-0"
                   animate={{
-                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                    backgroundPosition: ['200% 50%', '-100% 50%'],
                   }}
                   transition={{
-                    duration: 4,
+                    duration: 6,
                     repeat: Infinity,
                     ease: "linear",
                   }}
                   style={{
                     background: `linear-gradient(90deg,
                       transparent 0%,
-                      rgba(255, 255, 255, 0.05) 45%,
-                      rgba(255, 255, 255, 0.1) 50%,
-                      rgba(255, 255, 255, 0.05) 55%,
+                      transparent 40%,
+                      rgba(255, 255, 255, 0.08) 48%,
+                      rgba(255, 255, 255, 0.12) 50%,
+                      rgba(255, 255, 255, 0.08) 52%,
+                      transparent 60%,
                       transparent 100%
                     )`,
                     backgroundSize: '200% 100%',
@@ -981,22 +993,22 @@ export default function CrucibleLanding({
                 />
               </div>
 
-              {/* Scroll hint text + arrow */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+              {/* Scroll hint text + arrow - centered */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-10">
                 <motion.span
-                  className="text-xs tracking-widest uppercase"
-                  style={{ color: colors.textDim }}
-                  animate={{ opacity: [0.4, 0.8, 0.4] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  className="text-xs tracking-widest uppercase font-medium"
+                  style={{ color: colors.textMuted, textShadow: `0 0 20px ${colors.bg}` }}
+                  animate={{ opacity: [0.5, 0.9, 0.5] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                 >
                   Workflows Below
                 </motion.span>
                 <motion.div
-                  animate={{ y: [0, 6, 0] }}
+                  animate={{ y: [0, 8, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                   style={{ color: colors.textMuted }}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                     <path d="M7 10l5 5 5-5" />
                   </svg>
                 </motion.div>
