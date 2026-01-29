@@ -175,6 +175,16 @@ const tarotCards = [
 // Flat list for header icons
 const workflows = tarotCards.map(card => ({ id: card.id, icon: card.icon, title: card.title, subtitle: card.subtitle }))
 
+// Custom Automations - separated from main workflow cards
+const customAutomations = tarotCards.filter(card =>
+  card.id === 'stylest_email' || card.id === 'nurse_jamie_email'
+)
+
+// Merchant cards without custom automations
+const merchantCards = tarotCards.slice(4, 10).filter(card =>
+  card.id !== 'stylest_email' && card.id !== 'nurse_jamie_email'
+)
+
 // Icon component type
 type IconComponent = React.ForwardRefExoticComponent<React.PropsWithoutRef<{ size?: number | string; weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone'; color?: string }> & React.RefAttributes<SVGSVGElement>>
 
@@ -1108,8 +1118,8 @@ export default function CrucibleLanding({
           </motion.div>
 
           {/* Arcana Split Columns - unified symbols that fracture into playing cards */}
-          <div className="relative w-full max-w-6xl mx-auto z-10 px-2 md:px-4 overflow-x-auto">
-            <div className="flex justify-start md:justify-center items-start gap-3 md:gap-6 min-w-max md:min-w-0 pb-4">
+          <div className="relative w-full z-10 px-4 md:px-8 lg:px-12">
+            <div className="flex justify-center items-start gap-3 md:gap-5 lg:gap-8 flex-wrap">
               {/* The Visionary - Orange */}
               <ArcanaSplit
                 arcanaName="The Visionary"
@@ -1125,14 +1135,14 @@ export default function CrucibleLanding({
                 onCardSelect={onWorkflowSelect}
               />
 
-              {/* The Merchant - Green */}
+              {/* The Merchant - Green (without custom automations) */}
               <ArcanaSplit
                 arcanaName="The Merchant"
                 arcanaColor="#10B981"
                 arcanaSymbol={
                   <ScalesIcon size={48} weight="duotone" color="#10B981" />
                 }
-                cards={tarotCards.slice(4, 10)}
+                cards={merchantCards}
                 scrollProgress={smoothProgress}
                 splitStart={0.60}
                 splitEnd={0.78}
@@ -1171,6 +1181,112 @@ export default function CrucibleLanding({
               />
             </div>
           </div>
+
+          {/* Custom Automations Section */}
+          <motion.div
+            className="relative z-10 mt-12 md:mt-16 w-full px-4 md:px-8"
+            style={{
+              opacity: useTransform(smoothProgress, [0.72, 0.80, 0.90, 0.95], [0, 1, 1, 0.8]),
+              y: useTransform(smoothProgress, [0.72, 0.82], [40, 0]),
+            }}
+          >
+            {/* Section Header */}
+            <div className="text-center mb-6 md:mb-8">
+              <h4
+                className="text-sm md:text-base font-semibold tracking-wider uppercase mb-1"
+                style={{ color: colors.textMuted }}
+              >
+                Custom Automations
+              </h4>
+              <p className="text-xs" style={{ color: colors.textDim }}>
+                Client-specific workflow pipelines
+              </p>
+            </div>
+
+            {/* Horizontal Cards */}
+            <div className="flex justify-center gap-4 md:gap-6 flex-wrap">
+              {customAutomations.map((card) => {
+                const IconComponent = card.icon
+                return (
+                  <motion.div
+                    key={card.id}
+                    className="relative cursor-pointer group"
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => onWorkflowSelect(card.id)}
+                    style={{
+                      width: 280,
+                      background: colors.surface,
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: 16,
+                      padding: '20px 24px',
+                    }}
+                  >
+                    {/* Hover glow */}
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"
+                      style={{
+                        background: `radial-gradient(circle at 50% 50%, #10B98120 0%, transparent 70%)`,
+                      }}
+                    />
+
+                    <div className="relative flex items-center gap-4">
+                      {/* Icon */}
+                      <div
+                        className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center"
+                        style={{ background: `#10B98115` }}
+                      >
+                        <IconComponent size={24} weight="duotone" color="#10B981" />
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <h5
+                          className="font-semibold text-sm md:text-base truncate"
+                          style={{ color: colors.text }}
+                        >
+                          {card.title}
+                        </h5>
+                        <p
+                          className="text-xs truncate mt-0.5"
+                          style={{ color: colors.textMuted }}
+                        >
+                          {card.subtitle}
+                        </p>
+                      </div>
+
+                      {/* Arrow */}
+                      <div
+                        className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ color: '#10B981' }}
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Capabilities pills */}
+                    <div className="relative flex flex-wrap gap-1.5 mt-3">
+                      {card.capabilities.slice(0, 3).map((cap, i) => (
+                        <span
+                          key={i}
+                          className="px-2 py-0.5 rounded-full text-xs"
+                          style={{
+                            background: `#10B98110`,
+                            color: '#10B981',
+                            border: `1px solid #10B98130`,
+                          }}
+                        >
+                          {cap}
+                        </span>
+                      ))}
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </motion.div>
 
           {/* Footer */}
           <motion.footer
