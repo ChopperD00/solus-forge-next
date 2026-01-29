@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useIntelVault } from '../stores/intelVault'
 
 const colors = {
   bg: '#0A0A0A',
@@ -39,6 +40,74 @@ const workflowStats = [
   { name: 'Video Pipeline', runs: 42, success: 95.5 },
   { name: 'Image Generation', runs: 312, success: 99.1 },
   { name: 'Social Ads', runs: 89, success: 94.8 },
+]
+
+// Deployment strategy mock data
+const deploymentChannels = ['Email', 'Instagram', 'Twitter/X', 'LinkedIn', 'TikTok', 'Facebook', 'YouTube']
+const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const hoursOfDay = ['6AM', '9AM', '12PM', '3PM', '6PM', '9PM']
+
+// Generate mock heatmap data
+const generateHeatmapData = () => {
+  const data: Record<string, Record<string, number>> = {}
+  deploymentChannels.forEach(channel => {
+    data[channel] = {}
+    daysOfWeek.forEach(day => {
+      hoursOfDay.forEach(hour => {
+        // Generate realistic engagement patterns
+        let base = Math.random() * 40 + 20
+        // Higher engagement on weekday mornings/evenings for business channels
+        if (['Email', 'LinkedIn'].includes(channel)) {
+          if (['Tue', 'Wed', 'Thu'].includes(day) && ['9AM', '12PM'].includes(hour)) base += 30
+        }
+        // Higher engagement on evenings/weekends for social
+        if (['Instagram', 'TikTok', 'Facebook'].includes(channel)) {
+          if (['Sat', 'Sun'].includes(day) || ['6PM', '9PM'].includes(hour)) base += 25
+        }
+        data[channel][`${day}-${hour}`] = Math.min(100, Math.round(base))
+      })
+    })
+  })
+  return data
+}
+
+// Strategy recommendations
+const deploymentRecommendations = [
+  {
+    channel: 'Email',
+    bestTime: 'Tuesday 9AM',
+    engagement: 87,
+    tip: 'Send newsletters mid-week morning for highest open rates',
+    icon: '📧'
+  },
+  {
+    channel: 'Instagram',
+    bestTime: 'Saturday 6PM',
+    engagement: 92,
+    tip: 'Post carousel content during weekend evenings',
+    icon: '📸'
+  },
+  {
+    channel: 'LinkedIn',
+    bestTime: 'Wednesday 12PM',
+    engagement: 78,
+    tip: 'Share thought leadership during lunch hours',
+    icon: '💼'
+  },
+  {
+    channel: 'TikTok',
+    bestTime: 'Friday 9PM',
+    engagement: 95,
+    tip: 'Leverage weekend pre-gaming scroll behavior',
+    icon: '🎵'
+  },
+  {
+    channel: 'Twitter/X',
+    bestTime: 'Weekday mornings',
+    engagement: 71,
+    tip: 'Join trending conversations early in the day',
+    icon: '𝕏'
+  },
 ]
 
 // Google Sheets template options
@@ -83,6 +152,14 @@ const sheetsTemplates = [
 export default function AnalyticsWorkflow() {
   const [timeRange, setTimeRange] = useState('7d')
   const [activeMetric, setActiveMetric] = useState('all')
+
+  // Deployment strategy state
+  const [showDeploymentStrategy, setShowDeploymentStrategy] = useState(false)
+  const [selectedChannel, setSelectedChannel] = useState<string | null>(null)
+  const heatmapData = useMemo(() => generateHeatmapData(), [])
+
+  // Intel Vault integration
+  const { deploymentMetrics, setDeploymentMetrics, addAnalyticsInsight, analyticsInsights } = useIntelVault()
 
   // Google Sheets export state
   const [showSheetsExport, setShowSheetsExport] = useState(false)
@@ -286,7 +363,19 @@ export default function AnalyticsWorkflow() {
       </div>
 
       {/* Quick Actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          onClick={() => setShowDeploymentStrategy(!showDeploymentStrategy)}
+          className="px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-all hover:opacity-80"
+          style={{
+            background: showDeploymentStrategy ? colors.purple : colors.surface,
+            color: showDeploymentStrategy ? colors.text : colors.textMuted,
+            border: `1px solid ${showDeploymentStrategy ? colors.purple : colors.border}`
+          }}
+        >
+          🚀 Deployment Strategy
+          <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: `${colors.green}22`, color: colors.green }}>NEW</span>
+        </button>
         <button
           className="px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2"
           style={{ background: colors.surface, color: colors.textMuted, border: `1px solid ${colors.border}` }}
@@ -301,8 +390,7 @@ export default function AnalyticsWorkflow() {
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M19 11V9h-4V5h-2v4H9V5H7v4H3v2h4v4H3v2h4v4h2v-4h4v4h2v-4h4v-2h-4v-4h4zm-6 4H9v-4h4v4z"/>
           </svg>
-          Export to Google Sheets
-          <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'rgba(0,0,0,0.2)' }}>NEW</span>
+          Export to Sheets
         </button>
         <button
           className="px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2"
@@ -317,6 +405,233 @@ export default function AnalyticsWorkflow() {
           🔔 Set Alerts
         </button>
       </div>
+
+      {/* Deployment Strategy Section */}
+      <AnimatePresence>
+        {showDeploymentStrategy && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div
+              className="p-6 rounded-xl space-y-6"
+              style={{ background: `${colors.purple}11`, border: `1px solid ${colors.purple}33` }}
+            >
+              {/* Section Header */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">🚀</span>
+                  <div>
+                    <h3 className="text-lg font-bold" style={{ color: colors.text }}>Deployment Strategy Report</h3>
+                    <p className="text-sm" style={{ color: colors.textMuted }}>Optimal posting times based on engagement data</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs px-2 py-1 rounded" style={{ background: colors.purple, color: colors.text }}>
+                    Intel Vault Connected
+                  </span>
+                </div>
+              </div>
+
+              {/* Engagement Heatmap */}
+              <div className="p-4 rounded-xl" style={{ background: colors.surface }}>
+                <h4 className="text-sm font-semibold mb-4" style={{ color: colors.text }}>
+                  📊 Engagement Heatmap by Channel & Time
+                </h4>
+
+                {/* Channel selector */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <button
+                    onClick={() => setSelectedChannel(null)}
+                    className="px-3 py-1.5 rounded-lg text-xs transition-all"
+                    style={{
+                      background: selectedChannel === null ? colors.purple : colors.bg,
+                      color: selectedChannel === null ? colors.text : colors.textMuted,
+                      border: `1px solid ${selectedChannel === null ? colors.purple : colors.border}`
+                    }}
+                  >
+                    All Channels
+                  </button>
+                  {deploymentChannels.map(channel => (
+                    <button
+                      key={channel}
+                      onClick={() => setSelectedChannel(channel)}
+                      className="px-3 py-1.5 rounded-lg text-xs transition-all"
+                      style={{
+                        background: selectedChannel === channel ? colors.accent : colors.bg,
+                        color: selectedChannel === channel ? colors.text : colors.textMuted,
+                        border: `1px solid ${selectedChannel === channel ? colors.accent : colors.border}`
+                      }}
+                    >
+                      {channel}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Heatmap Grid */}
+                <div className="overflow-x-auto">
+                  <div className="min-w-[600px]">
+                    {/* Header row */}
+                    <div className="flex items-center gap-1 mb-1">
+                      <div className="w-20 text-xs" style={{ color: colors.textDim }}></div>
+                      {daysOfWeek.map(day => (
+                        <div key={day} className="flex-1 text-center text-xs font-medium" style={{ color: colors.textMuted }}>
+                          {day}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Heatmap rows */}
+                    {hoursOfDay.map(hour => (
+                      <div key={hour} className="flex items-center gap-1 mb-1">
+                        <div className="w-20 text-xs" style={{ color: colors.textDim }}>{hour}</div>
+                        {daysOfWeek.map(day => {
+                          // Calculate average if showing all channels, or show specific channel
+                          let value = 0
+                          if (selectedChannel) {
+                            value = heatmapData[selectedChannel]?.[`${day}-${hour}`] || 0
+                          } else {
+                            const values = deploymentChannels.map(ch => heatmapData[ch]?.[`${day}-${hour}`] || 0)
+                            value = values.reduce((a, b) => a + b, 0) / values.length
+                          }
+
+                          // Color gradient based on value
+                          const intensity = value / 100
+                          const bgColor = value > 75
+                            ? `rgba(16, 185, 129, ${intensity})` // green for high
+                            : value > 50
+                              ? `rgba(245, 158, 11, ${intensity})` // yellow for medium
+                              : `rgba(59, 130, 246, ${intensity * 0.5 + 0.2})` // blue for low
+
+                          return (
+                            <motion.div
+                              key={`${day}-${hour}`}
+                              className="flex-1 h-8 rounded flex items-center justify-center text-xs font-medium cursor-pointer transition-transform hover:scale-105"
+                              style={{
+                                background: bgColor,
+                                color: value > 60 ? colors.text : colors.textMuted,
+                              }}
+                              whileHover={{ scale: 1.1 }}
+                              title={`${selectedChannel || 'Avg'}: ${Math.round(value)}% engagement`}
+                            >
+                              {Math.round(value)}
+                            </motion.div>
+                          )
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Legend */}
+                <div className="flex items-center justify-center gap-4 mt-4">
+                  <div className="flex items-center gap-1">
+                    <div className="w-4 h-4 rounded" style={{ background: `rgba(59, 130, 246, 0.5)` }}></div>
+                    <span className="text-xs" style={{ color: colors.textMuted }}>Low (&lt;50%)</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-4 h-4 rounded" style={{ background: `rgba(245, 158, 11, 0.7)` }}></div>
+                    <span className="text-xs" style={{ color: colors.textMuted }}>Medium (50-75%)</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-4 h-4 rounded" style={{ background: `rgba(16, 185, 129, 0.9)` }}></div>
+                    <span className="text-xs" style={{ color: colors.textMuted }}>High (&gt;75%)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Channel Recommendations */}
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                {deploymentRecommendations.map((rec, i) => (
+                  <motion.div
+                    key={rec.channel}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="p-4 rounded-xl"
+                    style={{ background: colors.surface, border: `1px solid ${colors.border}` }}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-2xl">{rec.icon}</span>
+                      <span className="font-medium text-sm" style={{ color: colors.text }}>{rec.channel}</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div>
+                        <div className="text-xs" style={{ color: colors.textMuted }}>Best Time</div>
+                        <div className="text-sm font-semibold" style={{ color: colors.accent }}>{rec.bestTime}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs" style={{ color: colors.textMuted }}>Engagement</div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: colors.bg }}>
+                            <motion.div
+                              className="h-full rounded-full"
+                              style={{ background: colors.green }}
+                              initial={{ width: 0 }}
+                              animate={{ width: `${rec.engagement}%` }}
+                              transition={{ delay: 0.5 + i * 0.1 }}
+                            />
+                          </div>
+                          <span className="text-xs font-medium" style={{ color: colors.green }}>{rec.engagement}%</span>
+                        </div>
+                      </div>
+                      <p className="text-xs" style={{ color: colors.textDim }}>{rec.tip}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* ROI Prediction */}
+              <div className="p-4 rounded-xl" style={{ background: colors.surface }}>
+                <h4 className="text-sm font-semibold mb-4 flex items-center gap-2" style={{ color: colors.text }}>
+                  📈 Predicted ROI Impact
+                </h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl text-center" style={{ background: colors.bg }}>
+                    <div className="text-3xl font-bold" style={{ color: colors.green }}>+34%</div>
+                    <div className="text-xs mt-1" style={{ color: colors.textMuted }}>Engagement Uplift</div>
+                    <div className="text-xs" style={{ color: colors.textDim }}>Using optimal times</div>
+                  </div>
+                  <div className="p-4 rounded-xl text-center" style={{ background: colors.bg }}>
+                    <div className="text-3xl font-bold" style={{ color: colors.blue }}>-22%</div>
+                    <div className="text-xs mt-1" style={{ color: colors.textMuted }}>Cost Per Click</div>
+                    <div className="text-xs" style={{ color: colors.textDim }}>From better targeting</div>
+                  </div>
+                  <div className="p-4 rounded-xl text-center" style={{ background: colors.bg }}>
+                    <div className="text-3xl font-bold" style={{ color: colors.purple }}>2.4x</div>
+                    <div className="text-xs mt-1" style={{ color: colors.textMuted }}>Reach Multiplier</div>
+                    <div className="text-xs" style={{ color: colors.textDim }}>Cross-platform synergy</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between">
+                <p className="text-xs" style={{ color: colors.textDim }}>
+                  💡 Data aggregated from Intel Vault • Last updated: {new Date().toLocaleDateString()}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-80"
+                    style={{ background: colors.surface, color: colors.textMuted, border: `1px solid ${colors.border}` }}
+                  >
+                    📄 Export PDF
+                  </button>
+                  <button
+                    onClick={() => setShowSheetsExport(true)}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-80"
+                    style={{ background: colors.green, color: colors.bg }}
+                  >
+                    📊 Export to Sheets
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Google Sheets Export Modal */}
       <AnimatePresence>

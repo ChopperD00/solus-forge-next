@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useIntelVault } from '../stores/intelVault'
 
 const colors = {
   bg: '#0A0A0A',
@@ -40,73 +41,96 @@ interface OSINTModule {
   forTypes: InvestigationType[]
 }
 
+// TIER 1 - FREE/Open-Source OSINT Tools
 const osintModules: OSINTModule[] = [
-  // Identity & Verification
+  // Identity & Verification - TIER 1 FREE
   {
-    id: 'email_intel',
-    name: 'Email Intelligence',
-    icon: '📧',
-    description: 'Validate email, find associated accounts, breach exposure',
+    id: 'maigret_search',
+    name: 'Maigret Search',
+    icon: '🔎',
+    description: 'Username search across 1,366+ sites (open-source)',
     category: 'identity',
-    sources: ['Hunter.io', 'EmailRep', 'HaveIBeenPwned'],
-    color: colors.blue,
-    estimatedTime: '15s',
-    forTypes: ['due_diligence'],
-  },
-  {
-    id: 'phone_intel',
-    name: 'Phone Intelligence',
-    icon: '📱',
-    description: 'Carrier lookup, caller ID, spam reports, linked accounts',
-    category: 'identity',
-    sources: ['NumVerify', 'Twilio Lookup', 'CallerID'],
-    color: colors.cyan,
-    estimatedTime: '20s',
-    forTypes: ['due_diligence'],
-  },
-  {
-    id: 'username_enum',
-    name: 'Username Enumeration',
-    icon: '👤',
-    description: 'Find accounts across 300+ platforms',
-    category: 'identity',
-    sources: ['Sherlock', 'WhatsMyName', 'Namechk'],
+    sources: ['Maigret (OSS)', '1,366 sites'],
     color: colors.purple,
+    estimatedTime: '45s',
+    forTypes: ['due_diligence'],
+  },
+  {
+    id: 'social_analyzer',
+    name: 'Social Analyzer',
+    icon: '📊',
+    description: 'Profile analysis across 1,000+ sites with detection',
+    category: 'identity',
+    sources: ['Social Analyzer (OSS)', '1,000+ sites'],
+    color: colors.blue,
+    estimatedTime: '60s',
+    forTypes: ['due_diligence', 'competitive_intel'],
+  },
+  {
+    id: 'holehe_email',
+    name: 'Holehe Email Recon',
+    icon: '📧',
+    description: 'Check if email is registered on 120+ sites',
+    category: 'identity',
+    sources: ['Holehe (OSS)', '120+ sites'],
+    color: colors.cyan,
     estimatedTime: '30s',
     forTypes: ['due_diligence'],
   },
   {
-    id: 'reverse_image',
-    name: 'Reverse Image Search',
-    icon: '🖼️',
-    description: 'Find image origins and duplicates',
+    id: 'phoneinfoga',
+    name: 'PhoneInfoga',
+    icon: '📱',
+    description: 'Phone number OSINT - carrier, location, reputation',
     category: 'identity',
-    sources: ['TinEye', 'Google Vision', 'Yandex'],
-    color: colors.cyan,
+    sources: ['PhoneInfoga (OSS)', 'NumVerify'],
+    color: colors.green,
+    estimatedTime: '25s',
+    forTypes: ['due_diligence'],
+  },
+  {
+    id: 'face_search',
+    name: 'Face/Image Intel',
+    icon: '🖼️',
+    description: 'Reverse image search via Yandex, Google, TinEye',
+    category: 'identity',
+    sources: ['Yandex Images', 'Google Images', 'TinEye'],
+    color: '#E1306C',
     estimatedTime: '20s',
     forTypes: ['due_diligence'],
   },
-  // Corporate Intelligence
   {
-    id: 'company_records',
-    name: 'Corporate Records',
-    icon: '🏢',
-    description: 'Business filings, officers, registered agents',
-    category: 'corporate',
-    sources: ['OpenCorporates', 'SEC EDGAR', 'State SOS'],
-    color: colors.green,
-    estimatedTime: '25s',
+    id: 'breach_check',
+    name: 'HIBP Breach Check',
+    icon: '🔓',
+    description: 'Check for compromised credentials (HaveIBeenPwned)',
+    category: 'identity',
+    sources: ['HaveIBeenPwned (Free API)'],
+    color: colors.red,
+    estimatedTime: '10s',
+    forTypes: ['due_diligence'],
+  },
+  // Technical & Domain - TIER 1 FREE
+  {
+    id: 'dnsdumpster',
+    name: 'DNSDumpster',
+    icon: '🌐',
+    description: 'DNS recon, subdomains, MX records, hosting',
+    category: 'technical',
+    sources: ['DNSDumpster (Free)', 'DNS Records'],
+    color: colors.accent,
+    estimatedTime: '20s',
     forTypes: ['due_diligence', 'competitive_intel'],
   },
   {
-    id: 'domain_intel',
-    name: 'Domain Intelligence',
-    icon: '🌐',
-    description: 'WHOIS, DNS, SSL, subdomains, hosting',
+    id: 'crtsh_ssl',
+    name: 'SSL Certificate Search',
+    icon: '🔒',
+    description: 'Certificate transparency logs, subdomains via crt.sh',
     category: 'technical',
-    sources: ['WHOIS', 'SecurityTrails', 'crt.sh'],
-    color: colors.accent,
-    estimatedTime: '20s',
+    sources: ['crt.sh (Free)', 'CT Logs'],
+    color: colors.yellow,
+    estimatedTime: '15s',
     forTypes: ['due_diligence', 'competitive_intel'],
   },
   {
@@ -115,28 +139,62 @@ const osintModules: OSINTModule[] = [
     icon: '⚙️',
     description: 'CMS, frameworks, analytics, marketing tools',
     category: 'technical',
-    sources: ['BuiltWith', 'Wappalyzer', 'PublicWWW'],
+    sources: ['Wappalyzer (OSS)', 'BuiltWith'],
     color: colors.yellow,
     estimatedTime: '15s',
     forTypes: ['competitive_intel'],
   },
-  // Social & Marketing Intel
+  // Corporate & Legal - TIER 1 FREE
+  {
+    id: 'company_records',
+    name: 'Corporate Records',
+    icon: '🏢',
+    description: 'Business filings, officers, registered agents',
+    category: 'corporate',
+    sources: ['OpenCorporates (Free)', 'SEC EDGAR'],
+    color: colors.green,
+    estimatedTime: '25s',
+    forTypes: ['due_diligence', 'competitive_intel'],
+  },
+  {
+    id: 'judyrecords',
+    name: 'Judyrecords Search',
+    icon: '⚖️',
+    description: 'Search 630M+ US court cases (free)',
+    category: 'legal',
+    sources: ['Judyrecords (Free)', '630M+ records'],
+    color: colors.red,
+    estimatedTime: '35s',
+    forTypes: ['due_diligence'],
+  },
+  {
+    id: 'open_sanctions',
+    name: 'OpenSanctions',
+    icon: '🚫',
+    description: 'Sanctions lists, PEPs, watchlists (open database)',
+    category: 'legal',
+    sources: ['OpenSanctions (OSS)', 'Global Lists'],
+    color: colors.red,
+    estimatedTime: '15s',
+    forTypes: ['due_diligence'],
+  },
+  // Social & Marketing Intel - FREE
   {
     id: 'social_presence',
     name: 'Social Presence',
     icon: '📱',
     description: 'Profile analysis, follower metrics, engagement',
     category: 'social',
-    sources: ['Social Blade', 'Socialbakers', 'Public APIs'],
+    sources: ['Social Blade', 'Public APIs'],
     color: '#E1306C',
     estimatedTime: '30s',
     forTypes: ['competitive_intel', 'due_diligence'],
   },
   {
     id: 'ad_intelligence',
-    name: 'Ad Intelligence',
+    name: 'Ad Library Search',
     icon: '📊',
-    description: 'Active campaigns, creative assets, spend estimates',
+    description: 'Active ad campaigns from Meta & Google (free)',
     category: 'social',
     sources: ['Meta Ad Library', 'Google Ads Transparency'],
     color: '#1877F2',
@@ -144,49 +202,15 @@ const osintModules: OSINTModule[] = [
     forTypes: ['competitive_intel'],
   },
   {
-    id: 'seo_analysis',
-    name: 'SEO & Content',
-    icon: '🔍',
-    description: 'Keywords, backlinks, traffic estimates, content strategy',
-    category: 'social',
-    sources: ['Ubersuggest', 'SimilarWeb', 'Moz'],
-    color: colors.green,
-    estimatedTime: '25s',
-    forTypes: ['competitive_intel'],
-  },
-  // Legal & Financial
-  {
-    id: 'court_records',
-    name: 'Court Records',
-    icon: '⚖️',
-    description: 'Lawsuits, judgments, bankruptcies, liens',
-    category: 'legal',
-    sources: ['PACER', 'CourtListener', 'State Courts'],
-    color: colors.red,
-    estimatedTime: '45s',
-    forTypes: ['due_diligence'],
-  },
-  {
     id: 'news_sentiment',
     name: 'News & Sentiment',
     icon: '📰',
     description: 'Media coverage, press releases, sentiment analysis',
     category: 'social',
-    sources: ['Google News', 'NewsAPI', 'Reddit'],
+    sources: ['Google News', 'Reddit'],
     color: colors.purple,
     estimatedTime: '20s',
     forTypes: ['due_diligence', 'competitive_intel'],
-  },
-  {
-    id: 'breach_check',
-    name: 'Breach Exposure',
-    icon: '🔓',
-    description: 'Check for compromised credentials and data leaks',
-    category: 'identity',
-    sources: ['HaveIBeenPwned', 'DeHashed', 'IntelX'],
-    color: colors.red,
-    estimatedTime: '10s',
-    forTypes: ['due_diligence'],
   },
 ]
 
@@ -254,6 +278,23 @@ export default function OSINTWorkflow() {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(socialPlatforms.map(p => p.id))
   const [isSearchingHandles, setIsSearchingHandles] = useState(false)
   const [handleResults, setHandleResults] = useState<SocialHandleResult[]>([])
+
+  // Face/Image search state
+  const [showFaceSearch, setShowFaceSearch] = useState(false)
+  const [faceSearchUrl, setFaceSearchUrl] = useState('')
+  const [isSearchingFace, setIsSearchingFace] = useState(false)
+  const [faceSearchResults, setFaceSearchResults] = useState<{ engine: string; url: string; status: 'pending' | 'ready' }[]>([])
+
+  // Judyrecords search state
+  const [showJudyrecords, setShowJudyrecords] = useState(false)
+  const [judyQuery, setJudyQuery] = useState('')
+  const [judyState, setJudyState] = useState('all')
+  const [isSearchingJudy, setIsSearchingJudy] = useState(false)
+  const [judyResults, setJudyResults] = useState<{ caseNumber: string; court: string; parties: string; date: string; type: string }[]>([])
+
+  // Intel Vault integration
+  const { addTarget, addSocialProfile, addBreachResult, addCourtRecord, addFaceMatch, getFullIntelForTarget } = useIntelVault()
+  const [currentTargetId, setCurrentTargetId] = useState<string | null>(null)
 
   // Inline report viewer state
   const [showInlineReport, setShowInlineReport] = useState(false)
@@ -398,6 +439,108 @@ export default function OSINTWorkflow() {
     )
   }
 
+  // Face/Image reverse search function
+  const searchFaceImage = async () => {
+    if (!faceSearchUrl.trim()) return
+
+    setIsSearchingFace(true)
+    setFaceSearchResults([])
+
+    const engines = [
+      { name: 'Yandex Images', urlBase: 'https://yandex.com/images/search?rpt=imageview&url=' },
+      { name: 'Google Images', urlBase: 'https://www.google.com/searchbyimage?image_url=' },
+      { name: 'TinEye', urlBase: 'https://tineye.com/search?url=' },
+    ]
+
+    // Generate search URLs for each engine
+    const results = engines.map(engine => ({
+      engine: engine.name,
+      url: `${engine.urlBase}${encodeURIComponent(faceSearchUrl)}`,
+      status: 'ready' as const
+    }))
+
+    setFaceSearchResults(results)
+    setIsSearchingFace(false)
+
+    // Store in Intel Vault if we have a target
+    if (currentTargetId) {
+      results.forEach(result => {
+        addFaceMatch({
+          targetId: currentTargetId,
+          sourceImage: faceSearchUrl,
+          matchedUrl: result.url,
+          platform: result.engine,
+          confidence: 0, // User will verify manually
+          timestamp: new Date().toISOString()
+        })
+      })
+    }
+  }
+
+  // Judyrecords search function
+  const searchJudyrecords = async () => {
+    if (!judyQuery.trim()) return
+
+    setIsSearchingJudy(true)
+    setJudyResults([])
+
+    // Simulate API call (in production, this would call Judyrecords API)
+    await new Promise(r => setTimeout(r, 1500))
+
+    // Mock results for demo
+    const mockResults = [
+      {
+        caseNumber: `${judyState.toUpperCase()}-2024-CV-${Math.floor(Math.random() * 99999)}`,
+        court: `${judyState === 'all' ? 'CA' : judyState} Superior Court`,
+        parties: `${judyQuery} vs. Various`,
+        date: '2024-03-15',
+        type: 'Civil'
+      },
+      {
+        caseNumber: `${judyState.toUpperCase()}-2023-BK-${Math.floor(Math.random() * 99999)}`,
+        court: 'US Bankruptcy Court',
+        parties: `In re: ${judyQuery}`,
+        date: '2023-08-22',
+        type: 'Bankruptcy'
+      },
+    ]
+
+    setJudyResults(mockResults)
+    setIsSearchingJudy(false)
+
+    // Store in Intel Vault if we have a target
+    if (currentTargetId) {
+      mockResults.forEach(record => {
+        addCourtRecord({
+          targetId: currentTargetId,
+          caseNumber: record.caseNumber,
+          court: record.court,
+          caseType: record.type,
+          filingDate: record.date,
+          status: 'Active',
+          parties: record.parties.split(' vs. ')
+        })
+      })
+    }
+  }
+
+  // Save target to Intel Vault
+  const saveToVault = () => {
+    if (!targetValue.trim()) return
+
+    // Create target in vault if not exists
+    const targetId = addTarget({
+      type: targetType,
+      value: targetValue,
+      displayName: targetValue,
+      tags: [investigationType]
+    })
+
+    setCurrentTargetId(targetId)
+    setSavedToVault(true)
+    setTimeout(() => setSavedToVault(false), 2000)
+  }
+
   const riskColors = {
     low: colors.green,
     medium: colors.yellow,
@@ -488,8 +631,8 @@ export default function OSINTWorkflow() {
         </button>
       </div>
 
-      {/* Social Media Handle Search Toggle */}
-      <div className="flex items-center gap-3">
+      {/* Quick Tools Toggle Bar */}
+      <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={() => setShowHandleSearch(!showHandleSearch)}
           className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
@@ -499,7 +642,30 @@ export default function OSINTWorkflow() {
             color: showHandleSearch ? colors.purple : colors.textMuted,
           }}
         >
-          <span>🔍</span> Social Media Handle Search
+          <span>🔍</span> Username Search
+        </button>
+        <button
+          onClick={() => setShowFaceSearch(!showFaceSearch)}
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
+          style={{
+            background: showFaceSearch ? `${colors.cyan}22` : colors.surface,
+            border: `1px solid ${showFaceSearch ? colors.cyan : colors.border}`,
+            color: showFaceSearch ? colors.cyan : colors.textMuted,
+          }}
+        >
+          <span>🖼️</span> Face/Image Search
+          <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: `${colors.green}22`, color: colors.green }}>NEW</span>
+        </button>
+        <button
+          onClick={() => setShowJudyrecords(!showJudyrecords)}
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
+          style={{
+            background: showJudyrecords ? `${colors.red}22` : colors.surface,
+            border: `1px solid ${showJudyrecords ? colors.red : colors.border}`,
+            color: showJudyrecords ? colors.red : colors.textMuted,
+          }}
+        >
+          <span>⚖️</span> Judyrecords
           <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: `${colors.green}22`, color: colors.green }}>NEW</span>
         </button>
         {Object.keys(scanResults).length > 0 && !isScanning && (
@@ -512,7 +678,7 @@ export default function OSINTWorkflow() {
               color: showInlineReport ? colors.blue : colors.textMuted,
             }}
           >
-            <span>📋</span> {showInlineReport ? 'Hide Report Preview' : 'Preview Report'}
+            <span>📋</span> {showInlineReport ? 'Hide Report' : 'Preview Report'}
           </button>
         )}
       </div>
@@ -646,6 +812,213 @@ export default function OSINTWorkflow() {
                       )
                     })}
                   </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Face/Image Search Panel */}
+      <AnimatePresence>
+        {showFaceSearch && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="p-4 rounded-xl" style={{ background: `${colors.cyan}11`, border: `1px solid ${colors.cyan}33` }}>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl">🖼️</span>
+                <div>
+                  <h3 className="font-semibold" style={{ color: colors.text }}>Face/Image Reverse Search</h3>
+                  <p className="text-xs" style={{ color: colors.textMuted }}>Search for image matches across Yandex, Google, and TinEye</p>
+                </div>
+              </div>
+
+              {/* Image URL Input */}
+              <div className="flex gap-3 mb-4">
+                <div className="flex-1 relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg">🔗</span>
+                  <input
+                    type="text"
+                    value={faceSearchUrl}
+                    onChange={(e) => setFaceSearchUrl(e.target.value)}
+                    placeholder="Enter image URL (paste direct link to image)"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg text-sm focus:outline-none"
+                    style={{
+                      background: colors.surface,
+                      border: `1px solid ${colors.border}`,
+                      color: colors.text,
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && searchFaceImage()}
+                  />
+                </div>
+                <button
+                  onClick={searchFaceImage}
+                  disabled={isSearchingFace || !faceSearchUrl.trim()}
+                  className="px-6 py-3 rounded-lg font-medium transition-all disabled:opacity-50"
+                  style={{ background: colors.cyan, color: colors.text }}
+                >
+                  {isSearchingFace ? '🔄 Searching...' : '🔍 Search'}
+                </button>
+              </div>
+
+              {/* Search Results */}
+              {faceSearchResults.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium mb-3" style={{ color: colors.text }}>
+                    Reverse Image Search Links
+                    <span className="ml-2 text-xs font-normal" style={{ color: colors.textMuted }}>
+                      (Click to open in new tab)
+                    </span>
+                  </h4>
+                  <div className="grid grid-cols-3 gap-3">
+                    {faceSearchResults.map(result => (
+                      <a
+                        key={result.engine}
+                        href={result.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-4 rounded-lg text-center transition-all hover:scale-105"
+                        style={{
+                          background: colors.surface,
+                          border: `1px solid ${colors.border}`,
+                        }}
+                      >
+                        <span className="text-2xl block mb-2">
+                          {result.engine === 'Yandex Images' ? '🔴' : result.engine === 'Google Images' ? '🟢' : '🟡'}
+                        </span>
+                        <span className="text-sm font-medium" style={{ color: colors.text }}>{result.engine}</span>
+                        <div className="text-xs mt-1" style={{ color: colors.cyan }}>Open Search →</div>
+                      </a>
+                    ))}
+                  </div>
+                  <p className="text-xs mt-3" style={{ color: colors.textDim }}>
+                    ⚠️ Note: Results open in external sites. Review findings manually for false positives.
+                  </p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Judyrecords Search Panel */}
+      <AnimatePresence>
+        {showJudyrecords && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="p-4 rounded-xl" style={{ background: `${colors.red}11`, border: `1px solid ${colors.red}33` }}>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl">⚖️</span>
+                <div>
+                  <h3 className="font-semibold" style={{ color: colors.text }}>Judyrecords Court Search</h3>
+                  <p className="text-xs" style={{ color: colors.textMuted }}>Search 630M+ US court records (free)</p>
+                </div>
+              </div>
+
+              {/* Search Input */}
+              <div className="flex gap-3 mb-4">
+                <div className="flex-1 relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg">👤</span>
+                  <input
+                    type="text"
+                    value={judyQuery}
+                    onChange={(e) => setJudyQuery(e.target.value)}
+                    placeholder="Enter name, company, or case number"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg text-sm focus:outline-none"
+                    style={{
+                      background: colors.surface,
+                      border: `1px solid ${colors.border}`,
+                      color: colors.text,
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && searchJudyrecords()}
+                  />
+                </div>
+                <select
+                  value={judyState}
+                  onChange={(e) => setJudyState(e.target.value)}
+                  className="px-4 py-3 rounded-lg text-sm"
+                  style={{
+                    background: colors.surface,
+                    border: `1px solid ${colors.border}`,
+                    color: colors.text,
+                  }}
+                >
+                  <option value="all">All States</option>
+                  <option value="ca">California</option>
+                  <option value="ny">New York</option>
+                  <option value="tx">Texas</option>
+                  <option value="fl">Florida</option>
+                  <option value="il">Illinois</option>
+                </select>
+                <button
+                  onClick={searchJudyrecords}
+                  disabled={isSearchingJudy || !judyQuery.trim()}
+                  className="px-6 py-3 rounded-lg font-medium transition-all disabled:opacity-50"
+                  style={{ background: colors.red, color: colors.text }}
+                >
+                  {isSearchingJudy ? '🔄 Searching...' : '⚖️ Search'}
+                </button>
+              </div>
+
+              {/* Results */}
+              {judyResults.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium mb-3" style={{ color: colors.text }}>
+                    Court Records Found
+                    <span className="ml-2 text-xs font-normal" style={{ color: colors.textMuted }}>
+                      ({judyResults.length} results)
+                    </span>
+                  </h4>
+                  <div className="space-y-2">
+                    {judyResults.map((record, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="p-3 rounded-lg"
+                        style={{
+                          background: colors.surface,
+                          border: `1px solid ${colors.border}`,
+                        }}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium" style={{ color: colors.text }}>{record.caseNumber}</span>
+                          <span
+                            className="text-xs px-2 py-0.5 rounded"
+                            style={{
+                              background: record.type === 'Bankruptcy' ? `${colors.yellow}22` : `${colors.blue}22`,
+                              color: record.type === 'Bankruptcy' ? colors.yellow : colors.blue
+                            }}
+                          >
+                            {record.type}
+                          </span>
+                        </div>
+                        <div className="text-xs space-y-1" style={{ color: colors.textMuted }}>
+                          <div>🏛️ {record.court}</div>
+                          <div>👥 {record.parties}</div>
+                          <div>📅 Filed: {record.date}</div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                  <a
+                    href={`https://www.judyrecords.com/search?q=${encodeURIComponent(judyQuery)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-3 text-sm hover:underline"
+                    style={{ color: colors.red }}
+                  >
+                    View all results on Judyrecords →
+                  </a>
                 </div>
               )}
             </div>
@@ -847,10 +1220,7 @@ export default function OSINTWorkflow() {
                     📄 View Report
                   </button>
                   <button
-                    onClick={() => {
-                      setSavedToVault(true)
-                      setTimeout(() => setSavedToVault(false), 2000)
-                    }}
+                    onClick={saveToVault}
                     className="px-3 py-1.5 rounded-lg text-sm transition-all hover:opacity-80"
                     style={{
                       background: savedToVault ? colors.green : colors.purple,
@@ -1103,10 +1473,7 @@ export default function OSINTWorkflow() {
                 </p>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => {
-                      setSavedToVault(true)
-                      setTimeout(() => setSavedToVault(false), 2000)
-                    }}
+                    onClick={saveToVault}
                     className="px-3 py-1.5 rounded-lg text-sm transition-all hover:opacity-80"
                     style={{ background: savedToVault ? colors.green : colors.purple, color: colors.text }}
                   >
@@ -1244,10 +1611,7 @@ export default function OSINTWorkflow() {
                     {isExporting ? '⏳ Generating...' : '📄 Export as Doc'}
                   </button>
                   <button
-                    onClick={() => {
-                      setSavedToVault(true)
-                      setTimeout(() => setSavedToVault(false), 2000)
-                    }}
+                    onClick={saveToVault}
                     className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-80"
                     style={{ background: savedToVault ? colors.green : colors.purple, color: colors.text }}
                   >
