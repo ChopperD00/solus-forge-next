@@ -31,11 +31,12 @@ import {
   QrCode as QrCodeIcon,
   Circle as CircleIcon,
   Image as ImageIcon,
-  VideoCamera as VideoCameraIcon,  FlowArrow as FlowArrowIcon,
+  VideoCamera as VideoCameraIcon,
   Waveform as WaveformIcon,
   Robot as RobotIcon,
   Plug as PlugIcon,
   FigmaLogo as FigmaLogoIcon,
+  FlowArrow as FlowArrowIcon,
 } from '@phosphor-icons/react'
 
 // Service status types
@@ -161,7 +162,7 @@ const tarotCards = [
   { id: 'influencer_suite', icon: UserIcon, title: 'Influencer Suite', subtitle: 'LoRA training & clothing swap', capabilities: ['LoRA Training', 'Face Swap', 'Clothing Transfer', 'Brand Consistency'], arcana: 'The Merchant' },
   { id: 'stylest_email', icon: EnvelopeIcon, title: 'Stylest Email', subtitle: 'Swimwear campaign studio', capabilities: ['Product Swap', 'Colorway System', 'Zone Editing', 'Founder Sections'], arcana: 'The Merchant' },
   { id: 'nurse_jamie_email', icon: EnvelopeIcon, title: 'Nurse Jamie Email', subtitle: 'Beauty device campaigns', capabilities: ['Product Catalog', 'Content Blocks', 'HTML Export', 'Platform Targeting'], arcana: 'The Merchant' },
-  { id: 'email_flow_builder', icon: FlowArrowIcon, title: 'Email Flow Builder', subtitle: 'Visual automation editor', capabilities: ['Drag & Drop', 'Trigger Events', 'Conditional Logic', 'A/B Testing'], arcana: 'The Merchant' },
+  { id: 'email_flow_builder', icon: FlowArrowIcon, title: 'Email Flow Builder', subtitle: 'Node-based automation', capabilities: ['Visual Flow Editor', 'Trigger Sequences', 'A/B Split Testing', 'Performance Analytics'], arcana: 'The Merchant' },
   { id: 'automation', icon: LightningIcon, title: 'Automation', subtitle: 'Workflow triggers & sequences', capabilities: ['Trigger Events', 'Conditional Logic', 'API Integrations', 'Scheduled Tasks'], arcana: 'The Merchant' },
   // Intelligence
   { id: 'research', icon: FlaskIcon, title: 'Research', subtitle: 'Parallel AI research', capabilities: ['Multi-Source Search', 'Summarization', 'Fact Checking', 'Citation Tracking'], arcana: 'The Oracle' },
@@ -182,7 +183,7 @@ const customAutomations = tarotCards.filter(card =>
 )
 
 // Merchant cards without custom automations
-const merchantCards = tarotCards.slice(4, 10).filter(card =>
+const merchantCards = tarotCards.slice(4, 11).filter(card =>
   card.id !== 'stylest_email' && card.id !== 'nurse_jamie_email' && card.id !== 'email_flow_builder'
 )
 
