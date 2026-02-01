@@ -83,9 +83,28 @@ export function getWebhookUrl(): string {
   return N8N_BASE_URL + EMAIL_STUDIO_WORKFLOW.webhookPath;
 }
 
+export function buildRequestPayload(
+  formData: Record<string, any>,
+  assets: EmailAsset[] = []
+): Record<string, any> {
+  return {
+    campaign_name: formData.campaign_name,
+    sku: formData.sku,
+    product_name: formData.product_name || formData.sku,
+    sheets_url: formData.sheets_url,
+    sheet_name: formData.sheet_name || 'Email Copy',
+    template_type: formData.template_type || 'promotional',
+    export_format: formData.export_format || 'html',
+    export_target: formData.export_target || 'klaviyo',
+    include_gif: formData.include_gif || false,
+    product_grid: formData.product_grid || '2x2',
+    assets: assets
+  };
+}
+
 export const TEMPLATE_STYLES = {
-  promotional: { name: 'Promotional', bgColor: '#ffffff', accentColor: '#d4a5a5' },
-  announcement: { name: 'Announcement', bgColor: '#f8f5f2', accentColor: '#8b7355' },
-  educational: { name: 'Educational', bgColor: '#fafafa', accentColor: '#7a9e7e' },
-  minimal: { name: 'Minimal', bgColor: '#ffffff', accentColor: '#000000' }
+  promotional: { name: 'Promotional', bgColor: '#ffffff', accentColor: '#d4a5a5', textColor: '#333333', ctaColor: '#c17f7f' },
+  announcement: { name: 'Announcement', bgColor: '#f8f5f2', accentColor: '#8b7355', textColor: '#2c2c2c', ctaColor: '#6b5344' },
+  educational: { name: 'Educational', bgColor: '#fafafa', accentColor: '#7a9e7e', textColor: '#333333', ctaColor: '#5a7e5e' },
+  minimal: { name: 'Minimal', bgColor: '#ffffff', accentColor: '#000000', textColor: '#1a1a1a', ctaColor: '#333333' }
 };
