@@ -1,5 +1,7 @@
 /**
  * Next.js API Route Handler for Nurse Jamie Email Studio
+ *
+ * Copy this to: app/api/email-studio/nurse-jamie/route.ts
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -11,6 +13,7 @@ import {
   EmailAsset
 } from './workflow-config';
 
+// Types
 interface EmailGenerateRequest {
   campaign_name: string;
   sku: string;
@@ -40,6 +43,7 @@ interface EmailGenerateResponse {
   testMode?: boolean;
 }
 
+// GET: Return workflow configuration and template options
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const includeStyles = searchParams.get('styles') === 'true';
@@ -54,10 +58,23 @@ export async function GET(request: NextRequest) {
       expectedOutput: EMAIL_STUDIO_WORKFLOW.expectedOutput
     },
     n8nInstance: 'https://secretmenu.app.n8n.cloud',
+    sheetsFormat: {
+      description: 'Google Sheets should have columns: Type, Content, Notes',
+      requiredTypes: ['SL', 'PH', 'HERO', 'CTA'],
+      optionalTypes: ['BODY1', 'BODY2', 'BODY3', 'FOOTER'],
+      example: [
+        { Type: 'SL', Content: 'Your skin deserves this ✨', Notes: 'A/B test subject' },
+        { Type: 'PH', Content: 'New UPLIFT formula available now', Notes: '' },
+        { Type: 'HERO', Content: 'Experience the UPLIFT Difference', Notes: 'Main headline' },
+        { Type: 'BODY1', Content: 'Our revolutionary formula...', Notes: '' },
+        { Type: 'CTA', Content: 'Shop Now', Notes: 'Button text' }
+      ]
+    },
     ...(includeStyles && { templateStyles: TEMPLATE_STYLES })
   });
 }
 
+// POST: Trigger email generation
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
@@ -65,6 +82,7 @@ export async function POST(request: NextRequest) {
     const body: EmailGenerateRequest = await request.json();
     const { testMode = false, assets = [], ...formData } = body;
 
+    // Validate required fields
     const missingFields = validateRequest(formData);
     if (missingFields.length > 0) {
       return NextResponse.json({
@@ -75,15 +93,18 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Validate Google Sheets URL format
     if (!isValidSheetsUrl(formData.sheets_url)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid Google Sheets URL'
+        error: 'Invalid Google Sheets URL. Expected format: https://docs.google.com/spreadsheets/d/...'
       }, { status: 400 });
     }
 
+    // Build the request payload
     const payload = buildRequestPayload(formData, assets);
 
+    // Test mode - return mock response
     if (testMode) {
       return NextResponse.json({
         success: true,
@@ -93,10 +114,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Trigger the actual n8n workflow
     const webhookUrl = getWebhookUrl();
     const n8nResponse = await fetch(webhookUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(payload),
     });
 
@@ -111,7 +135,7 @@ export async function POST(request: NextRequest) {
       }, { status: 502 });
     }
 
-    return NextResponse.json({
+    const response: EmailGenerateResponse = {
       success: true,
       job_id: responseData.job_id,
       campaign_name: responseData.campaign_name,
@@ -121,7 +145,9 @@ export async function POST(request: NextRequest) {
       klaviyo_template_id: responseData.klaviyo_template_id,
       export_target: responseData.export_target,
       executionTime: Date.now() - startTime
-    });
+    };
+
+    return NextResponse.json(response);
 
   } catch (error) {
     return NextResponse.json({
@@ -132,22 +158,35 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// Validate required fields
 function validateRequest(formData: Partial<EmailGenerateRequest>): string[] {
   const required = ['campaign_name', 'sku', 'sheets_url'];
-  return required.filter(field => !formData[field as keyof EmailGenerateRequest]);
+  const missing: string[] = [];
+
+  for (const field of required) {
+    if (!formData[field as keyof EmailGenerateRequest]) {
+      missing.push(field);
+    }
+  }
+
+  return missing;
 }
 
+// Validate Google Sheets URL
 function isValidSheetsUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.hostname === 'docs.google.com' && parsed.pathname.includes('/spreadsheets/d/');
+    return parsed.hostname === 'docs.google.com' &&
+           parsed.pathname.includes('/spreadsheets/d/');
   } catch {
     return false;
   }
 }
 
-function generateMockResponse(payload: Record<string, any>) {
+// Generate mock response for test mode
+function generateMockResponse(payload: Record<string, any>): Partial<EmailGenerateResponse> {
   const jobId = `email_${Date.now()}`;
+
   return {
     job_id: jobId,
     campaign_name: payload.campaign_name,
