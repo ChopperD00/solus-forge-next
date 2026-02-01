@@ -21,6 +21,7 @@ import OSINTWorkflow from './components/OSINTWorkflow'
 import StylestEmailWorkflow from './components/StylestEmailWorkflow'
 import NurseJamieEmailWorkflow from './components/NurseJamieEmailWorkflow'
 import NurseJamieEmailStudio from './components/NurseJamieEmailStudio'
+import EmailFlowBuilder from './components/EmailFlowBuilder'
 import AnalyticsWorkflow from './components/AnalyticsWorkflow'
 import AssetVaultWorkflow from './components/AssetVaultWorkflow'
 import CrucibleLanding from './components/CrucibleLanding'
@@ -48,7 +49,7 @@ import {
   CaretDoubleLeft as CaretDoubleLeftIcon,
 } from '@phosphor-icons/react'
 
-type IntentId = 'email_campaign' | 'video_production' | 'image_generation' | 'audio' | '3d_assets' | 'research' | 'automation' | 'prompt_vault' | 'influencer_suite' | 'social_paid_ads' | 'email_automation' | 'social_ads_automation' | 'lupin_iii' | 'analytics' | 'asset_vault' | 'stylest_email' | 'nurse_jamie_email' | null
+type IntentId = 'email_campaign' | 'video_production' | 'image_generation' | 'audio' | '3d_assets' | 'research' | 'automation' | 'prompt_vault' | 'influencer_suite' | 'social_paid_ads' | 'email_automation' | 'social_ads_automation' | 'lupin_iii' | 'analytics' | 'asset_vault' | 'stylest_email' | 'nurse_jamie_email' | 'email_flow_builder' | null
 
 // SOLUS color palette - Darker, more cinematic
 const colors = {
@@ -306,6 +307,7 @@ export default function Home() {
               {selectedIntent === 'asset_vault' && <AssetVaultWorkflow />}
               {selectedIntent === 'stylest_email' && <StylestEmailWorkflow />}
               {selectedIntent === 'nurse_jamie_email' && <NurseJamieEmailStudio />}
+              {selectedIntent === 'email_flow_builder' && <EmailFlowBuilder />}
             </main>
           </motion.div>
         )}
