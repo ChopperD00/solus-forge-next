@@ -57,6 +57,7 @@ interface EmailSection {
   status: 'pending' | 'ready' | 'processing' | 'complete'
   images: UploadedFile[]
   video: UploadedFile | null
+  isCustom?: boolean
 }
 
 // File Upload Dropzone Component
@@ -291,10 +292,12 @@ function DesignSectionCard({
   section,
   isActive,
   onClick,
+  onRemove,
 }: {
   section: EmailSection
   isActive: boolean
   onClick: () => void
+  onRemove?: () => void
 }) {
   const statusColors = {
     pending: njColors.textDim,
@@ -306,19 +309,42 @@ function DesignSectionCard({
   const hasMedia = section.images.length > 0 || section.video !== null
 
   return (
-    <motion.button
-      onClick={onClick}
-      className={`w-full p-3 rounded-xl text-left transition-all ${isActive ? 'ring-2' : ''}`}
+    <motion.div
+      className={`relative w-full p-3 rounded-xl text-left transition-all cursor-pointer ${isActive ? 'ring-2' : ''}`}
       style={{
         background: njColors.bg,
-        border: `1px solid ${njColors.accent}`,
+        border: `1px solid ${section.isCustom ? njColors.cyan : njColors.accent}`,
         '--tw-ring-color': njColors.accent,
       } as React.CSSProperties}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
+      onClick={onClick}
     >
+      {/* Remove button for custom sections */}
+      {section.isCustom && onRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onRemove()
+          }}
+          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-xs hover:scale-110 transition-transform"
+          style={{
+            background: njColors.rosegold,
+            color: '#fff',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+          }}
+          title="Remove section"
+        >
+          ×
+        </button>
+      )}
       <div className="flex items-center justify-between mb-1">
-        <span className="text-sm font-medium" style={{ color: njColors.text }}>{section.name}</span>
+        <div className="flex items-center gap-1.5">
+          {section.isCustom && (
+            <span className="text-xs" title="Custom section">✦</span>
+          )}
+          <span className="text-sm font-medium" style={{ color: njColors.text }}>{section.name}</span>
+        </div>
         <div className="flex items-center gap-1">
           {/* Media indicators */}
           {section.images.length > 0 && (
@@ -336,7 +362,7 @@ function DesignSectionCard({
       <div className="text-xs truncate" style={{ color: njColors.textMuted }}>
         {section.content || (hasMedia ? 'Media added' : 'No content yet')}
       </div>
-    </motion.button>
+    </motion.div>
   )
 }
 
@@ -402,6 +428,9 @@ export default function NurseJamieEmailStudio() {
     { id: 'footer', name: 'Footer', content: '', status: 'pending', images: [], video: null },
   ])
   const [activeSection, setActiveSection] = useState<string | null>(null)
+  const [isAddingSection, setIsAddingSection] = useState(false)
+  const [newSectionName, setNewSectionName] = useState('')
+  const [showPreview, setShowPreview] = useState(false)
 
   // Production State
   const [productionSteps, setProductionSteps] = useState({
@@ -575,6 +604,33 @@ export default function NurseJamieEmailStudio() {
     )
   }
 
+  // Add new section handler
+  const handleAddSection = () => {
+    if (!newSectionName.trim()) return
+
+    const newSection: EmailSection = {
+      id: `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: newSectionName.trim(),
+      content: '',
+      status: 'pending',
+      images: [],
+      video: null,
+      isCustom: true,
+    }
+
+    setEmailSections([...emailSections, newSection])
+    setNewSectionName('')
+    setIsAddingSection(false)
+  }
+
+  // Remove custom section handler
+  const handleRemoveSection = (sectionId: string) => {
+    setEmailSections(sections => sections.filter(s => s.id !== sectionId))
+    if (activeSection === sectionId) {
+      setActiveSection(null)
+    }
+  }
+
   // Production handlers
   const handleProductionStep = async (step: keyof typeof productionSteps) => {
     setProductionSteps(prev => ({
@@ -692,8 +748,80 @@ export default function NurseJamieEmailStudio() {
                 section={section}
                 isActive={activeSection === section.id}
                 onClick={() => setActiveSection(section.id)}
+                onRemove={section.isCustom ? () => handleRemoveSection(section.id) : undefined}
               />
             ))}
+
+            {/* Add Section Button / Input */}
+            {isAddingSection ? (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="p-2 rounded-xl"
+                style={{ background: njColors.bg, border: `1px dashed ${njColors.cyan}` }}
+              >
+                <input
+                  type="text"
+                  value={newSectionName}
+                  onChange={e => setNewSectionName(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') handleAddSection()
+                    if (e.key === 'Escape') {
+                      setIsAddingSection(false)
+                      setNewSectionName('')
+                    }
+                  }}
+                  placeholder="Section name (e.g., How To 2, PDP 2)"
+                  autoFocus
+                  className="w-full p-2 rounded-lg text-sm mb-2"
+                  style={{
+                    background: njColors.surfaceLight,
+                    color: njColors.text,
+                    border: `1px solid ${njColors.border}`,
+                  }}
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleAddSection}
+                    disabled={!newSectionName.trim()}
+                    className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-50"
+                    style={{ background: njColors.cyan, color: njColors.charcoal }}
+                  >
+                    Add Section
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsAddingSection(false)
+                      setNewSectionName('')
+                    }}
+                    className="px-3 py-1.5 rounded-lg text-xs"
+                    style={{ background: njColors.surfaceLight, color: njColors.textMuted }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.button
+                onClick={() => setIsAddingSection(true)}
+                className="w-full p-3 rounded-xl text-center transition-all"
+                style={{
+                  background: 'transparent',
+                  border: `1px dashed ${njColors.textDim}`,
+                }}
+                whileHover={{
+                  scale: 1.02,
+                  borderColor: njColors.cyan,
+                  background: `${njColors.cyan}11`
+                }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <span className="text-lg">+</span>
+                <div className="text-xs mt-1" style={{ color: njColors.textDim }}>
+                  Add Section
+                </div>
+              </motion.button>
+            )}
           </div>
 
           {/* Active Section Editor */}
@@ -932,10 +1060,11 @@ export default function NurseJamieEmailStudio() {
         <div className="flex items-center gap-4 text-xs" style={{ color: njColors.textDim }}>
           <span>🖼️ {images.length + emailSections.reduce((sum, s) => sum + s.images.length, 0)} images</span>
           <span>🎬 {videos.length + emailSections.filter(s => s.video !== null).length} videos</span>
-          <span>📝 {emailSections.filter(s => s.status === 'ready').length}/6 sections ready</span>
+          <span>📝 {emailSections.filter(s => s.status === 'ready').length}/{emailSections.length} sections ready</span>
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => setShowPreview(true)}
             className="px-3 py-1.5 rounded-lg text-xs transition-colors hover:bg-white/5"
             style={{ color: njColors.textMuted }}
           >
@@ -949,6 +1078,139 @@ export default function NurseJamieEmailStudio() {
           </button>
         </div>
       </div>
+
+      {/* Preview Modal */}
+      <AnimatePresence>
+        {showPreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.8)' }}
+            onClick={() => setShowPreview(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl"
+              style={{ background: njColors.surface, border: `1px solid ${njColors.border}` }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Preview Header */}
+              <div
+                className="px-6 py-4 flex items-center justify-between"
+                style={{ borderBottom: `1px solid ${njColors.border}` }}
+              >
+                <div>
+                  <h3 className="font-semibold" style={{ color: njColors.text }}>Email Preview</h3>
+                  <p className="text-xs" style={{ color: njColors.textDim }}>
+                    {sheetsData?.subjectLines?.[0] || 'No subject line set'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/10"
+                  style={{ color: njColors.textMuted }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Preview Content - Email Mockup */}
+              <div
+                className="p-6 overflow-y-auto"
+                style={{ maxHeight: 'calc(90vh - 140px)', background: '#ffffff' }}
+              >
+                {/* Email Container */}
+                <div
+                  className="mx-auto rounded-lg overflow-hidden"
+                  style={{ maxWidth: '600px', background: '#ffffff', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+                >
+                  {emailSections.map(section => (
+                    <div
+                      key={section.id}
+                      className="border-b last:border-b-0"
+                      style={{ borderColor: '#eee' }}
+                    >
+                      {/* Section Label */}
+                      <div
+                        className="px-4 py-1 text-xs font-medium"
+                        style={{ background: '#f5f5f5', color: '#666' }}
+                      >
+                        {section.name} {section.isCustom && '✦'}
+                      </div>
+
+                      {/* Section Content */}
+                      <div className="p-4">
+                        {/* Section Images */}
+                        {section.images.length > 0 && (
+                          <div className="mb-3 flex flex-wrap gap-2">
+                            {section.images.map(img => (
+                              <div
+                                key={img.id}
+                                className="relative rounded overflow-hidden"
+                                style={{ width: section.images.length === 1 ? '100%' : '48%' }}
+                              >
+                                <img
+                                  src={img.url}
+                                  alt={img.name}
+                                  className="w-full h-auto object-cover"
+                                  style={{ maxHeight: '200px' }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Section Video */}
+                        {section.video && (
+                          <div className="mb-3 rounded overflow-hidden bg-gray-100 p-4 text-center">
+                            <span className="text-2xl">🎬</span>
+                            <p className="text-sm text-gray-600 mt-1">{section.video.name}</p>
+                          </div>
+                        )}
+
+                        {/* Section Text */}
+                        {section.content ? (
+                          <div
+                            className="text-sm whitespace-pre-wrap"
+                            style={{ color: '#333', lineHeight: 1.6 }}
+                          >
+                            {section.content}
+                          </div>
+                        ) : (
+                          <div className="text-sm italic" style={{ color: '#999' }}>
+                            No content yet
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Preview Footer */}
+              <div
+                className="px-6 py-3 flex items-center justify-between"
+                style={{ borderTop: `1px solid ${njColors.border}` }}
+              >
+                <div className="text-xs" style={{ color: njColors.textDim }}>
+                  {emailSections.length} sections • {emailSections.filter(s => s.content || s.images.length || s.video).length} with content
+                </div>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="px-4 py-1.5 rounded-lg text-xs font-medium"
+                  style={{ background: njColors.accent, color: njColors.charcoal }}
+                >
+                  Close Preview
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
