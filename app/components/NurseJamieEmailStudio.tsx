@@ -55,6 +55,8 @@ interface EmailSection {
   name: string
   content: string
   status: 'pending' | 'ready' | 'processing' | 'complete'
+  images: UploadedFile[]
+  video: UploadedFile | null
 }
 
 // File Upload Dropzone Component
@@ -301,6 +303,8 @@ function DesignSectionCard({
     complete: njColors.green,
   }
 
+  const hasMedia = section.images.length > 0 || section.video !== null
+
   return (
     <motion.button
       onClick={onClick}
@@ -315,13 +319,22 @@ function DesignSectionCard({
     >
       <div className="flex items-center justify-between mb-1">
         <span className="text-sm font-medium" style={{ color: njColors.text }}>{section.name}</span>
-        <span
-          className="w-2 h-2 rounded-full"
-          style={{ background: statusColors[section.status] }}
-        />
+        <div className="flex items-center gap-1">
+          {/* Media indicators */}
+          {section.images.length > 0 && (
+            <span className="text-xs" title={`${section.images.length} image(s)`}>🖼️</span>
+          )}
+          {section.video && (
+            <span className="text-xs" title="Has video">🎬</span>
+          )}
+          <span
+            className="w-2 h-2 rounded-full ml-1"
+            style={{ background: statusColors[section.status] }}
+          />
+        </div>
       </div>
       <div className="text-xs truncate" style={{ color: njColors.textMuted }}>
-        {section.content || 'No content yet'}
+        {section.content || (hasMedia ? 'Media added' : 'No content yet')}
       </div>
     </motion.button>
   )
@@ -381,12 +394,12 @@ export default function NurseJamieEmailStudio() {
 
   // Email Design State
   const [emailSections, setEmailSections] = useState<EmailSection[]>([
-    { id: 'header', name: 'Header', content: '', status: 'pending' },
-    { id: 'hero', name: 'Hero', content: '', status: 'pending' },
-    { id: 'hero-pdp', name: 'Hero PDP', content: '', status: 'pending' },
-    { id: 'how-to', name: 'How To', content: '', status: 'pending' },
-    { id: 'pdp', name: 'PDP', content: '', status: 'pending' },
-    { id: 'footer', name: 'Footer', content: '', status: 'pending' },
+    { id: 'header', name: 'Header', content: '', status: 'pending', images: [], video: null },
+    { id: 'hero', name: 'Hero', content: '', status: 'pending', images: [], video: null },
+    { id: 'hero-pdp', name: 'Hero PDP', content: '', status: 'pending', images: [], video: null },
+    { id: 'how-to', name: 'How To', content: '', status: 'pending', images: [], video: null },
+    { id: 'pdp', name: 'PDP', content: '', status: 'pending', images: [], video: null },
+    { id: 'footer', name: 'Footer', content: '', status: 'pending', images: [], video: null },
   ])
   const [activeSection, setActiveSection] = useState<string | null>(null)
 
@@ -411,6 +424,9 @@ export default function NurseJamieEmailStudio() {
             ...section,
             content: matchingRow.content,
             status: 'ready' as const,
+            // Preserve existing images and video
+            images: section.images,
+            video: section.video,
           }
         }
         return section
@@ -490,7 +506,73 @@ export default function NurseJamieEmailStudio() {
     setSheetsConnected(false)
     setSheetsUrl('')
     setSheetsData(null)
-    setEmailSections(sections => sections.map(s => ({ ...s, content: '', status: 'pending' as const })))
+    setEmailSections(sections => sections.map(s => ({ ...s, content: '', status: 'pending' as const, images: [], video: null })))
+  }
+
+  // Section-specific upload handlers
+  const handleSectionImageUpload = (sectionId: string, files: File[]) => {
+    const newImages: UploadedFile[] = files
+      .filter(f => f.type.startsWith('image/'))
+      .map(f => ({
+        id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: f.name,
+        type: 'image' as const,
+        mimeType: f.type,
+        size: f.size,
+        url: URL.createObjectURL(f),
+        uploadedAt: new Date().toISOString(),
+      }))
+
+    setEmailSections(sections =>
+      sections.map(s =>
+        s.id === sectionId
+          ? { ...s, images: [...s.images, ...newImages], status: 'ready' as const }
+          : s
+      )
+    )
+  }
+
+  const handleSectionImageRemove = (sectionId: string, imageId: string) => {
+    setEmailSections(sections =>
+      sections.map(s =>
+        s.id === sectionId
+          ? { ...s, images: s.images.filter(img => img.id !== imageId) }
+          : s
+      )
+    )
+  }
+
+  const handleSectionVideoUpload = (sectionId: string, files: File[]) => {
+    const videoFile = files.find(f => f.type.startsWith('video/'))
+    if (!videoFile) return
+
+    const newVideo: UploadedFile = {
+      id: `vid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: videoFile.name,
+      type: 'video' as const,
+      mimeType: videoFile.type,
+      size: videoFile.size,
+      url: URL.createObjectURL(videoFile),
+      uploadedAt: new Date().toISOString(),
+    }
+
+    setEmailSections(sections =>
+      sections.map(s =>
+        s.id === sectionId
+          ? { ...s, video: newVideo, status: 'ready' as const }
+          : s
+      )
+    )
+  }
+
+  const handleSectionVideoRemove = (sectionId: string) => {
+    setEmailSections(sections =>
+      sections.map(s =>
+        s.id === sectionId
+          ? { ...s, video: null }
+          : s
+      )
+    )
   }
 
   // Production handlers
@@ -630,6 +712,110 @@ export default function NurseJamieEmailStudio() {
                   <div className="text-xs font-medium mb-2" style={{ color: njColors.accent }}>
                     Editing: {emailSections.find(s => s.id === activeSection)?.name}
                   </div>
+
+                  {/* Section Media Uploads */}
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    {/* Section Images */}
+                    <div
+                      className="p-2 rounded-lg cursor-pointer transition-all hover:scale-[1.02]"
+                      style={{ background: njColors.surfaceLight, border: `1px dashed ${njColors.cyan}` }}
+                      onClick={() => {
+                        const input = document.createElement('input')
+                        input.type = 'file'
+                        input.accept = 'image/*'
+                        input.multiple = true
+                        input.onchange = (e) => {
+                          const files = (e.target as HTMLInputElement).files
+                          if (files) handleSectionImageUpload(activeSection, Array.from(files))
+                        }
+                        input.click()
+                      }}
+                    >
+                      <div className="text-center">
+                        <div className="text-lg">🖼️</div>
+                        <div className="text-xs" style={{ color: njColors.text }}>Section Image</div>
+                        <div className="text-xs" style={{ color: njColors.textDim }}>
+                          {emailSections.find(s => s.id === activeSection)?.images.length || 0} added
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section Video */}
+                    <div
+                      className="p-2 rounded-lg cursor-pointer transition-all hover:scale-[1.02]"
+                      style={{ background: njColors.surfaceLight, border: `1px dashed ${njColors.rosegold}` }}
+                      onClick={() => {
+                        const input = document.createElement('input')
+                        input.type = 'file'
+                        input.accept = 'video/*'
+                        input.onchange = (e) => {
+                          const files = (e.target as HTMLInputElement).files
+                          if (files) handleSectionVideoUpload(activeSection, Array.from(files))
+                        }
+                        input.click()
+                      }}
+                    >
+                      <div className="text-center">
+                        <div className="text-lg">🎬</div>
+                        <div className="text-xs" style={{ color: njColors.text }}>Section Video</div>
+                        <div className="text-xs" style={{ color: njColors.textDim }}>
+                          {emailSections.find(s => s.id === activeSection)?.video ? '1 added' : 'None'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Uploaded Media Preview */}
+                  {(() => {
+                    const section = emailSections.find(s => s.id === activeSection)
+                    if (!section || (section.images.length === 0 && !section.video)) return null
+                    return (
+                      <div className="mb-3 space-y-1 max-h-20 overflow-y-auto">
+                        {section.images.map(img => (
+                          <div
+                            key={img.id}
+                            className="flex items-center gap-2 p-1.5 rounded text-xs"
+                            style={{ background: njColors.surfaceLight }}
+                          >
+                            <span>🖼️</span>
+                            <span className="flex-1 truncate" style={{ color: njColors.text }}>{img.name}</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleSectionImageRemove(activeSection, img.id)
+                              }}
+                              className="w-4 h-4 rounded flex items-center justify-center hover:bg-white/10"
+                              style={{ color: njColors.textMuted }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                        {section.video && (
+                          <div
+                            className="flex items-center gap-2 p-1.5 rounded text-xs"
+                            style={{ background: njColors.surfaceLight }}
+                          >
+                            <span>🎬</span>
+                            <span className="flex-1 truncate" style={{ color: njColors.text }}>{section.video.name}</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleSectionVideoRemove(activeSection)
+                              }}
+                              className="w-4 h-4 rounded flex items-center justify-center hover:bg-white/10"
+                              style={{ color: njColors.textMuted }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })()}
+
+                  {/* Text Content */}
+                  <div className="text-xs mb-1" style={{ color: njColors.textDim }}>Text Content</div>
                   <textarea
                     value={emailSections.find(s => s.id === activeSection)?.content || ''}
                     onChange={e => {
@@ -641,7 +827,7 @@ export default function NurseJamieEmailStudio() {
                         )
                       )
                     }}
-                    className="w-full h-24 p-2 rounded-lg text-sm resize-none"
+                    className="w-full h-20 p-2 rounded-lg text-sm resize-none"
                     style={{
                       background: njColors.surfaceLight,
                       color: njColors.text,
@@ -744,8 +930,8 @@ export default function NurseJamieEmailStudio() {
         style={{ background: njColors.bg, borderTop: `1px solid ${njColors.border}` }}
       >
         <div className="flex items-center gap-4 text-xs" style={{ color: njColors.textDim }}>
-          <span>🖼️ {images.length} images</span>
-          <span>🎬 {videos.length} videos</span>
+          <span>🖼️ {images.length + emailSections.reduce((sum, s) => sum + s.images.length, 0)} images</span>
+          <span>🎬 {videos.length + emailSections.filter(s => s.video !== null).length} videos</span>
           <span>📝 {emailSections.filter(s => s.status === 'ready').length}/6 sections ready</span>
         </div>
         <div className="flex items-center gap-2">
