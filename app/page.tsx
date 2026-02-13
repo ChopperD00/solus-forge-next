@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import SolusLogo from './components/SolusLogo'
 import BlackHoleGate from './components/BlackHoleGate'
 import HyperspeedTransition from './components/HyperspeedTransition'
 import EmailCampaignWorkflow from './components/EmailCampaignWorkflow'
@@ -51,7 +50,7 @@ import {
 
 type IntentId = 'email_campaign' | 'video_production' | 'image_generation' | 'audio' | '3d_assets' | 'research' | 'automation' | 'prompt_vault' | 'influencer_suite' | 'social_paid_ads' | 'email_automation' | 'social_ads_automation' | 'lupin_iii' | 'analytics' | 'asset_vault' | 'stylest_email' | 'nurse_jamie_email' | 'email_flow_builder' | null
 
-// SOLUS color palette - Darker, more cinematic
+// Inferis color palette - Darker, more cinematic
 const colors = {
   bg: '#0A0A0A',
   bgWarm: '#141010',

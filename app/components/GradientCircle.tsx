@@ -289,7 +289,7 @@ export default function GradientCircle({ children, scrollProgress = 0, isHovered
 
       {/* Circular text around outer perimeter - hidden on very small screens */}
       <OuterCircularText
-        text="SOLUS FORGE"
+        text="INFERIS"
         radius={textRadius}
         isVisible={showText && responsiveSize > 400}
         fontSize={responsiveSize > 600 ? 14 : 10}

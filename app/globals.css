@@ -269,7 +269,7 @@ body {
   100% { clip-path: inset(31% 0 4% 0); }
 }
 
-/* Subtle orange glitch for SOLUS FORGE branding */
+/* Subtle orange glitch for Inferis branding */
 @keyframes glitchOrange {
   0%, 90%, 100% {
     opacity: 1;

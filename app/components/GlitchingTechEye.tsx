@@ -273,7 +273,7 @@ export default function GlitchingTechEye({
       const cy = hCss / 2
       const radius = Math.min(wCss, hCss) * 0.35
 
-      // Orange hue shift for SOLUS FORGE palette
+      // Orange hue shift for Inferis palette
       const hueShift = (Math.sin(t * 0.5) * 0.5 + 0.5) * 20
       const hue = (hueBase + hueShift) % 360
 
@@ -492,7 +492,7 @@ export default function GlitchingTechEye({
 
       {/* Circular text that appears on hover */}
       <CircularText
-        text="SOLUS FORGE"
+        text="INFERIS"
         radius={textRadius}
         isVisible={isHovered}
         fontSize={11}

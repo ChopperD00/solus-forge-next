@@ -556,7 +556,7 @@ export default function CrucibleLanding({
                 fontFamily: "system-ui, -apple-system, sans-serif",
               }}
             >
-              Pre-Alpha v3.5
+              v3.8
             </div>
 
             {/* MCP/API Status Indicators - below version badge */}
@@ -1158,7 +1158,7 @@ export default function CrucibleLanding({
             transition={{ delay: 0.5 }}
           >
             <a
-              href="mailto:phil@secretme.nu?subject=SOLUS%20FORGE%20-%20Bug%20Report%2FFeature%20Request"
+              href="mailto:phil@secretme.nu?subject=Inferis%20-%20Bug%20Report%2FFeature%20Request"
               className="px-4 py-2 rounded-lg text-xs transition-all hover:bg-white/5 flex items-center gap-2"
               style={{
                 color: colors.textDim,
