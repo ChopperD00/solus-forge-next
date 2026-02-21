@@ -37,6 +37,10 @@ import {
   Plug as PlugIcon,
   FigmaLogo as FigmaLogoIcon,
   FlowArrow as FlowArrowIcon,
+  Bell as BellIcon,
+  ClipboardText as ClipboardTextIcon,
+  Pulse as PulseIcon,
+  CloudArrowUp as CloudArrowUpIcon,
 } from '@phosphor-icons/react'
 
 // Service status types
@@ -186,6 +190,70 @@ const customAutomations = tarotCards.filter(card =>
 const merchantCards = tarotCards.slice(4, 11).filter(card =>
   card.id !== 'stylest_email' && card.id !== 'nurse_jamie_email' && card.id !== 'email_flow_builder'
 )
+
+// Forge-Press Agents — distribution and publish pipeline
+const forgePressAgents = [
+  {
+    id: 'scoop',
+    callsign: 'SCOOP',
+    name: 'Scoop',
+    icon: EyeIcon,
+    role: 'Visual Taste Layer',
+    description: 'Evaluates archive assets and promotes worthy work into LENS',
+    capabilities: ['Visual Curation', 'Taste Evaluation', 'Asset Promotion', 'Quality Scoring'],
+    color: '#F59E0B',
+  },
+  {
+    id: 'payload',
+    callsign: 'PAYLOAD',
+    name: 'Payload',
+    icon: ClipboardTextIcon,
+    role: 'Brief Intake',
+    description: 'Normalizes, validates, and routes incoming client project triggers',
+    capabilities: ['Brief Intake', 'Normalization', 'Routing', 'Webhook Handling'],
+    color: '#06B6D4',
+  },
+  {
+    id: 'pathfinder',
+    callsign: 'PATHFINDER',
+    name: 'Pathfinder',
+    icon: CompassIcon,
+    role: 'Distribution Engine',
+    description: 'Routes finished deliverables to n8n, GDrive, Dropbox, and client channels',
+    capabilities: ['Multi-Platform Routing', 'Asset Delivery', 'n8n Integration', 'Format Conversion'],
+    color: '#10B981',
+  },
+  {
+    id: 'dial_tone',
+    callsign: 'DIAL TONE',
+    name: 'Dial Tone',
+    icon: BellIcon,
+    role: 'Notification Daemon',
+    description: 'Fires on pipeline milestones — client comms, status alerts, multi-channel notify',
+    capabilities: ['Milestone Alerts', 'Client Comms', 'Webhook Dispatch', 'Multi-Channel'],
+    color: '#8B5CF6',
+  },
+  {
+    id: 'breaker',
+    callsign: 'BREAKER',
+    name: 'Breaker',
+    icon: PulseIcon,
+    role: 'Circuit Breaker',
+    description: 'Monitors external service health — LENS, Archivist, Qdrant, R2, n8n',
+    capabilities: ['Health Monitoring', 'Circuit Breaking', 'API Health', 'Dependency Mgmt'],
+    color: '#EF4444',
+  },
+  {
+    id: 'salvo',
+    callsign: 'SALVO',
+    name: 'Salvo',
+    icon: CloudArrowUpIcon,
+    role: 'Archive Bridge',
+    description: 'Syncs promoted TITAN assets into UNICRON Qdrant vector store + R2 CDN',
+    capabilities: ['Archive Sync', 'Vector Ingestion', 'R2 Sync', 'Cross-Node Sync'],
+    color: '#EC4899',
+  },
+]
 
 // Icon component type
 type IconComponent = React.ForwardRefExoticComponent<React.PropsWithoutRef<{ size?: number | string; weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone'; color?: string }> & React.RefAttributes<SVGSVGElement>>
@@ -1138,6 +1206,115 @@ export default function CrucibleLanding({
                             background: `#10B98110`,
                             color: '#10B981',
                             border: `1px solid #10B98130`,
+                          }}
+                        >
+                          {cap}
+                        </span>
+                      ))}
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </motion.div>
+
+          {/* ─── FORGE-PRESS PIPELINE ──────────────────────────────────────────────── */}
+          <motion.div
+            className="relative z-10 mt-12 md:mt-16 w-full px-4 md:px-8 pb-8"
+            style={{
+              opacity: useTransform(smoothProgress, [0.62, 0.70], [0, 1]),
+              y: useTransform(smoothProgress, [0.62, 0.70], [40, 0]),
+            }}
+          >
+            {/* Section Header */}
+            <div className="text-center mb-6 md:mb-8">
+              <h4
+                className="text-sm md:text-base font-semibold tracking-wider uppercase mb-1"
+                style={{ color: colors.textMuted }}
+              >
+                Forge-Press Pipeline
+              </h4>
+              <p className="text-xs" style={{ color: colors.textDim }}>
+                Distribution & publish layer — bridges production to the outside world
+              </p>
+            </div>
+
+            {/* Agent Grid — 3 col on desktop, 2 on tablet, 1 on mobile */}
+            <div className="flex justify-center gap-4 md:gap-5 flex-wrap max-w-5xl mx-auto">
+              {forgePressAgents.map((agent) => {
+                const IconComponent = agent.icon
+                return (
+                  <motion.div
+                    key={agent.id}
+                    className="relative group"
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    style={{
+                      width: 260,
+                      background: colors.surface,
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: 16,
+                      padding: '20px',
+                    }}
+                  >
+                    {/* Hover glow */}
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"
+                      style={{
+                        background: `radial-gradient(circle at 50% 30%, ${agent.color}15 0%, transparent 70%)`,
+                      }}
+                    />
+
+                    {/* Top row: callsign badge + icon */}
+                    <div className="relative flex items-center justify-between mb-3">
+                      <span
+                        className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full"
+                        style={{
+                          color: agent.color,
+                          background: `${agent.color}18`,
+                          border: `1px solid ${agent.color}33`,
+                        }}
+                      >
+                        {agent.callsign}
+                      </span>
+                      <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center"
+                        style={{ background: `${agent.color}15` }}
+                      >
+                        <IconComponent size={18} weight="duotone" color={agent.color} />
+                      </div>
+                    </div>
+
+                    {/* Name + role */}
+                    <div className="relative mb-2">
+                      <h5
+                        className="font-semibold text-sm"
+                        style={{ color: colors.text }}
+                      >
+                        {agent.name}
+                      </h5>
+                      <p className="text-xs mt-0.5" style={{ color: agent.color }}>
+                        {agent.role}
+                      </p>
+                    </div>
+
+                    {/* Description */}
+                    <p
+                      className="relative text-xs leading-relaxed mb-3"
+                      style={{ color: colors.textMuted }}
+                    >
+                      {agent.description}
+                    </p>
+
+                    {/* Capability pills */}
+                    <div className="relative flex flex-wrap gap-1.5">
+                      {agent.capabilities.map((cap, i) => (
+                        <span
+                          key={i}
+                          className="px-2 py-0.5 rounded-full text-[10px]"
+                          style={{
+                            background: `${agent.color}10`,
+                            color: agent.color,
+                            border: `1px solid ${agent.color}25`,
                           }}
                         >
                           {cap}
