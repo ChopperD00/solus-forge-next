@@ -41,6 +41,8 @@ import {
   ClipboardText as ClipboardTextIcon,
   Pulse as PulseIcon,
   CloudArrowUp as CloudArrowUpIcon,
+  Shield as ShieldIcon,
+  Wrench as WrenchIcon,
 } from '@phosphor-icons/react'
 
 // Service status types
@@ -252,6 +254,131 @@ const forgePressAgents = [
     description: 'Syncs promoted TITAN assets into UNICRON Qdrant vector store + R2 CDN',
     capabilities: ['Archive Sync', 'Vector Ingestion', 'R2 Sync', 'Cross-Node Sync'],
     color: '#EC4899',
+  },
+  {
+    id: 'relay',
+    callsign: 'RELAY',
+    name: 'Relay',
+    icon: FlowArrowIcon,
+    role: 'Node Relay',
+    description: 'Routes agent-to-agent messages across the Inferis mesh, maintaining context fidelity across pipeline hops',
+    capabilities: ['Message Routing', 'Context Handoff', 'Pipeline Sync', 'Node Bridge'],
+    color: '#0EA5E9',
+  },
+  {
+    id: 'echo',
+    callsign: 'ECHO',
+    name: 'Echo',
+    icon: EnvelopeIcon,
+    role: 'Voice Layer',
+    description: 'Handles all external communications — email drafts, client-facing copy, and outbound voice of the system',
+    capabilities: ['Email Drafting', 'Client Copy', 'Voice Calibration', 'Tone Matching'],
+    color: '#A78BFA',
+  },
+]
+
+const commandBridgeAgents = [
+  {
+    callsign: 'HAWK',
+    name: 'Hawk',
+    icon: EyeIcon,
+    role: 'Oversight',
+    description: 'Monitors the full pipeline, flags anomalies, and enforces quality standards across all agent outputs',
+    capabilities: ['Pipeline Monitoring', 'Anomaly Detection', 'Quality Enforcement', 'Alert Dispatch'],
+    color: '#F59E0B',
+  },
+  {
+    callsign: 'SPIRIT',
+    name: 'Spirit',
+    icon: WaveformIcon,
+    role: 'Pulse Monitor',
+    description: 'Tracks system health, resource usage, and agent responsiveness across the Inferis runtime',
+    capabilities: ['Health Tracking', 'Resource Monitoring', 'Latency Analysis', 'Runtime Diagnostics'],
+    color: '#8B5CF6',
+  },
+  {
+    callsign: 'FLINT',
+    name: 'Flint',
+    icon: LightningIcon,
+    role: 'Rapid Deploy',
+    description: 'Spins up agents on demand, hot-swaps pipeline components, and manages dynamic task allocation',
+    capabilities: ['Agent Spawning', 'Hot Swap', 'Task Allocation', 'Load Balancing'],
+    color: '#EF4444',
+  },
+  {
+    callsign: 'DUKE',
+    name: 'Duke',
+    icon: ShieldIcon,
+    role: 'Security Gate',
+    description: 'Guards against prompt injection, enforces access control, and validates all inbound instructions',
+    capabilities: ['Injection Defense', 'Access Control', 'Instruction Validation', 'Audit Logging'],
+    color: '#10B981',
+  },
+]
+
+const crucibleAgents = [
+  {
+    callsign: 'CONVOY',
+    name: 'Convoy',
+    icon: FlowArrowIcon,
+    role: 'Batch Router',
+    description: 'Orchestrates large-scale batch jobs, routing work across available agents with load-aware scheduling',
+    capabilities: ['Batch Orchestration', 'Load Routing', 'Job Scheduling', 'Queue Management'],
+    color: '#F59E0B',
+  },
+  {
+    callsign: 'PERCEPTOR',
+    name: 'Perceptor',
+    icon: MagnifyingGlassIcon,
+    role: 'Deep Analyst',
+    description: 'Conducts exhaustive research and analysis, synthesizing multi-source intelligence into actionable insight',
+    capabilities: ['Deep Research', 'Source Synthesis', 'Pattern Recognition', 'Intelligence Reports'],
+    color: '#06B6D4',
+  },
+  {
+    callsign: 'BRAINSTORM',
+    name: 'Brainstorm',
+    icon: LightningIcon,
+    role: 'Ideation Engine',
+    description: 'Generates high-velocity creative concepts, divergent strategies, and lateral-thinking breakthroughs',
+    capabilities: ['Concept Generation', 'Divergent Thinking', 'Strategy Sprints', 'Creative Bursts'],
+    color: '#A78BFA',
+  },
+  {
+    callsign: 'ARCANA',
+    name: 'Arcana',
+    icon: FlaskIcon,
+    role: 'Experimental Lab',
+    description: 'Runs speculative experiments, prototype workflows, and high-risk creative tests in isolation',
+    capabilities: ['Experimental Runs', 'Prototype Testing', 'Risk Isolation', 'Speculative Design'],
+    color: '#EC4899',
+  },
+  {
+    callsign: 'CALIDUS',
+    name: 'Calidus',
+    icon: SparkleIcon,
+    role: 'Polish Engine',
+    description: 'Final-pass refinement agent that elevates outputs to client-ready quality across all formats',
+    capabilities: ['Output Refinement', 'Quality Polish', 'Format Optimization', 'Consistency Pass'],
+    color: '#EF4444',
+  },
+  {
+    callsign: 'IRONHIDE',
+    name: 'Ironhide',
+    icon: ShieldIcon,
+    role: 'Resilience Core',
+    description: 'Hardens pipelines against failure, implements fallback strategies, and ensures graceful degradation',
+    capabilities: ['Failure Handling', 'Fallback Strategy', 'Pipeline Hardening', 'Graceful Degradation'],
+    color: '#10B981',
+  },
+  {
+    callsign: 'RATCHET',
+    name: 'Ratchet',
+    icon: WrenchIcon,
+    role: 'System Repair',
+    description: 'Diagnoses pipeline issues, patches broken agent states, and restores system integrity post-failure',
+    capabilities: ['Diagnostics', 'State Repair', 'Integrity Restore', 'Error Recovery'],
+    color: '#8B5CF6',
   },
 ]
 
@@ -1305,6 +1432,204 @@ export default function CrucibleLanding({
                       {agent.description}
                     </p>
 
+                    {/* Capability pills */}
+                    <div className="relative flex flex-wrap gap-1.5">
+                      {agent.capabilities.map((cap, i) => (
+                        <span
+                          key={i}
+                          className="px-2 py-0.5 rounded-full text-[10px]"
+                          style={{
+                            background: `${agent.color}10`,
+                            color: agent.color,
+                            border: `1px solid ${agent.color}25`,
+                          }}
+                        >
+                          {cap}
+                        </span>
+                      ))}
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </motion.div>
+
+          {/* ─── COMMAND BRIDGE ──────────────────────────────────────────── */}
+          <motion.div
+            className="relative z-10 mt-12 md:mt-16 w-full px-4 md:px-8 pb-8"
+            style={{
+              opacity: useTransform(smoothProgress, [0.73, 0.81], [0, 1]),
+              y: useTransform(smoothProgress, [0.73, 0.81], [40, 0]),
+            }}
+          >
+            {/* Section Header */}
+            <div className="text-center mb-6 md:mb-8">
+              <h4
+                className="text-sm md:text-base font-semibold tracking-wider uppercase mb-1"
+                style={{ color: colors.textMuted }}
+              >
+                Command Bridge
+              </h4>
+              <p className="text-xs" style={{ color: colors.textDim }}>
+                Ops &amp; oversight — monitors, deploys, and guards the full Inferis runtime
+              </p>
+            </div>
+
+            {/* Agent Grid */}
+            <div className="flex justify-center gap-4 md:gap-5 flex-wrap max-w-5xl mx-auto">
+              {commandBridgeAgents.map((agent) => {
+                const IconComponent = agent.icon
+                return (
+                  <motion.div
+                    key={agent.callsign}
+                    className="relative group"
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    style={{
+                      width: 260,
+                      background: colors.surface,
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: 16,
+                      padding: '20px',
+                    }}
+                  >
+                    {/* Hover glow */}
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"
+                      style={{
+                        background: `radial-gradient(circle at 50% 30%, ${agent.color}15 0%, transparent 70%)`,
+                      }}
+                    />
+                    {/* Top row: callsign badge + icon */}
+                    <div className="relative flex items-center justify-between mb-3">
+                      <span
+                        className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full"
+                        style={{
+                          color: agent.color,
+                          background: `${agent.color}18`,
+                          border: `1px solid ${agent.color}33`,
+                        }}
+                      >
+                        {agent.callsign}
+                      </span>
+                      <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center"
+                        style={{ background: `${agent.color}15` }}
+                      >
+                        <IconComponent size={18} weight="duotone" color={agent.color} />
+                      </div>
+                    </div>
+                    {/* Name + role */}
+                    <div className="relative mb-2">
+                      <h5 className="font-semibold text-sm" style={{ color: colors.text }}>
+                        {agent.name}
+                      </h5>
+                      <p className="text-xs mt-0.5" style={{ color: agent.color }}>
+                        {agent.role}
+                      </p>
+                    </div>
+                    {/* Description */}
+                    <p className="relative text-xs leading-relaxed mb-3" style={{ color: colors.textMuted }}>
+                      {agent.description}
+                    </p>
+                    {/* Capability pills */}
+                    <div className="relative flex flex-wrap gap-1.5">
+                      {agent.capabilities.map((cap, i) => (
+                        <span
+                          key={i}
+                          className="px-2 py-0.5 rounded-full text-[10px]"
+                          style={{
+                            background: `${agent.color}10`,
+                            color: agent.color,
+                            border: `1px solid ${agent.color}25`,
+                          }}
+                        >
+                          {cap}
+                        </span>
+                      ))}
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </motion.div>
+
+          {/* ─── THE CRUCIBLE ─────────────────────────────────────────────── */}
+          <motion.div
+            className="relative z-10 mt-12 md:mt-16 w-full px-4 md:px-8 pb-8"
+            style={{
+              opacity: useTransform(smoothProgress, [0.82, 0.90], [0, 1]),
+              y: useTransform(smoothProgress, [0.82, 0.90], [40, 0]),
+            }}
+          >
+            {/* Section Header */}
+            <div className="text-center mb-6 md:mb-8">
+              <h4
+                className="text-sm md:text-base font-semibold tracking-wider uppercase mb-1"
+                style={{ color: colors.textMuted }}
+              >
+                The Crucible
+              </h4>
+              <p className="text-xs" style={{ color: colors.textDim }}>
+                Quality &amp; resilience — stress-tests, refines, and hardens every pipeline output
+              </p>
+            </div>
+
+            {/* Agent Grid */}
+            <div className="flex justify-center gap-4 md:gap-5 flex-wrap max-w-5xl mx-auto">
+              {crucibleAgents.map((agent) => {
+                const IconComponent = agent.icon
+                return (
+                  <motion.div
+                    key={agent.callsign}
+                    className="relative group"
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    style={{
+                      width: 260,
+                      background: colors.surface,
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: 16,
+                      padding: '20px',
+                    }}
+                  >
+                    {/* Hover glow */}
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"
+                      style={{
+                        background: `radial-gradient(circle at 50% 30%, ${agent.color}15 0%, transparent 70%)`,
+                      }}
+                    />
+                    {/* Top row: callsign badge + icon */}
+                    <div className="relative flex items-center justify-between mb-3">
+                      <span
+                        className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full"
+                        style={{
+                          color: agent.color,
+                          background: `${agent.color}18`,
+                          border: `1px solid ${agent.color}33`,
+                        }}
+                      >
+                        {agent.callsign}
+                      </span>
+                      <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center"
+                        style={{ background: `${agent.color}15` }}
+                      >
+                        <IconComponent size={18} weight="duotone" color={agent.color} />
+                      </div>
+                    </div>
+                    {/* Name + role */}
+                    <div className="relative mb-2">
+                      <h5 className="font-semibold text-sm" style={{ color: colors.text }}>
+                        {agent.name}
+                      </h5>
+                      <p className="text-xs mt-0.5" style={{ color: agent.color }}>
+                        {agent.role}
+                      </p>
+                    </div>
+                    {/* Description */}
+                    <p className="relative text-xs leading-relaxed mb-3" style={{ color: colors.textMuted }}>
+                      {agent.description}
+                    </p>
                     {/* Capability pills */}
                     <div className="relative flex flex-wrap gap-1.5">
                       {agent.capabilities.map((cap, i) => (
